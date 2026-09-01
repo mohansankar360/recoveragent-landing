@@ -1,0 +1,321 @@
+/**
+ * Backup — pricing section CSS before Apple-design v2 (Aug 2026).
+ * To revert: replace the /* Plans */ block in globals.css with this file's contents.
+ */
+
+.plans-scroll-link {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-archivo), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--recover);
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 100ms ease-out;
+}
+
+.plans-scroll-link:hover {
+  opacity: 0.8;
+}
+
+.plans-compare {
+  margin-top: 24px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.plans-card {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  box-shadow:
+    0 1px 2px rgba(23, 21, 18, 0.04),
+    0 20px 48px rgba(23, 21, 18, 0.06);
+  overflow: hidden;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: minmax(168px, 1.4fr) repeat(3, minmax(0, 1fr));
+  width: 100%;
+}
+
+.plans-grid-row {
+  display: contents;
+}
+
+.plans-grid > .plans-grid-label,
+.plans-grid > .plans-tier-head,
+.plans-grid-row > .plans-grid-label,
+.plans-grid-row > [role="cell"] {
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.45;
+  min-width: 0;
+  background: var(--surface);
+}
+
+.plans-grid-label,
+.plans-grid-row > .plans-grid-label {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.plans-grid-corner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-self: start;
+  padding-top: 24px;
+  padding-bottom: 20px;
+  text-align: left;
+}
+
+.plans-corner-label {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.plans-tier-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.plans-tier-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+}
+
+.plans-tier-icon-starter {
+  background: var(--accent-wash);
+  color: var(--accent);
+}
+
+.plans-tier-icon-growth {
+  background: var(--recover-wash);
+  color: var(--recover-lo);
+}
+
+.plans-tier-icon-scale {
+  background: rgba(23, 21, 18, 0.06);
+  color: var(--ink);
+}
+
+.plans-tier-name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.plans-tier-tag {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-align: center;
+  max-width: 14ch;
+  line-height: 1.35;
+}
+
+.plans-row-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.plans-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--paper-2);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.plans-price-cell {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.plans-tier-head.is-highlight,
+.plans-grid-row > .is-highlight {
+  background: rgba(17, 122, 101, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(17, 122, 101, 0.12);
+}
+
+.plans-star {
+  margin-left: 4px;
+  color: #9a7b1a;
+  font-size: 14px;
+}
+
+.plans-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.plans-check.is-yes {
+  background: var(--recover-wash);
+  color: var(--recover-lo);
+}
+
+.plans-check.is-no {
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-jetbrains), monospace;
+}
+
+.plans-all-included {
+  margin-top: 20px;
+  padding: 20px 20px 18px;
+  border: 1px solid rgba(17, 122, 101, 0.22);
+  border-radius: var(--r);
+  background: linear-gradient(
+    180deg,
+    rgba(17, 122, 101, 0.06) 0%,
+    rgba(17, 122, 101, 0.02) 100%
+  );
+}
+
+.plans-all-included-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.plans-wa-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--recover-wash);
+  color: var(--recover-lo);
+  flex-shrink: 0;
+}
+
+.plans-all-included-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.plans-all-included-lead {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.plans-wa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plans-wa-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  box-shadow: 0 1px 2px rgba(23, 21, 18, 0.03);
+}
+
+.plans-wa-chips li svg {
+  color: var(--recover-lo);
+  flex-shrink: 0;
+}
+
+.plans-cta {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.plans-cta-note {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.plans-cta-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .plans-cta-btns .btn {
+    flex: 0 1 auto;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 720px) {
+  .plans-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .plans-grid {
+    min-width: 640px;
+  }
+
+  .plans-wa-chips li {
+    flex: 1 1 100%;
+  }
+
+  .plans-grid > .plans-grid-label,
+  .plans-grid > .plans-tier-head,
+  .plans-grid-row > .plans-grid-label,
+  .plans-grid-row > [role="cell"] {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+}
