@@ -1,6 +1,6 @@
 import type { LandingVariant } from "@/lib/landing-variant";
 import { Play } from "@phosphor-icons/react/ssr";
-import { ShippingManifest } from "./ShippingManifest";
+import { HeroCallCard } from "./HeroCallCard";
 
 export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant }) {
   return (
@@ -47,7 +47,7 @@ export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant 
             </div>
           </div>
         </div>
-        <ShippingManifest />
+        <HeroCallCard />
       </div>
     </header>
   );
