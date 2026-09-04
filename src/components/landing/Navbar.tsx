@@ -19,25 +19,28 @@ const navActionSwap = {
 
 const NAV_LINKS: Record<LandingVariant, { href: string; label: string }[]> = {
   cold: [
-    { href: "#calc", label: "Calculator" },
+    { href: "#leaks", label: "Where you leak" },
+    { href: "#calc", label: "Loss calculator" },
     { href: "#control-room", label: "Control room" },
     { href: "#call", label: "Hear a call" },
     { href: "#plans", label: "Plans" },
-    { href: "#demo-booking", label: "Book demo" },
+    { href: "#demo-booking", label: "Book a demo" },
   ],
   warm: [
-    { href: "#calc", label: "Calculator" },
-    { href: "#call", label: "Hear a call" },
+    { href: "#leaks", label: "Where you leak" },
+    { href: "#calc", label: "Loss calculator" },
     { href: "#control-room", label: "Control room" },
+    { href: "#call", label: "Hear a call" },
     { href: "#plans", label: "Plans" },
-    { href: "#demo-booking", label: "Book demo" },
+    { href: "#demo-booking", label: "Book a demo" },
   ],
   full: [
     { href: "#leaks", label: "Where you leak" },
-    { href: "#control-room", label: "Control room" },
     { href: "#calc", label: "Loss calculator" },
-    { href: "#plans", label: "Plans" },
+    { href: "#control-room", label: "Control room" },
     { href: "#call", label: "Hear a call" },
+    { href: "#call-versus", label: "Why calling" },
+    { href: "#plans", label: "Plans" },
     { href: "#demo-booking", label: "Book a demo" },
   ],
 };

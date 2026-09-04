@@ -15,7 +15,7 @@ export function FAQ({ variant = "full" }: { variant?: LandingVariant }) {
       : faqs;
 
   return (
-    <section className="sec" style={{ paddingTop: 0 }}>
+    <section className="sec">
       <div className="wrap">
         <Reveal className="sec-head">
           <div className="eyebrow">Before you book</div>

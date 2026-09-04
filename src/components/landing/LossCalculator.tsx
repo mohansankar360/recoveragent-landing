@@ -150,7 +150,7 @@ export function LossCalculator({ showInlineDemoCta = false }: { showInlineDemoCt
   ];
 
   return (
-    <section className="sec" id="calc" style={{ paddingTop: 0 }}>
+    <section className="sec" id="calc">
       <div className="wrap">
         <Reveal className="sec-head">
           <div className="eyebrow">Your number, not a benchmark</div>

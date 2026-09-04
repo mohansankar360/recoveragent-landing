@@ -23,7 +23,7 @@ const STEPS = [
 
 export function GoLive({ compact = false }: { compact?: boolean }) {
   return (
-    <section className="sec">
+    <section className="sec sec-alt">
       <div className="wrap">
         <Reveal className="sec-head">
           <div className="eyebrow">No integration project. No IT ticket.</div>

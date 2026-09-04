@@ -10,27 +10,6 @@ import {
   type CallJourneyId,
 } from "@/lib/call-scripts";
 
-const VERSUS = [
-  {
-    dim: true,
-    label: "Email reminder",
-    stat: "~10%",
-    body: "Often buried in inboxes or promotions. Customers may see it much later—or never. It rarely creates the urgency needed to confirm an order or resolve a delivery issue.",
-  },
-  {
-    dim: true,
-    label: "WhatsApp",
-    stat: "40–50%",
-    body: "Much better reach and engagement, but customers can still ignore the message, postpone the action, or forget to respond.",
-  },
-  {
-    dim: false,
-    label: "Voice Call + WhatsApp",
-    stat: "70–80%",
-    body: "A call creates a real-time interaction. The customer can confirm, clarify, reschedule, or take action immediately. WhatsApp then delivers the link, details, or follow-up.",
-  },
-];
-
 function formatTime(sec: number) {
   if (!Number.isFinite(sec) || sec < 0) return "00:00";
   const m = Math.floor(sec / 60);
@@ -49,7 +28,6 @@ function seedBars(seed: string, count = 48) {
 
 export function CallDemo({ variant = "full" }: { variant?: LandingVariant }) {
   const showCallPoints = variant !== "cold";
-  const showVersus = variant === "full";
   const [journey, setJourney] = useState<CallJourneyId>("cod");
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -192,7 +170,7 @@ export function CallDemo({ variant = "full" }: { variant?: LandingVariant }) {
   const playhead = `${Math.round(progress * 100)}%`;
 
   return (
-    <section className="sec sec-alt" id="call">
+    <section className="sec" id="call">
       <div className="wrap">
         <Reveal className="sec-head">
           <div className="eyebrow">The part every founder asks about first</div>
@@ -316,33 +294,13 @@ export function CallDemo({ variant = "full" }: { variant?: LandingVariant }) {
           )}
         </div>
 
-        {!showVersus && (
+        {variant !== "full" && (
           <Reveal>
             <p className="call-proof-line">
               Messages get ignored. Calls get answered. Voice + WhatsApp:{" "}
               <b>70–80% response</b> vs WhatsApp alone at 40–50%.
             </p>
           </Reveal>
-        )}
-
-        {showVersus && (
-        <div style={{ marginTop: 48 }}>
-          <Reveal className="sec-head mb-26">
-            <div className="eyebrow">Why calling, and not another WhatsApp?</div>
-            <h2 className="vs-headline">
-              Because messages can be ignored. Calls demand a response.
-            </h2>
-          </Reveal>
-          <Reveal className="vs">
-            {VERSUS.map((card) => (
-              <div key={card.label} className={`vscard${card.dim ? " dim" : " win"}`}>
-                <div className="h">{card.label}</div>
-                <div className="big">{card.stat}</div>
-                <p>{card.body}</p>
-              </div>
-            ))}
-          </Reveal>
-        </div>
         )}
       </div>
     </section>

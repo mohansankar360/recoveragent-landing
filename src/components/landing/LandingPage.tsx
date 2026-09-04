@@ -2,11 +2,12 @@ import type { LandingVariant } from "@/lib/landing-variant";
 
 import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
-import { ThreeLeaks } from "./ThreeLeaks";
+import { RecoveryPaths } from "./RecoveryPaths";
 import { ControlRoomDemo } from "./ControlRoomDemo";
 import { LossCalculator } from "./LossCalculator";
 import { PlansSection } from "./PlansSection";
 import { CallDemo } from "./CallDemo";
+import { CallVersus } from "./CallVersus";
 import { GoLive } from "./GoLive";
 import { FAQ } from "./FAQ";
 import { DemoBooking } from "./DemoBooking";
@@ -23,10 +24,10 @@ function WarmPage() {
       <Navbar variant="warm" />
       <main>
         <Hero variant="warm" />
-        <ThreeLeaks compressed />
-        <CallDemo variant="warm" />
-        <ControlRoomDemo />
+        <RecoveryPaths />
         <LossCalculator />
+        <ControlRoomDemo />
+        <CallDemo variant="warm" />
         <PlansSection />
         <GoLive compact />
         <FAQ variant="warm" />
@@ -47,10 +48,10 @@ function ColdPage() {
       <Navbar variant="cold" />
       <main>
         <Hero variant="cold" />
+        <RecoveryPaths />
         <LossCalculator showInlineDemoCta />
-        <CallDemo variant="full" />
-        <ThreeLeaks />
         <ControlRoomDemo />
+        <CallDemo variant="full" />
         <PlansSection />
         <GoLive compact />
         <DemoBooking compact />
@@ -70,11 +71,12 @@ function FullPage() {
       <Navbar variant="full" />
       <main>
         <Hero variant="full" />
-        <ThreeLeaks />
-        <ControlRoomDemo />
+        <RecoveryPaths />
         <LossCalculator />
-        <PlansSection />
+        <ControlRoomDemo />
         <CallDemo variant="full" />
+        <CallVersus />
+        <PlansSection />
         <GoLive />
         <FAQ variant="full" />
         <DemoBooking />

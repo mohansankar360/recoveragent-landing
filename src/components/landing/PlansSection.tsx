@@ -26,7 +26,7 @@ export function PlansSection() {
   }, []);
 
   return (
-    <section className="sec sec-alt" id="plans" ref={sectionRef}>
+    <section className="sec" id="plans" ref={sectionRef}>
       <div className="wrap">
         <Reveal className="sec-head">
           <div className="eyebrow">Pricing</div>

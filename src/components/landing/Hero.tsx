@@ -1,13 +1,14 @@
 import type { LandingVariant } from "@/lib/landing-variant";
 import { Play } from "@phosphor-icons/react/ssr";
 import { HeroCallCard } from "./HeroCallCard";
-
 export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant }) {
   return (
     <header className="hero" id="top">
       <div className="wrap">
         <div>
-          <div className="eyebrow">For Indian D2C brands on Shopify · COD-heavy</div>
+          <div className="eyebrow">
+            Built by a founder who ran COD at scale · Made for D2C ops
+          </div>
           <h1 className="display">
             Shopify says
             <br />
@@ -20,13 +21,11 @@ export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant 
             </span>
           </h1>
           <p className="hero-sub">
-            The gap isn&apos;t a sales problem. It&apos;s COD orders that come back,
-            checkouts nobody follows up on, and NDRs nobody re-attempts.
+            The <strong>revenue gap hiding</strong> inside your ecommerce operations.
           </p>
           <p className="hero-sub">
-            <strong>Recover Agent uses AI voice agents</strong> to call customers, along
-            with WhatsApp and automated follow-ups, to recover that revenue — before the
-            money walks.
+            Recover Agent uses <strong>AI voice agents</strong> to recover abandoned checkouts,
+            confirm COD orders, and save failed deliveries — <strong>automatically</strong>.
           </p>
           <div className="hero-cta">
             <a className="btn btn-primary" href="#calc">
