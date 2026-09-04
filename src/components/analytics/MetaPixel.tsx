@@ -1,27 +1,29 @@
-import Script from "next/script";
 import { getMetaPixelId } from "@/lib/meta-pixel";
-import { MetaPageView } from "./MetaPageView";
 
-export function MetaPixel() {
+function buildMetaPixelSnippet(pixelId: string): string {
+  return `
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '${pixelId}');
+fbq('track', 'PageView');
+`.trim();
+}
+
+export function MetaPixelHead() {
   const pixelId = getMetaPixelId();
   if (!pixelId) return null;
 
   return (
     <>
-      <Script id="meta-pixel" strategy="afterInteractive">
-        {`
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '${pixelId}');
-          fbq('track', 'PageView');
-        `}
-      </Script>
+      <script
+        dangerouslySetInnerHTML={{ __html: buildMetaPixelSnippet(pixelId) }}
+      />
       <noscript>
         {/* Meta Pixel noscript fallback requires a raw tracking pixel */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -33,7 +35,6 @@ export function MetaPixel() {
           alt=""
         />
       </noscript>
-      <MetaPageView />
     </>
   );
 }

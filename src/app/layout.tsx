@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
-import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { MetaPixelHead } from "@/components/analytics/MetaPixel";
+import { MetaPageView } from "@/components/analytics/MetaPageView";
 import { faqStructuredData } from "@/lib/faq-data";
 import "./globals.css";
 
@@ -56,13 +57,14 @@ export default function RootLayout({
       className={`${archivo.variable} ${jetbrains.variable}`}
     >
       <head>
+        <MetaPixelHead />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData()) }}
         />
       </head>
       <body>
-        <MetaPixel />
+        <MetaPageView />
         {children}
       </body>
     </html>
