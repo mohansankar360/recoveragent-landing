@@ -7,7 +7,7 @@ export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant 
       <div className="wrap">
         <div>
           <div className="eyebrow">
-            Built by a founder who ran COD at scale · Made for D2C ops
+            Built by a D2C founder · For D2C Ops
           </div>
           <h1 className="display">
             Shopify says
