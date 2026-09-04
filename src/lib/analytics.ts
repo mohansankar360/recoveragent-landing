@@ -1,3 +1,5 @@
+import { trackMetaEvent, trackMetaPageView } from "./meta-pixel";
+
 export type AnalyticsEvent =
   | "hero_demo_click"
   | "hero_video_play"
@@ -28,12 +30,13 @@ export function trackEvent(
   // eslint-disable-next-line no-console
   console.debug("[analytics]", event, properties);
 
-  // Example: window.gtag?.("event", event, properties);
-  // Example: window.mixpanel?.track(event, properties);
+  trackMetaEvent(event, properties);
 }
 
 export function trackPageView(path: string): void {
   if (typeof window === "undefined") return;
   // eslint-disable-next-line no-console
   console.debug("[analytics] page_view", path);
+
+  trackMetaPageView(path);
 }

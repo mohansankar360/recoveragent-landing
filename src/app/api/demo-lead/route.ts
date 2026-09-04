@@ -1,4 +1,5 @@
 import { buildDemoLeadPayload, isValidDemoFormData } from "@/lib/demo-lead";
+import { sendMetaServerEvent } from "@/lib/meta-conversions-api";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -8,6 +9,8 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
   }
+
+  const metaEventId = getMetaEventId(body);
 
   if (!isValidDemoFormData(body)) {
     return Response.json({ ok: false, error: "Invalid form data" }, { status: 400 });
@@ -57,8 +60,35 @@ export async function POST(request: Request) {
     );
   }
 
+  await sendMetaServerEvent({
+    eventName: "Lead",
+    eventId: metaEventId ?? crypto.randomUUID(),
+    eventSourceUrl: request.headers.get("referer") ?? undefined,
+    clientIpAddress:
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      undefined,
+    clientUserAgent: request.headers.get("user-agent") ?? undefined,
+    phone: payload.phone,
+    firstName: payload.name.split(/\s+/)[0],
+    customData: {
+      content_name: "demo_booking",
+      monthly_orders: payload.monthlyOrders,
+    },
+  });
+
   return Response.json({
     ok: true,
     calBookingUrl: payload.calBookingUrl,
   });
+}
+
+function getMetaEventId(body: unknown): string | undefined {
+  if (!body || typeof body !== "object" || !("metaEventId" in body)) {
+    return undefined;
+  }
+
+  const metaEventId = (body as { metaEventId?: unknown }).metaEventId;
+  return typeof metaEventId === "string" && metaEventId.trim().length > 0
+    ? metaEventId.trim()
+    : undefined;
 }

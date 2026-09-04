@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
+import { generateMetaEventId } from "@/lib/meta-pixel";
 import { buildDemoBookingUrl, DEMO_LANGUAGE_OPTIONS } from "@/lib/demo-booking";
 import { appleFade, appleSpring } from "@/lib/motion";
 
@@ -123,11 +124,13 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
         }
       : form;
 
+    const metaEventId = generateMetaEventId();
+
     try {
       const response = await fetch("/api/demo-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, metaEventId }),
       });
 
       const result = (await response.json()) as {
@@ -140,7 +143,10 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
         throw new Error(result.error ?? "Could not save your details");
       }
 
-      trackEvent("demo_form_submitted", { monthly_orders: form.monthlyOrders });
+      trackEvent("demo_form_submitted", {
+        monthly_orders: form.monthlyOrders,
+        event_id: metaEventId,
+      });
       setIsSubmitting(false);
       setIsRedirecting(true);
 
