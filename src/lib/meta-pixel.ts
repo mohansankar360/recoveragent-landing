@@ -76,6 +76,17 @@ function mapAnalyticsEventToMeta(
             : {}),
         },
       };
+    case "demo_scheduled":
+      return {
+        kind: "standard",
+        name: "Schedule",
+        params: {
+          content_name: "demo_booking",
+          ...(properties?.start_time
+            ? { start_time: properties.start_time }
+            : {}),
+        },
+      };
     case "demo_form_started":
       return {
         kind: "custom",

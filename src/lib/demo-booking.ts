@@ -1,4 +1,6 @@
-import { CAL_BOOKING_FIELDS, DEMO_URL } from "./constants";
+import { CAL_BOOKING_FIELDS, CAL_EVENT_LINK, DEMO_URL } from "./constants";
+
+export { CAL_EVENT_LINK };
 
 export interface DemoFormData {
   name: string;
@@ -45,4 +47,26 @@ export function buildDemoBookingUrl(data: DemoFormData): string {
   params.set("metadata[preferredLanguage]", preferredLanguage);
 
   return `${DEMO_URL}?${params.toString()}`;
+}
+
+/** Prefill values for the embedded Cal.com booker (same fields as the external link). */
+export function buildDemoEmbedConfig(
+  data: DemoFormData
+): Record<string, string> {
+  const name = data.name.trim();
+  const phone = normalizeWhatsAppNumber(data.whatsapp);
+  const storeUrl = data.storeUrl.trim();
+  const monthlyOrders = data.monthlyOrders.trim();
+  const preferredLanguage = demoLanguageLabel(data.preferredLanguage);
+
+  return {
+    name,
+    attendeePhoneNumber: phone,
+    [CAL_BOOKING_FIELDS.websiteUrl]: storeUrl,
+    [CAL_BOOKING_FIELDS.preferredLanguage]: preferredLanguage,
+    notes: `Monthly orders: ${monthlyOrders}`,
+    "metadata[storeUrl]": storeUrl,
+    "metadata[monthlyOrders]": monthlyOrders,
+    "metadata[preferredLanguage]": preferredLanguage,
+  };
 }

@@ -5,7 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
 import { generateMetaEventId } from "@/lib/meta-pixel";
-import { buildDemoBookingUrl, DEMO_LANGUAGE_OPTIONS } from "@/lib/demo-booking";
+import { DEMO_LANGUAGE_OPTIONS } from "@/lib/demo-booking";
+import { saveDemoBookingSession } from "@/lib/demo-booking-session";
 import { appleFade, appleSpring } from "@/lib/motion";
 
 interface FormData {
@@ -147,11 +148,12 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
         monthly_orders: form.monthlyOrders,
         event_id: metaEventId,
       });
+      saveDemoBookingSession(payload);
       setIsSubmitting(false);
       setIsRedirecting(true);
 
       window.setTimeout(() => {
-        window.location.href = result.calBookingUrl ?? buildDemoBookingUrl(form);
+        window.location.href = "/calendar";
       }, REDIRECT_DELAY_MS);
     } catch (error) {
       setIsSubmitting(false);
