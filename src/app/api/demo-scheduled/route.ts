@@ -15,6 +15,7 @@ export async function POST(request: Request) {
   }
 
   const phone = getOptionalString(body, "phone");
+  const email = getOptionalString(body, "email");
   const name = getOptionalString(body, "name");
   const startTime = getOptionalString(body, "startTime");
 
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
       undefined,
     clientUserAgent: request.headers.get("user-agent") ?? undefined,
     phone,
+    email,
     firstName: name?.split(/\s+/)[0],
     customData: {
       content_name: "demo_booking",

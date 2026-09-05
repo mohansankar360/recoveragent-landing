@@ -9,4 +9,5 @@ export const DEMO_URL = `https://cal.com/${CAL_EVENT_LINK}`;
 export const CAL_BOOKING_FIELDS = {
   websiteUrl: "website-url",
   preferredLanguage: "preferred-language-for-demo",
+  storePlatform: "which-platform-your-store-is-in",
 } as const;

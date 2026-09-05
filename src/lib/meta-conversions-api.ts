@@ -7,6 +7,7 @@ type MetaServerEventParams = {
   clientIpAddress?: string;
   clientUserAgent?: string;
   phone?: string;
+  email?: string;
   firstName?: string;
   customData?: Record<string, string | number>;
 };
@@ -43,6 +44,10 @@ export async function sendMetaServerEvent(
 
   if (params.phone) {
     userData.ph = sha256(normalizePhoneForMetaHash(params.phone));
+  }
+
+  if (params.email) {
+    userData.em = sha256(params.email.trim().toLowerCase());
   }
 
   if (params.firstName) {

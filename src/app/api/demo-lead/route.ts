@@ -69,10 +69,13 @@ export async function POST(request: Request) {
       undefined,
     clientUserAgent: request.headers.get("user-agent") ?? undefined,
     phone: payload.phone,
+    email: payload.email,
     firstName: payload.name.split(/\s+/)[0],
     customData: {
       content_name: "demo_booking",
       monthly_orders: payload.monthlyOrders,
+      store_platform: payload.storePlatform,
+      qualifies_for_calendar: payload.qualifiesForCalendar ? 1 : 0,
     },
   });
 

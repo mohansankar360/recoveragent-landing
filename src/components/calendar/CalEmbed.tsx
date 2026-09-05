@@ -48,6 +48,7 @@ export function CalEmbed({ prefill }: CalEmbedProps) {
           body: JSON.stringify({
             metaEventId: eventId,
             phone: prefill ? normalizeWhatsAppNumber(prefill.whatsapp) : undefined,
+            email: prefill?.email.trim(),
             name: prefill?.name.trim(),
             startTime,
           }),

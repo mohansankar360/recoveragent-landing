@@ -1,4 +1,5 @@
 import type { DemoFormData } from "./demo-booking";
+import { isValidMonthlyOrders, isValidStorePlatform } from "./demo-booking";
 
 export const DEMO_BOOKING_SESSION_KEY = "recoveragent_demo_booking";
 
@@ -18,9 +19,13 @@ export function readDemoBookingSession(): DemoFormData | null {
     if (
       typeof parsed.name === "string" &&
       typeof parsed.whatsapp === "string" &&
+      typeof parsed.email === "string" &&
       typeof parsed.storeUrl === "string" &&
+      typeof parsed.storePlatform === "string" &&
       typeof parsed.monthlyOrders === "string" &&
-      typeof parsed.preferredLanguage === "string"
+      typeof parsed.preferredLanguage === "string" &&
+      isValidStorePlatform(parsed.storePlatform) &&
+      isValidMonthlyOrders(parsed.monthlyOrders)
     ) {
       return parsed;
     }

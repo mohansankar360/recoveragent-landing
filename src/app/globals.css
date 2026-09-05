@@ -3256,125 +3256,202 @@ footer.site-footer .wrap {
 }
 
 .demo-panel {
-  max-width: 520px;
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
+  max-width: 540px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
   color: var(--ink);
-  padding: 26px 24px;
-  border-radius: var(--r);
+  padding: 28px 28px 24px;
+  border-radius: calc(var(--r) + 2px);
   box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
     0 1px 2px rgba(23, 21, 18, 0.04),
-    0 20px 48px rgba(23, 21, 18, 0.08);
+    0 18px 44px rgba(12, 92, 76, 0.1);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .demo-panel {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: var(--line-strong);
+  }
+}
+
+.demo-form-head {
+  padding-bottom: 2px;
 }
 
 .demo-panel .numfield label {
+  display: block;
   font-size: 12.5px;
-  margin-bottom: 5px;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  color: var(--ink-soft);
+  margin-bottom: 7px;
 }
 
 .demo-panel .numfield input[type="number"],
 .demo-panel .numfield input[type="text"],
-.demo-panel .numfield input[type="tel"],
 .demo-panel .numfield input[type="url"],
 .demo-panel .numfield input[type="email"],
 .demo-panel .numfield select {
-  min-height: 40px;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 9px 12px;
+  min-height: 44px;
+  font-family: var(--font-archivo), sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r-sm) + 1px);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  transition:
+    border-color 100ms ease-out,
+    box-shadow 100ms ease-out,
+    background 100ms ease-out;
+}
+
+.demo-panel .numfield input[type="number"]::placeholder,
+.demo-panel .numfield input[type="text"]::placeholder,
+.demo-panel .numfield input[type="url"]::placeholder,
+.demo-panel .numfield input[type="email"]::placeholder {
+  color: var(--ink-muted);
+  font-weight: 500;
+  opacity: 0.92;
 }
 
 .demo-panel .numfield select {
   width: 100%;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  color: var(--ink);
-  font-family: var(--font-archivo), sans-serif;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235f5950' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%237a8f88' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
+  background-position: right 13px center;
+  padding-right: 38px;
 }
 
+.demo-panel .numfield input[type="number"]:focus,
+.demo-panel .numfield input[type="text"]:focus,
+.demo-panel .numfield input[type="url"]:focus,
+.demo-panel .numfield input[type="email"]:focus,
 .demo-panel .numfield select:focus {
   outline: none;
-  border-color: var(--recover);
-  box-shadow: 0 0 0 3px var(--recover-wash);
+  border-color: rgba(13, 122, 98, 0.45);
+  background: #fff;
+  box-shadow:
+    0 0 0 3px var(--recover-wash),
+    0 1px 2px rgba(12, 92, 76, 0.06);
 }
 
-.demo-panel .numfield select.field-error {
-  border-color: var(--stamp);
+.demo-panel .numfield select.demo-select-placeholder {
+  color: var(--ink-muted);
+  font-weight: 500;
+  opacity: 0.92;
+}
+
+.demo-panel .numfield select.field-error,
+.demo-panel .numfield input.field-error {
+  border-color: rgba(180, 35, 24, 0.45);
   box-shadow: 0 0 0 3px var(--stamp-wash);
 }
 
-.demo-panel .numfield select:invalid,
+.demo-panel .numfield select:invalid:not(.demo-select-placeholder),
+.demo-panel .numfield select option:not([value=""]) {
+  color: var(--ink);
+}
+
 .demo-panel .numfield select option[value=""] {
   color: var(--ink-muted);
 }
 
 .demo-form-title {
-  font-size: 19px;
+  font-size: clamp(21px, 2.4vw, 24px);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
 }
 
 .demo-form-note {
-  margin-top: 6px;
-  font-size: 11.5px;
-  letter-spacing: 0.02em;
+  margin-top: 8px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
   text-transform: none;
   color: var(--ink-muted);
 }
 
 .demo-fields {
-  margin-top: 18px;
+  margin-top: 22px;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 14px;
 }
 
 .demo-field {
-  margin-bottom: 10px;
+  margin-bottom: 0;
+}
+
+.demo-contact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.demo-contact-row .demo-field {
+  margin-bottom: 0;
+}
+
+@media (max-width: 560px) {
+  .demo-panel {
+    padding: 24px 20px 20px;
+  }
+
+  .demo-contact-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
 }
 
 .phone-input {
   display: flex;
   align-items: stretch;
-  min-height: 40px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
-  background: var(--surface);
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r-sm) + 1px);
+  background: rgba(255, 255, 255, 0.92);
   overflow: hidden;
   transition:
     border-color 100ms ease-out,
-    box-shadow 100ms ease-out;
+    box-shadow 100ms ease-out,
+    background 100ms ease-out;
 }
 
 .phone-input:focus-within {
-  border-color: var(--recover);
-  box-shadow: 0 0 0 3px var(--recover-wash);
+  border-color: rgba(13, 122, 98, 0.45);
+  background: #fff;
+  box-shadow:
+    0 0 0 3px var(--recover-wash),
+    0 1px 2px rgba(12, 92, 76, 0.06);
 }
 
 .phone-input.field-error {
-  border-color: var(--stamp);
+  border-color: rgba(180, 35, 24, 0.45);
   box-shadow: 0 0 0 3px var(--stamp-wash);
 }
 
 .phone-prefix {
   display: flex;
   align-items: center;
-  padding: 0 10px 0 12px;
+  padding: 0 11px 0 12px;
   border-right: 1px solid var(--line);
   font-family: var(--font-jetbrains), monospace;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+  color: var(--recover-lo);
   flex-shrink: 0;
   user-select: none;
-  background: var(--paper-2);
+  background: rgba(13, 122, 98, 0.06);
 }
 
 .phone-input input {
@@ -3382,14 +3459,21 @@ footer.site-footer .wrap {
   min-width: 0;
   border: 0;
   background: transparent;
-  min-height: 38px;
-  padding: 9px 12px;
+  min-height: 42px;
+  padding: 10px 13px;
   font-family: var(--font-jetbrains), monospace;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--ink);
   outline: none;
   box-shadow: none;
+}
+
+.phone-input input::placeholder {
+  color: var(--ink-muted);
+  font-weight: 500;
+  opacity: 0.92;
 }
 
 .phone-input input:focus {
@@ -3400,20 +3484,23 @@ footer.site-footer .wrap {
 .demo-submit {
   width: 100%;
   justify-content: center;
-  margin-top: 16px;
-  min-height: 42px;
-  padding: 11px 20px;
-  font-size: 14.5px;
+  margin-top: 20px;
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: calc(var(--r-sm) + 1px);
 }
 
 .demo-submit:disabled {
-  opacity: 0.72;
+  opacity: 0.68;
   cursor: wait;
   transform: none;
 }
 
 .demo-submit-error {
-  margin-top: 14px;
+  margin-top: 12px;
   font-size: 13px;
   font-weight: 600;
   color: var(--stamp);
@@ -3422,26 +3509,38 @@ footer.site-footer .wrap {
 
 .demo-success {
   text-align: center;
-  padding: 16px 0;
+  padding: 20px 4px;
 }
 
 .demo-success-title {
-  font-size: 24px;
+  font-size: clamp(21px, 2.4vw, 24px);
   font-weight: 800;
   color: var(--recover-lo);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
 
 .demo-success-copy {
   margin-top: 10px;
   font-size: 15px;
+  line-height: 1.55;
   color: var(--ink-soft);
+  max-width: 36ch;
+  margin-inline: auto;
 }
 
-.field-msg {
-  margin-top: 6px;
-  font-size: 12px;
+.demo-success-muted {
+  padding: 22px 16px;
+  background: rgba(230, 242, 237, 0.72);
+  border: 1px solid rgba(13, 122, 98, 0.12);
+  border-radius: calc(var(--r-sm) + 1px);
+}
+
+.demo-panel .field-msg {
+  margin-top: 7px;
+  font-size: 11.5px;
   font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--stamp);
 }
 

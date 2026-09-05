@@ -5,19 +5,28 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
 import { generateMetaEventId } from "@/lib/meta-pixel";
-import { DEMO_LANGUAGE_OPTIONS } from "@/lib/demo-booking";
+import {
+  DEMO_LANGUAGE_OPTIONS,
+  getDisqualificationMessage,
+  MONTHLY_ORDERS_OPTIONS,
+  qualifiesForDemoCalendar,
+  STORE_PLATFORM_OPTIONS,
+} from "@/lib/demo-booking";
 import { saveDemoBookingSession } from "@/lib/demo-booking-session";
 import { appleFade, appleSpring } from "@/lib/motion";
 
 interface FormData {
   name: string;
   whatsapp: string;
+  email: string;
   storeUrl: string;
+  storePlatform: string;
   monthlyOrders: string;
   preferredLanguage: string;
 }
 
 const REDIRECT_DELAY_MS = 320;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateField(field: keyof FormData, value: string): string | undefined {
   const trimmed = value.trim();
@@ -31,11 +40,18 @@ function validateField(field: keyof FormData, value: string): string | undefined
         return "Enter a valid 10-digit mobile number";
       }
       return undefined;
+    case "email":
+      if (!trimmed) return "Email is required";
+      if (!EMAIL_PATTERN.test(trimmed)) return "Enter a valid email address";
+      return undefined;
     case "storeUrl":
       if (!trimmed) return "Store URL is required";
       return undefined;
+    case "storePlatform":
+      if (!trimmed) return "Select your store platform";
+      return undefined;
     case "monthlyOrders":
-      if (!trimmed) return "Monthly orders is required";
+      if (!trimmed) return "Select your monthly order volume";
       return undefined;
     case "preferredLanguage":
       if (!trimmed) return "Select a preferred language";
@@ -45,23 +61,46 @@ function validateField(field: keyof FormData, value: string): string | undefined
   }
 }
 
+function getValidatedFields(compact: boolean): (keyof FormData)[] {
+  return compact
+    ? ["name", "whatsapp", "email", "monthlyOrders", "storePlatform"]
+    : [
+        "name",
+        "whatsapp",
+        "email",
+        "monthlyOrders",
+        "storePlatform",
+        "storeUrl",
+        "preferredLanguage",
+      ];
+}
+
 function validateAll(form: FormData, compact: boolean): Partial<FormData> {
   const next: Partial<FormData> = {};
-  const fields: (keyof FormData)[] = compact
-    ? ["name", "whatsapp", "monthlyOrders"]
-    : ["name", "whatsapp", "storeUrl", "monthlyOrders", "preferredLanguage"];
-  fields.forEach((field) => {
+  getValidatedFields(compact).forEach((field) => {
     const error = validateField(field, form[field]);
     if (error) next[field] = error;
   });
   return next;
 }
 
+function buildTouchedState(compact: boolean): Partial<Record<keyof FormData, boolean>> {
+  return getValidatedFields(compact).reduce(
+    (acc, field) => {
+      acc[field] = true;
+      return acc;
+    },
+    {} as Partial<Record<keyof FormData, boolean>>
+  );
+}
+
 export function DemoBooking({ compact = false }: { compact?: boolean }) {
   const [form, setForm] = useState<FormData>({
     name: "",
     whatsapp: "",
+    email: "",
     storeUrl: "",
+    storePlatform: "",
     monthlyOrders: "",
     preferredLanguage: "",
   });
@@ -69,7 +108,12 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
   const [touched, setTouched] = useState<Partial<Record<keyof FormData, boolean>>>(
     {}
   );
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [submitOutcome, setSubmitOutcome] = useState<
+    null | "redirecting" | "disqualified"
+  >(null);
+  const [disqualificationMessage, setDisqualificationMessage] = useState<
+    string | null
+  >(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
@@ -96,21 +140,11 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (isRedirecting || isSubmitting) return;
+    if (submitOutcome || isSubmitting) return;
 
     const nextErrors = validateAll(form, compact);
     setErrors(nextErrors);
-    setTouched(
-      compact
-        ? { name: true, whatsapp: true, monthlyOrders: true }
-        : {
-            name: true,
-            whatsapp: true,
-            storeUrl: true,
-            monthlyOrders: true,
-            preferredLanguage: true,
-          }
-    );
+    setTouched(buildTouchedState(compact));
 
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -125,6 +159,7 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
         }
       : form;
 
+    const qualifies = qualifiesForDemoCalendar(payload);
     const metaEventId = generateMetaEventId();
 
     try {
@@ -137,7 +172,6 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
       const result = (await response.json()) as {
         ok?: boolean;
         error?: string;
-        calBookingUrl?: string;
       };
 
       if (!response.ok || !result.ok) {
@@ -146,11 +180,20 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
 
       trackEvent("demo_form_submitted", {
         monthly_orders: form.monthlyOrders,
+        store_platform: form.storePlatform,
         event_id: metaEventId,
       });
-      saveDemoBookingSession(payload);
+
       setIsSubmitting(false);
-      setIsRedirecting(true);
+
+      if (!qualifies) {
+        setDisqualificationMessage(getDisqualificationMessage(payload));
+        setSubmitOutcome("disqualified");
+        return;
+      }
+
+      saveDemoBookingSession(payload);
+      setSubmitOutcome("redirecting");
 
       window.setTimeout(() => {
         window.location.href = "/calendar";
@@ -181,7 +224,7 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
         <Reveal>
           <div className="demo-panel">
             <AnimatePresence mode="wait" initial={false}>
-              {isRedirecting ? (
+              {submitOutcome === "redirecting" ? (
                 <motion.div
                   key="redirect"
                   className="demo-success"
@@ -194,9 +237,23 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                 >
                   <p className="demo-success-title">Taking you to the calendar…</p>
                   <p className="demo-success-copy">
-                    Your name, WhatsApp number, and store details will be prefilled
-                    so you can pick a demo slot.
+                    Your name, email, WhatsApp number, and store details will be
+                    prefilled so you can pick a demo slot.
                   </p>
+                </motion.div>
+              ) : submitOutcome === "disqualified" ? (
+                <motion.div
+                  key="disqualified"
+                  className="demo-success demo-success-muted"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={appleFade}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <p className="demo-success-title">Thanks — we&apos;ve got your details.</p>
+                  <p className="demo-success-copy">{disqualificationMessage}</p>
                 </motion.div>
               ) : (
                 <motion.form
@@ -207,10 +264,12 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                   exit={{ opacity: 0 }}
                   transition={appleFade}
                 >
-                  <h3 className="demo-form-title">Book your demo</h3>
-                  <p className="demo-form-note mono">
-                    30 minutes · Explore the Recover agent live · No setup fee
-                  </p>
+                  <div className="demo-form-head">
+                    <h3 className="demo-form-title">Book your demo</h3>
+                    <p className="demo-form-note mono">
+                      30 minutes · Explore the Recover agent live · No setup fee
+                    </p>
+                  </div>
 
                   <div className="demo-fields">
                     <Field
@@ -223,24 +282,59 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                       placeholder="Your name"
                       autoComplete="name"
                     />
-                    <PhoneField
-                      id="demo-whatsapp"
-                      label="WhatsApp number"
-                      value={form.whatsapp}
-                      error={errors.whatsapp}
-                      onChange={(v) => handleChange("whatsapp", v)}
-                      onBlur={() => handleBlur("whatsapp")}
-                    />
-                    <Field
-                      id="demo-orders"
-                      label="Monthly orders"
-                      value={form.monthlyOrders}
-                      error={errors.monthlyOrders}
-                      onChange={(v) => handleChange("monthlyOrders", v)}
-                      onBlur={() => handleBlur("monthlyOrders")}
-                      placeholder="e.g. 5,000"
-                      inputMode="numeric"
-                    />
+
+                    <div className="demo-contact-row">
+                      <PhoneField
+                        id="demo-whatsapp"
+                        label="WhatsApp number"
+                        value={form.whatsapp}
+                        error={errors.whatsapp}
+                        onChange={(v) => handleChange("whatsapp", v)}
+                        onBlur={() => handleBlur("whatsapp")}
+                      />
+                      <Field
+                        id="demo-email"
+                        label="Email id"
+                        value={form.email}
+                        error={errors.email}
+                        onChange={(v) => handleChange("email", v)}
+                        onBlur={() => handleBlur("email")}
+                        placeholder="you@store.com"
+                        type="email"
+                        autoComplete="email"
+                        inputMode="email"
+                      />
+                    </div>
+
+                    <div className="demo-contact-row">
+                      <SelectField
+                        id="demo-orders"
+                        label="Monthly orders"
+                        value={form.monthlyOrders}
+                        error={errors.monthlyOrders}
+                        onChange={(v) => handleChange("monthlyOrders", v)}
+                        onBlur={() => handleBlur("monthlyOrders")}
+                        placeholder="Select monthly order volume"
+                        options={MONTHLY_ORDERS_OPTIONS.map((option) => ({
+                          value: option.value,
+                          label: option.label,
+                        }))}
+                      />
+                      <SelectField
+                        id="demo-platform"
+                        label="Which platform your store is in"
+                        value={form.storePlatform}
+                        error={errors.storePlatform}
+                        onChange={(v) => handleChange("storePlatform", v)}
+                        onBlur={() => handleBlur("storePlatform")}
+                        placeholder="Select your store platform"
+                        options={STORE_PLATFORM_OPTIONS.map((option) => ({
+                          value: option.value,
+                          label: option.label,
+                        }))}
+                      />
+                    </div>
+
                     {!compact && (
                       <>
                         <Field
@@ -262,6 +356,7 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                           error={errors.preferredLanguage}
                           onChange={(v) => handleChange("preferredLanguage", v)}
                           onBlur={() => handleBlur("preferredLanguage")}
+                          placeholder="Select a language"
                           options={DEMO_LANGUAGE_OPTIONS.map((option) => ({
                             value: option.value,
                             label: option.label,
@@ -280,7 +375,7 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                   <button
                     type="submit"
                     className="btn btn-green demo-submit"
-                    disabled={isRedirecting || isSubmitting}
+                    disabled={Boolean(submitOutcome) || isSubmitting}
                   >
                     {isSubmitting ? "Saving your details…" : "Book my demo"}
                   </button>
@@ -366,6 +461,7 @@ function SelectField({
   error,
   onChange,
   onBlur,
+  placeholder,
   options,
 }: {
   id: string;
@@ -374,6 +470,7 @@ function SelectField({
   error?: string;
   onChange: (v: string) => void;
   onBlur: () => void;
+  placeholder: string;
   options: { value: string; label: string }[];
 }) {
   const reduceMotion = useReducedMotion();
@@ -386,12 +483,17 @@ function SelectField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={error ? "field-error" : undefined}
+        className={[
+          !value ? "demo-select-placeholder" : "",
+          error ? "field-error" : "",
+        ]
+          .filter(Boolean)
+          .join(" ") || undefined}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
       >
         <option value="" disabled>
-          Select a language
+          {placeholder}
         </option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
