@@ -1,10 +1,15 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="site-footer">
       <div className="wrap">
         <span>
           <b style={{ color: "var(--paper)" }}>Recover Agent</b> — AI voice
-          &amp; WhatsApp recovery for Indian D2C.
+          &amp; WhatsApp recovery for Indian D2C.{" "}
+          <Link href="/blog" className="site-footer-link">
+            Blog
+          </Link>
         </span>
         <span className="mono" style={{ fontSize: 11, letterSpacing: "0.1em" }}>
           DPDP 2023 · Official WhatsApp Business API

@@ -1,4 +1,5 @@
 import { ALL_PLANS_WHATSAPP } from "@/lib/pricing-plans";
+import { getAllBlogPosts } from "@/lib/blog";
 import { SITE_SECTIONS } from "@/lib/site-sections";
 import { SITE_USE_CASES } from "@/lib/site-use-cases";
 import { siteUrl } from "@/lib/site-url";
@@ -45,6 +46,13 @@ export function buildLlmsTxt(): string {
   const whatsappFlows = ALL_PLANS_WHATSAPP.map((flow) => `- ${flow}`).join("\n");
 
   const bookDemo = SITE_SECTIONS.find((section) => section.slug === "book-demo")!;
+
+  const blogPosts = getAllBlogPosts()
+    .map(
+      (post) =>
+        `- [${post.title}](${siteUrl}/blog/${post.slug}): ${post.description}`
+    )
+    .join("\n");
 
   return `# Recover Agent
 
@@ -122,7 +130,10 @@ ${productPages}
 
 ${resources}
 
-No public blog, documentation portal, or help center routes exist in the site at this time.
+## Blog
+
+- [Blog index](${siteUrl}/blog): Guides on RTO reduction, COD verification, NDR recovery, and ecommerce automation for Indian D2C brands
+${blogPosts}
 
 ## Booking
 

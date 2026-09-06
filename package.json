@@ -16,9 +16,12 @@
     "@phosphor-icons/react": "^2.1.10",
     "framer-motion": "^11.18.0",
     "geist": "^1.7.2",
+    "gray-matter": "^4.0.3",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
