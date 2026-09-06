@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { List, X } from "@phosphor-icons/react";
+import { CaretDown, List, X } from "@phosphor-icons/react";
 import { SITE_SECTIONS } from "@/lib/site-sections";
 import { appleSpring } from "@/lib/motion";
 import { useMobileNav } from "@/lib/use-mobile-nav";
@@ -17,17 +17,34 @@ const navActionSwap = {
   transition: appleSpring.ui,
 };
 
-const NAV_LINKS = SITE_SECTIONS.filter(
-  (section) => section.slug !== "go-live" && section.slug !== "faq"
+const HIDDEN_NAV_SLUGS = new Set(["go-live", "faq", "book-demo"]);
+const PRIMARY_NAV_SLUGS = new Set([
+  "loss-calculator",
+  "plans",
+  "how-it-works",
+  "hear-a-call",
+]);
+
+const ALL_NAV_LINKS = SITE_SECTIONS.filter(
+  (section) => !HIDDEN_NAV_SLUGS.has(section.slug)
 ).map((section) => ({
   href: `/${section.slug}`,
   label: section.navLabel,
 }));
 
+const PRIMARY_NAV_LINKS = ALL_NAV_LINKS.filter((link) =>
+  PRIMARY_NAV_SLUGS.has(link.href.slice(1))
+);
+
+const MORE_NAV_LINKS = ALL_NAV_LINKS.filter(
+  (link) => !PRIMARY_NAV_SLUGS.has(link.href.slice(1))
+);
+
 export function Navbar() {
   const isMobile = useMobileNav();
   const stickyBarVisible = useStickyBarVisible();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const showHamburger = isMobile && stickyBarVisible;
 
   useEffect(() => {
@@ -35,15 +52,18 @@ export function Navbar() {
   }, [showHamburger]);
 
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen && !moreOpen) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        setMoreOpen(false);
+      }
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [menuOpen]);
+  }, [menuOpen, moreOpen]);
 
   return (
     <nav className="site-nav">
@@ -59,11 +79,66 @@ export function Navbar() {
           />
         </Link>
         <div className="nav-links">
-          {NAV_LINKS.map((link) => (
+          {PRIMARY_NAV_LINKS.map((link) => (
             <a key={link.href} href={link.href}>
               {link.label}
             </a>
           ))}
+          {MORE_NAV_LINKS.length > 0 && (
+            <div className="nav-more-wrap">
+              <button
+                type="button"
+                className="nav-more-btn"
+                aria-expanded={moreOpen}
+                aria-controls="nav-more-menu"
+                onClick={() => setMoreOpen((open) => !open)}
+              >
+                More
+                <CaretDown
+                  size={14}
+                  weight="bold"
+                  aria-hidden
+                  className={moreOpen ? "nav-more-caret open" : "nav-more-caret"}
+                />
+              </button>
+              <AnimatePresence>
+                {moreOpen && (
+                  <>
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="nav-menu-scrim"
+                      aria-label="Close menu"
+                      onClick={() => setMoreOpen(false)}
+                    />
+                    <motion.div
+                      id="nav-more-menu"
+                      role="menu"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={appleSpring.ui}
+                      className="nav-more-menu"
+                    >
+                      {MORE_NAV_LINKS.map((link) => (
+                        <a
+                          key={link.href}
+                          href={link.href}
+                          role="menuitem"
+                          onClick={() => setMoreOpen(false)}
+                        >
+                          {link.label}
+                        </a>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
         <div className="nav-actions">
           <AnimatePresence mode="wait" initial={false}>
@@ -131,7 +206,7 @@ export function Navbar() {
                         transition={appleSpring.ui}
                         className="nav-mobile-menu"
                       >
-                        {NAV_LINKS.map((link) => (
+                        {ALL_NAV_LINKS.map((link) => (
                           <a
                             key={link.href}
                             href={link.href}
