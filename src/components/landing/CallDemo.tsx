@@ -26,9 +26,15 @@ function seedBars(seed: string, count = 48) {
   });
 }
 
-export function CallDemo({ variant = "full" }: { variant?: LandingVariant }) {
+export function CallDemo({
+  variant = "full",
+  defaultJourney = "cod",
+}: {
+  variant?: LandingVariant;
+  defaultJourney?: CallJourneyId;
+}) {
   const showCallPoints = variant !== "cold";
-  const [journey, setJourney] = useState<CallJourneyId>("cod");
+  const [journey, setJourney] = useState<CallJourneyId>(defaultJourney);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentSec, setCurrentSec] = useState(0);

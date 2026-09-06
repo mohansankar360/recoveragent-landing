@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { List, X } from "@phosphor-icons/react";
-import type { LandingVariant } from "@/lib/landing-variant";
+import { SITE_SECTIONS } from "@/lib/site-sections";
 import { appleSpring } from "@/lib/motion";
 import { useMobileNav } from "@/lib/use-mobile-nav";
 import { useStickyBarVisible } from "@/lib/use-sticky-bar-visible";
@@ -17,35 +17,14 @@ const navActionSwap = {
   transition: appleSpring.ui,
 };
 
-const NAV_LINKS: Record<LandingVariant, { href: string; label: string }[]> = {
-  cold: [
-    { href: "#leaks", label: "Where you leak" },
-    { href: "#calc", label: "Loss calculator" },
-    { href: "#control-room", label: "Control room" },
-    { href: "#call", label: "Hear a call" },
-    { href: "#plans", label: "Plans" },
-    { href: "#demo-booking", label: "Book a demo" },
-  ],
-  warm: [
-    { href: "#leaks", label: "Where you leak" },
-    { href: "#calc", label: "Loss calculator" },
-    { href: "#control-room", label: "Control room" },
-    { href: "#call", label: "Hear a call" },
-    { href: "#plans", label: "Plans" },
-    { href: "#demo-booking", label: "Book a demo" },
-  ],
-  full: [
-    { href: "#leaks", label: "Where you leak" },
-    { href: "#calc", label: "Loss calculator" },
-    { href: "#control-room", label: "Control room" },
-    { href: "#call", label: "Hear a call" },
-    { href: "#call-versus", label: "Why calling" },
-    { href: "#plans", label: "Plans" },
-    { href: "#demo-booking", label: "Book a demo" },
-  ],
-};
+const NAV_LINKS = SITE_SECTIONS.filter(
+  (section) => section.slug !== "go-live" && section.slug !== "faq"
+).map((section) => ({
+  href: `/${section.slug}`,
+  label: section.navLabel,
+}));
 
-export function Navbar({ variant = "full" }: { variant?: LandingVariant }) {
+export function Navbar() {
   const isMobile = useMobileNav();
   const stickyBarVisible = useStickyBarVisible();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,7 +48,7 @@ export function Navbar({ variant = "full" }: { variant?: LandingVariant }) {
   return (
     <nav className="site-nav">
       <div className="wrap">
-        <Link className="brand" href="#top">
+        <Link className="brand" href="/">
           <Image
             src="/recover-agent-logo-transparent.png"
             alt="Recover Agent"
@@ -80,7 +59,7 @@ export function Navbar({ variant = "full" }: { variant?: LandingVariant }) {
           />
         </Link>
         <div className="nav-links">
-          {NAV_LINKS[variant].map((link) => (
+          {NAV_LINKS.map((link) => (
             <a key={link.href} href={link.href}>
               {link.label}
             </a>
@@ -152,7 +131,7 @@ export function Navbar({ variant = "full" }: { variant?: LandingVariant }) {
                         transition={appleSpring.ui}
                         className="nav-mobile-menu"
                       >
-                        {NAV_LINKS[variant].map((link) => (
+                        {NAV_LINKS.map((link) => (
                           <a
                             key={link.href}
                             href={link.href}
@@ -170,7 +149,7 @@ export function Navbar({ variant = "full" }: { variant?: LandingVariant }) {
               <motion.a
                 key="nav-cta"
                 className="btn btn-primary nav-cta"
-                href="#demo-booking"
+                href="/book-demo"
                 {...navActionSwap}
               >
                 Book a 15-min demo

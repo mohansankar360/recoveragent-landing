@@ -21,7 +21,7 @@ function WarmPage() {
   return (
     <>
       <VersionSwitcher />
-      <Navbar variant="warm" />
+      <Navbar />
       <main>
         <Hero variant="warm" />
         <RecoveryPaths />
@@ -45,7 +45,7 @@ function ColdPage() {
   return (
     <>
       <VersionSwitcher />
-      <Navbar variant="cold" />
+      <Navbar />
       <main>
         <Hero variant="cold" />
         <RecoveryPaths />
@@ -68,7 +68,7 @@ function ColdPage() {
 function FullPage() {
   return (
     <>
-      <Navbar variant="full" />
+      <Navbar />
       <main>
         <Hero variant="full" />
         <RecoveryPaths />

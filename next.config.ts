@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         destination: "/calendar",
         permanent: true,
       },
+      { source: "/full", destination: "/", permanent: true },
+      { source: "/cold", destination: "/", permanent: true },
+      { source: "/warm", destination: "/", permanent: true },
+      { source: "/preview", destination: "/", permanent: true },
     ];
   },
 };
