@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FadeIn } from "@/components/ui/AnimatedCounter";
+import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
 import { appleSpring } from "@/lib/motion";
 
@@ -97,64 +97,44 @@ export function RecoveryJourney() {
   const current = steps[activeStep];
 
   return (
-    <section id="how-it-works" className="section-padding">
-      <div className="container-wide">
-        <FadeIn>
-          <h2 className="text-left text-3xl font-bold tracking-tighter text-ink sm:text-4xl">
-            One COD order. Multiple chances to save it.
-          </h2>
-        </FadeIn>
+    <section id="how-it-works" className="sec">
+      <div className="wrap">
+        <Reveal className="sec-head">
+          <div className="eyebrow">How it works</div>
+          <h2>One COD order. Multiple chances to save it.</h2>
+        </Reveal>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-[320px_1fr]">
-          {/* Mobile: swipeable step pills */}
-          <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden snap-x snap-mandatory scrollbar-none">
+        <div className="recovery-workflow">
+          <div className="recovery-workflow-pills">
             {steps.map((step, i) => (
               <button
                 key={step.id}
+                type="button"
                 onClick={() => handleStepClick(i)}
-                className={`shrink-0 snap-start rounded-full px-4 py-2 text-xs font-medium transition-all ${
-                  activeStep === i
-                    ? "bg-ink text-white"
-                    : "ops-panel text-ink-muted"
-                }`}
+                className={`recovery-workflow-pill${activeStep === i ? " is-active" : ""}`}
               >
                 {step.title}
               </button>
             ))}
           </div>
 
-          {/* Desktop timeline */}
-          <div className="hidden space-y-1 lg:block">
+          <div className="recovery-workflow-nav">
             {steps.map((step, i) => (
               <button
                 key={step.id}
+                type="button"
                 onClick={() => handleStepClick(i)}
-                className={`group flex w-full items-start gap-4 rounded-xl p-4 text-left transition-all ${
-                  activeStep === i
-                    ? "bg-canvas-subtle ring-1 ring-line-strong"
-                    : "hover:bg-canvas-subtle"
-                }`}
+                className={`recovery-workflow-step${activeStep === i ? " is-active" : ""}`}
               >
-                <span
-                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold ${
-                    activeStep === i
-                      ? "bg-ink text-white"
-                      : "ops-panel text-ink-faint"
-                  }`}
-                >
-                  {step.id}
-                </span>
+                <span className="recovery-workflow-step-num">{step.id}</span>
                 <div>
-                  <p className={`text-sm font-semibold ${activeStep === i ? "text-ink" : "text-ink-muted"}`}>
-                    {step.title}
-                  </p>
-                  <p className="mt-0.5 text-xs text-ink-faint">{step.summary}</p>
+                  <p className="recovery-workflow-step-title">{step.title}</p>
+                  <p className="recovery-workflow-step-summary">{step.summary}</p>
                 </div>
               </button>
             ))}
           </div>
 
-          {/* Panel */}
           <AnimatePresence mode="wait">
             <motion.div
               key={activeStep}
@@ -162,24 +142,17 @@ export function RecoveryJourney() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={appleSpring.ui}
-              className="ops-panel p-6 sm:p-8"
+              className="recovery-workflow-panel"
             >
-              <p className="font-mono text-xs uppercase tracking-widest text-ink-faint">
-                Step {current.id}
-              </p>
-              <h3 className="mt-2 text-2xl font-bold text-ink">{current.title}</h3>
-              <p className="mt-3 text-ink-muted">{current.detail}</p>
+              <p className="recovery-workflow-panel-label">Step {current.id}</p>
+              <h3>{current.title}</h3>
+              <p>{current.detail}</p>
 
-              <div className="mt-8 rounded-lg border border-line bg-canvas-subtle p-5">
-                <p className="mb-4 font-mono text-xs uppercase tracking-widest text-ink-faint">
-                  {current.panel.title}
-                </p>
-                <ul className="space-y-3">
+              <div className="recovery-workflow-panel-card">
+                <p className="recovery-workflow-panel-card-label">{current.panel.title}</p>
+                <ul className="recovery-workflow-panel-list">
                   {current.panel.items.map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm text-ink-muted">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ops-confirm" />
-                      {item}
-                    </li>
+                    <li key={item}>{item}</li>
                   ))}
                 </ul>
               </div>
