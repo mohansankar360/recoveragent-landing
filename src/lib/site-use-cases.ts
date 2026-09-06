@@ -9,6 +9,10 @@ const USE_CASE_SLUG_BY_PATH: Record<RecoveryPath["id"], string> = {
   ndr: "ndr-recovery",
 };
 
+export function getUseCaseSlugForPath(pathId: RecoveryPath["id"]): string {
+  return USE_CASE_SLUG_BY_PATH[pathId];
+}
+
 export const SITE_USE_CASES = [
   {
     slug: USE_CASE_SLUG_BY_PATH.cod,

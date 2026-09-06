@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { RECOVERY_PATHS } from "@/lib/recovery-paths-data";
+import { getUseCaseSlugForPath } from "@/lib/site-use-cases";
 import { RecoveryPathCard } from "./RecoveryPathCard";
 
 export function RecoveryPaths() {
@@ -16,7 +17,11 @@ export function RecoveryPaths() {
 
         <Reveal className="recovery-grid">
           {RECOVERY_PATHS.map((path) => (
-            <RecoveryPathCard key={path.id} path={path} />
+            <RecoveryPathCard
+              key={path.id}
+              path={path}
+              href={`/${getUseCaseSlugForPath(path.id)}`}
+            />
           ))}
         </Reveal>
       </div>

@@ -1370,6 +1370,20 @@ nav.site-nav .wrap {
   min-width: 0;
 }
 
+a.recovery-path-card {
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+a.recovery-path-card:hover {
+  border-color: var(--recover-lo);
+  box-shadow:
+    0 1px 2px rgba(23, 21, 18, 0.06),
+    0 20px 44px rgba(23, 21, 18, 0.08);
+  transform: translateY(-2px);
+}
+
 .recovery-path-meta {
   display: flex;
   align-items: center;
