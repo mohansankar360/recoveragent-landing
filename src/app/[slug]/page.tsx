@@ -89,7 +89,7 @@ export default async function PublicPage({
   const { page } = resolved;
 
   return (
-    <PageShell slug={page.slug} navLabel={page.navLabel}>
+    <PageShell navLabel={page.navLabel}>
       {resolved.type === "use-case" ? (
         <UseCasePageContent path={getRecoveryPathForUseCase(resolved.page)} />
       ) : (
