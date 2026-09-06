@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { Icon } from "@phosphor-icons/react";
 import {
   Bell,
@@ -85,15 +86,15 @@ function PlanTierCTA({
   recommended?: boolean;
 }) {
   return (
-    <a
+    <Link
       className={`plans-tier-cta btn ${recommended ? "btn-primary" : "btn-ghost plans-tier-cta-muted"}`}
-      href="#demo-booking"
+      href="/book-demo"
       onClick={() =>
         trackEvent("sticky_cta_clicked", { source: "pricing", tier: tierId })
       }
     >
       Book a demo
-    </a>
+    </Link>
   );
 }
 

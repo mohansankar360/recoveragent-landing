@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { LandingVariant } from "@/lib/landing-variant";
 
 export function FinalCTA({ variant = "full" }: { variant?: LandingVariant }) {
@@ -18,12 +19,12 @@ export function FinalCTA({ variant = "full" }: { variant?: LandingVariant }) {
           minutes free consultation.
         </p>
         <div className="btns">
-          <a className="btn btn-primary" href="#demo-booking">
+          <Link className="btn btn-primary" href="/book-demo">
             Go live now
-          </a>
-          <a className="btn btn-ghost" href="#calc">
+          </Link>
+          <Link className="btn btn-ghost" href="/loss-calculator">
             {isCold ? "Calculate my gap →" : "Find my gap in 30 seconds →"}
-          </a>
+          </Link>
         </div>
       </div>
     </section>

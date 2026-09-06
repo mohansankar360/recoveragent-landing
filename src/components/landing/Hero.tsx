@@ -1,4 +1,5 @@
 import type { LandingVariant } from "@/lib/landing-variant";
+import Link from "next/link";
 import { Play } from "@phosphor-icons/react/ssr";
 import { HeroCallCard } from "./HeroCallCard";
 export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant }) {
@@ -28,13 +29,13 @@ export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant 
             confirm COD orders, and save failed deliveries — <strong>automatically</strong>.
           </p>
           <div className="hero-cta">
-            <a className="btn btn-primary" href="#calc">
+            <Link className="btn btn-primary" href="/loss-calculator">
               Find my gap in 30 seconds →
-            </a>
-            <a className="btn btn-ghost" href="#call">
+            </Link>
+            <Link className="btn btn-ghost" href="/hear-a-call">
               <Play size={16} weight="fill" aria-hidden />
               Hear an actual call
-            </a>
+            </Link>
           </div>
           <p className="hero-note">Live on your store in 3 days. No call centre. No coding required.</p>
           <div className="tick">

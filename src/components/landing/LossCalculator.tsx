@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Calculator,
@@ -407,7 +408,7 @@ export function LossCalculator({ showInlineDemoCta = false }: { showInlineDemoCt
                 </div>
 
                 <div className="calc-cta">
-                  <a className="btn btn-green calc-cta-btn" href="#demo-booking">
+                  <Link className="btn btn-green calc-cta-btn" href="/book-demo">
                     <CalendarBlank size={22} weight="regular" aria-hidden />
                     <span className="calc-cta-copy">
                       <span className="calc-cta-title">See how much more you can keep →</span>
@@ -415,7 +416,7 @@ export function LossCalculator({ showInlineDemoCta = false }: { showInlineDemoCt
                         Book a 30-min demo to see real impact
                       </span>
                     </span>
-                  </a>
+                  </Link>
                   <ul className="calc-trust-badges" aria-label="Why book a demo">
                     <li>
                       <Clock size={16} weight="regular" aria-hidden />
@@ -429,9 +430,9 @@ export function LossCalculator({ showInlineDemoCta = false }: { showInlineDemoCt
                 </div>
 
                 {showInlineDemoCta && displayResults && (
-                  <a className="calc-inline-link" href="#demo-booking">
+                  <Link className="calc-inline-link" href="/book-demo">
                     Or book with these numbers prefilled →
-                  </a>
+                  </Link>
                 )}
               </div>
             )}

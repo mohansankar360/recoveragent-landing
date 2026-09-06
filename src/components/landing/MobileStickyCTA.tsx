@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { scrollToSection } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { appleSpring } from "@/lib/motion";
 import { useStickyBarVisible } from "@/lib/use-sticky-bar-visible";
@@ -11,25 +11,27 @@ export function MobileStickyCTA() {
 
   const handleClick = () => {
     trackEvent("sticky_cta_clicked", { source: "sticky_bar" });
-    scrollToSection("demo-booking");
   };
 
   return (
     <>
       <AnimatePresence>
         {visible && (
-          <motion.button
-            type="button"
+          <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={appleSpring.ui}
-            onClick={handleClick}
             whileTap={{ scale: 0.97 }}
-            className="btn btn-primary floating-cta"
           >
-            Losing orders to RTO? Book demo
-          </motion.button>
+            <Link
+              href="/book-demo"
+              onClick={handleClick}
+              className="btn btn-primary floating-cta"
+            >
+              Losing orders to RTO? Book demo
+            </Link>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -44,9 +46,13 @@ export function MobileStickyCTA() {
           >
             <div className="sticky-sheet-inner">
               <p className="sticky-sheet-copy">See Recover Agent in action</p>
-              <button type="button" onClick={handleClick} className="btn btn-primary sticky-sheet-btn">
+              <Link
+                href="/book-demo"
+                onClick={handleClick}
+                className="btn btn-primary sticky-sheet-btn"
+              >
                 Book demo
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}

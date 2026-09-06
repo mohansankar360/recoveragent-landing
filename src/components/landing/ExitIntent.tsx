@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { scrollToSection } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { appleFade, appleSpring } from "@/lib/motion";
 
@@ -32,7 +32,6 @@ export function ExitIntent() {
   const handleCTA = () => {
     trackEvent("exit_intent_cta_clicked");
     setOpen(false);
-    scrollToSection("demo-booking");
   };
 
   return (
@@ -72,9 +71,9 @@ export function ExitIntent() {
                 See how Recover Agent automates confirmation, NDR follow-up, and recovery
                 before orders turn into RTO.
               </p>
-              <button type="button" onClick={handleCTA} className="btn btn-primary modal-cta">
+              <Link href="/book-demo" onClick={handleCTA} className="btn btn-primary modal-cta">
                 See a 10-min demo
-              </button>
+              </Link>
             </div>
           </motion.div>
         </>

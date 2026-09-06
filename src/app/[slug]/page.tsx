@@ -15,6 +15,7 @@ import { UseCasePageContent } from "@/components/landing/UseCasePageContent";
 import { getAllPublicSlugs, resolvePublicPage } from "@/lib/site-pages";
 import type { SiteSectionSlug } from "@/lib/site-sections";
 import { getRecoveryPathForUseCase } from "@/lib/site-use-cases";
+import { OG_IMAGE, SITE_NAME } from "@/lib/site-metadata";
 import { siteUrl } from "@/lib/site-url";
 
 function SectionContent({ slug }: { slug: SiteSectionSlug }) {
@@ -67,12 +68,14 @@ export async function generateMetadata({
       description: page.description,
       url,
       type: "website",
-      siteName: "Recover Agent",
+      siteName: SITE_NAME,
+      images: [OG_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: page.title,
       description: page.description,
+      images: [OG_IMAGE.url],
     },
   };
 }
