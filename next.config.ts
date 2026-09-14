@@ -1,9 +1,17 @@
 import type { NextConfig } from "next";
 
+const WWW_HOST = "www.recoveragent.ai";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "recoveragent.ai" }],
+        destination: `https://${WWW_HOST}/:path*`,
+        permanent: true,
+      },
       {
         source: "/calender",
         destination: "/calendar",

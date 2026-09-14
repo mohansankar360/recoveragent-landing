@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
@@ -9,10 +9,18 @@ import {
   DEMO_LANGUAGE_OPTIONS,
   getDisqualificationMessage,
   MONTHLY_ORDERS_OPTIONS,
+  getStoreUrlInlineError,
+  getStoreUrlValidationError,
+  normalizeStoreUrl,
   qualifiesForDemoCalendar,
   STORE_PLATFORM_OPTIONS,
 } from "@/lib/demo-booking";
 import { saveDemoBookingSession } from "@/lib/demo-booking-session";
+import {
+  applyLeadPrefill,
+  clearLeadPrefill,
+  readLeadPrefill,
+} from "@/lib/lead-prefill";
 import { appleFade, appleSpring } from "@/lib/motion";
 
 interface FormData {
@@ -28,7 +36,11 @@ interface FormData {
 const REDIRECT_DELAY_MS = 320;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateField(field: keyof FormData, value: string): string | undefined {
+function validateField(
+  field: keyof FormData,
+  value: string,
+  mode: "inline" | "submit" = "inline"
+): string | undefined {
   const trimmed = value.trim();
   switch (field) {
     case "name":
@@ -45,8 +57,9 @@ function validateField(field: keyof FormData, value: string): string | undefined
       if (!EMAIL_PATTERN.test(trimmed)) return "Enter a valid email address";
       return undefined;
     case "storeUrl":
-      if (!trimmed) return "Store URL is required";
-      return undefined;
+      if (!trimmed) return mode === "submit" ? "Store URL is required" : undefined;
+      if (mode === "submit") return getStoreUrlValidationError(value);
+      return getStoreUrlInlineError(value);
     case "storePlatform":
       if (!trimmed) return "Select your store platform";
       return undefined;
@@ -78,7 +91,7 @@ function getValidatedFields(compact: boolean): (keyof FormData)[] {
 function validateAll(form: FormData, compact: boolean): Partial<FormData> {
   const next: Partial<FormData> = {};
   getValidatedFields(compact).forEach((field) => {
-    const error = validateField(field, form[field]);
+    const error = validateField(field, form[field], "submit");
     if (error) next[field] = error;
   });
   return next;
@@ -117,6 +130,15 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [hasPrefill, setHasPrefill] = useState(false);
+
+  useEffect(() => {
+    const prefill = readLeadPrefill();
+    if (!prefill) return;
+
+    setForm((prev) => applyLeadPrefill(prev, prefill));
+    setHasPrefill(true);
+  }, []);
 
   const handleChange = (field: keyof FormData, value: string) => {
     if (!hasStarted) {
@@ -157,7 +179,10 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
           storeUrl: form.storeUrl.trim() || "To be shared on call",
           preferredLanguage: form.preferredLanguage || "english-or-hindi",
         }
-      : form;
+      : {
+          ...form,
+          storeUrl: normalizeStoreUrl(form.storeUrl),
+        };
 
     const qualifies = qualifiesForDemoCalendar(payload);
     const metaEventId = generateMetaEventId();
@@ -183,6 +208,7 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
         store_platform: form.storePlatform,
         event_id: metaEventId,
       });
+      clearLeadPrefill();
 
       setIsSubmitting(false);
 
@@ -269,6 +295,12 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                     <p className="demo-form-note mono">
                       30 minutes · Explore the Recover agent live · No setup fee
                     </p>
+                    {hasPrefill && (
+                      <p className="demo-prefill-note" role="status">
+                        We&apos;ve prefilled your details from earlier — review
+                        and complete the remaining fields.
+                      </p>
+                    )}
                   </div>
 
                   <div className="demo-fields">
@@ -299,7 +331,6 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                         error={errors.email}
                         onChange={(v) => handleChange("email", v)}
                         onBlur={() => handleBlur("email")}
-                        placeholder="you@store.com"
                         type="email"
                         autoComplete="email"
                         inputMode="email"

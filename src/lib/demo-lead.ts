@@ -3,6 +3,7 @@ import {
   demoLanguageLabel,
   isValidMonthlyOrders,
   isValidStorePlatform,
+  isValidStoreUrl,
   monthlyOrdersLabel,
   normalizeWhatsAppNumber,
   storePlatformLabel,
@@ -61,7 +62,7 @@ export function isValidDemoFormData(data: unknown): data is DemoFormData {
     typeof form.email === "string" &&
     EMAIL_PATTERN.test(form.email.trim()) &&
     typeof form.storeUrl === "string" &&
-    form.storeUrl.trim().length > 0 &&
+    isValidStoreUrl(form.storeUrl) &&
     typeof form.storePlatform === "string" &&
     isValidStorePlatform(form.storePlatform) &&
     typeof form.monthlyOrders === "string" &&

@@ -95,6 +95,76 @@ export function normalizeWhatsAppNumber(phone: string): string {
   return `+91${digits}`;
 }
 
+const STORE_URL_PLACEHOLDER = "to be shared on call";
+
+/** Prepends https:// when the user enters a bare domain. */
+export function normalizeStoreUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+const STORE_HOSTNAME_PATTERN =
+  /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
+
+const STORE_URL_INVALID_MESSAGE =
+  "Enter a valid store URL (e.g. yourstore.com)";
+
+export function getStoreUrlValidationError(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return "Store URL is required";
+
+  if (trimmed.toLowerCase() === STORE_URL_PLACEHOLDER) return undefined;
+
+  if (/\s/.test(trimmed)) {
+    return "Store URL cannot contain spaces";
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(normalizeStoreUrl(trimmed));
+  } catch {
+    return STORE_URL_INVALID_MESSAGE;
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return STORE_URL_INVALID_MESSAGE;
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+  if (
+    !hostname.includes(".") ||
+    !STORE_HOSTNAME_PATTERN.test(hostname)
+  ) {
+    return STORE_URL_INVALID_MESSAGE;
+  }
+
+  const labels = hostname.split(".");
+  const tld = labels[labels.length - 1];
+  if (
+    labels.some((label) => label.length === 0) ||
+    tld.length < 2 ||
+    !/^[a-z]{2,63}$/i.test(tld)
+  ) {
+    return STORE_URL_INVALID_MESSAGE;
+  }
+
+  return undefined;
+}
+
+/** Lighter checks while typing; full validation runs on submit. */
+export function getStoreUrlInlineError(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (/\s/.test(trimmed)) return "Store URL cannot contain spaces";
+  if (!trimmed.includes(".")) return undefined;
+  return getStoreUrlValidationError(value);
+}
+
+export function isValidStoreUrl(value: string): boolean {
+  return getStoreUrlValidationError(value) === undefined;
+}
+
 /** Build Cal.com link with booking fields prefilled from the demo form. */
 export function buildDemoBookingUrl(data: DemoFormData): string {
   const params = new URLSearchParams();

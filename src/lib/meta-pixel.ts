@@ -87,6 +87,23 @@ function mapAnalyticsEventToMeta(
             : {}),
         },
       };
+    case "lead_form_submitted":
+      return {
+        kind: "standard",
+        name: "Lead",
+        params: {
+          content_name: "lead_capture",
+          ...(properties?.monthly_orders
+            ? { monthly_orders: properties.monthly_orders }
+            : {}),
+        },
+      };
+    case "lead_form_started":
+      return {
+        kind: "custom",
+        name: "LeadFormStarted",
+        params: { content_name: "lead_capture" },
+      };
     case "demo_form_started":
       return {
         kind: "custom",
