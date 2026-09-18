@@ -29,8 +29,11 @@ export const MONTHLY_ORDERS_OPTIONS = [
 export const STORE_PLATFORM_OPTIONS = [
   { value: "shopify", label: "Shopify" },
   { value: "woocommerce", label: "Woocommerce" },
-  { value: "other", label: "Other platform — currently not supported" },
+  { value: "other", label: "Other platform - currently not supported" },
 ] as const;
+
+export const UNSUPPORTED_PLATFORM_MESSAGE =
+  "Sorry, Recover Agent is built only for Shopify and WooCommerce stores.";
 
 const MONTHLY_ORDERS_VALUE_SET = new Set(
   MONTHLY_ORDERS_OPTIONS.map((option) => option.value)
@@ -76,7 +79,7 @@ export function getDisqualificationMessage(
   const unsupportedPlatform = data.storePlatform === "other";
 
   if (lowVolume && unsupportedPlatform) {
-    return "Live demos are for Shopify and WooCommerce stores doing 500+ orders per month. We can still help with our WhatsApp API service — our team will call you soon to see how we can help you reduce your RTO.";
+    return UNSUPPORTED_PLATFORM_MESSAGE;
   }
 
   if (lowVolume) {
@@ -84,7 +87,7 @@ export function getDisqualificationMessage(
   }
 
   if (unsupportedPlatform) {
-    return "Recover Agent currently supports Shopify and WooCommerce only. We've saved your details — we'll notify you when your platform is supported.";
+    return UNSUPPORTED_PLATFORM_MESSAGE;
   }
 
   return null;

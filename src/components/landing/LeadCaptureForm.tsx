@@ -7,6 +7,7 @@ import { trackEvent } from "@/lib/analytics";
 import {
   MONTHLY_ORDERS_OPTIONS,
   STORE_PLATFORM_OPTIONS,
+  UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { saveLeadPrefill } from "@/lib/lead-prefill";
 import { generateMetaEventId } from "@/lib/meta-pixel";
@@ -77,6 +78,7 @@ export function LeadCaptureForm() {
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isUnsupportedPlatform, setIsUnsupportedPlatform] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
   const handleChange = (field: keyof LeadFormData, value: string) => {
@@ -116,6 +118,11 @@ export function LeadCaptureForm() {
     );
 
     if (Object.keys(nextErrors).length > 0) return;
+
+    if (form.storePlatform === "other") {
+      setIsUnsupportedPlatform(true);
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -166,7 +173,21 @@ export function LeadCaptureForm() {
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {isRedirecting ? (
+          {isUnsupportedPlatform ? (
+            <motion.div
+              key="unsupported-platform"
+              className="demo-success"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={appleFade}
+              role="status"
+              aria-live="polite"
+            >
+              <p className="demo-success-title">This platform is not supported.</p>
+              <p className="demo-success-copy">{UNSUPPORTED_PLATFORM_MESSAGE}</p>
+            </motion.div>
+          ) : isRedirecting ? (
             <motion.div
               key="redirect"
               className="demo-success"

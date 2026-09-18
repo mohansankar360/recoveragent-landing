@@ -16,6 +16,12 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "Invalid form data" }, { status: 400 });
   }
 
+  // Unsupported-platform leads are intentionally not forwarded to the CRM.
+  // Keep this server-side guard even though the UI blocks these submissions.
+  if (body.storePlatform === "other") {
+    return Response.json({ ok: true, skipped: true });
+  }
+
   const payload = buildDemoLeadPayload(body);
   const webhookUrl = process.env.CRM_WEBHOOK_URL;
 

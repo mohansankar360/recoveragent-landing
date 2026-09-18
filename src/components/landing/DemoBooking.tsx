@@ -14,6 +14,7 @@ import {
   normalizeStoreUrl,
   qualifiesForDemoCalendar,
   STORE_PLATFORM_OPTIONS,
+  UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { saveDemoBookingSession } from "@/lib/demo-booking-session";
 import {
@@ -171,6 +172,13 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
     if (Object.keys(nextErrors).length > 0) return;
 
     setSubmitError(null);
+
+    if (form.storePlatform === "other") {
+      setDisqualificationMessage(UNSUPPORTED_PLATFORM_MESSAGE);
+      setSubmitOutcome("disqualified");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload = compact
@@ -278,7 +286,7 @@ export function DemoBooking({ compact = false }: { compact?: boolean }) {
                   role="status"
                   aria-live="polite"
                 >
-                  <p className="demo-success-title">Thanks — we&apos;ve got your details.</p>
+                  <p className="demo-success-title">This platform is not supported.</p>
                   <p className="demo-success-copy">{disqualificationMessage}</p>
                 </motion.div>
               ) : (
