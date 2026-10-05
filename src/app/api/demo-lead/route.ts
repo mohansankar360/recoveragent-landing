@@ -1,5 +1,6 @@
 import { buildDemoLeadPayload, isValidDemoFormData } from "@/lib/demo-lead";
 import { sendMetaServerEvent } from "@/lib/meta-conversions-api";
+import { buildDashboardLeadRequest, isDashboardLeadEndpoint, readDashboardLeadReceipt } from "@/lib/demo-crm";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -37,26 +38,45 @@ export async function POST(request: Request) {
     "Content-Type": "application/json",
   };
 
-  const secret = process.env.CRM_WEBHOOK_SECRET;
+  const secret = process.env.CRM_WEBHOOK_SECRET?.trim();
+  const dashboardSync = isDashboardLeadEndpoint(webhookUrl);
+  const companyId = process.env.CRM_COMPANY_ID?.trim();
+  if (dashboardSync && (!companyId || !secret)) {
+    console.error("[demo-lead] Dashboard sync requires CRM_COMPANY_ID and CRM_WEBHOOK_SECRET");
+    return Response.json({ ok: false, error: "Lead capture is not configured yet" }, { status: 503 });
+  }
+  const crmPayload = dashboardSync ? buildDashboardLeadRequest(payload, companyId!) : payload;
   if (secret) {
-    headers.Authorization = `Bearer ${secret}`;
+    if (dashboardSync) {
+      headers["x-api-key"] = secret;
+      const gatewayKey = process.env.CRM_GATEWAY_KEY?.trim();
+      if (gatewayKey) headers.Authorization = `Bearer ${gatewayKey}`;
+    } else headers.Authorization = `Bearer ${secret}`;
   }
 
+  let leadReceipt: { id: string; duplicate: boolean } | null = null;
   try {
     const crmResponse = await fetch(webhookUrl, {
       method: "POST",
       headers,
-      body: JSON.stringify(payload),
+      body: JSON.stringify(crmPayload),
       signal: AbortSignal.timeout(10_000),
     });
 
     if (!crmResponse.ok) {
-      const detail = await crmResponse.text().catch(() => "");
-      console.error("[demo-lead] CRM webhook failed", crmResponse.status, detail);
+
+      console.error("[demo-lead] CRM webhook failed", crmResponse.status);
       return Response.json(
         { ok: false, error: "Could not save to CRM" },
         { status: 502 }
       );
+    }
+    if (dashboardSync) {
+      leadReceipt = readDashboardLeadReceipt(await crmResponse.json().catch(() => null));
+      if (!leadReceipt) {
+        console.error("[demo-lead] Dashboard did not confirm lead creation");
+        return Response.json({ ok: false, error: "Could not save your details. Please try again." }, { status: 502 });
+      }
     }
   } catch (error) {
     console.error("[demo-lead] CRM webhook error", error);
@@ -88,6 +108,7 @@ export async function POST(request: Request) {
   return Response.json({
     ok: true,
     calBookingUrl: payload.calBookingUrl,
+    ...(leadReceipt ? { leadId: leadReceipt.id, duplicate: leadReceipt.duplicate } : {}),
   });
 }
 
