@@ -16,6 +16,7 @@ import { Footer } from "./Footer";
 import { ExitIntent } from "./ExitIntent";
 import { MobileStickyCTA } from "./MobileStickyCTA";
 import { VersionSwitcher } from "./VersionSwitcher";
+import { ConversionHomepage } from "./ConversionHomepage";
 
 function WarmPage() {
   return (
@@ -66,27 +67,7 @@ function ColdPage() {
 }
 
 function FullPage() {
-  return (
-    <>
-      <Navbar />
-      <main>
-        <Hero variant="full" />
-        <RecoveryPaths />
-        <LossCalculator />
-        <ControlRoomDemo />
-        <CallDemo variant="full" />
-        <CallVersus />
-        <PlansSection />
-        <GoLive />
-        <FAQ variant="full" />
-        <DemoBooking />
-        <FinalCTA variant="full" />
-      </main>
-      <Footer />
-      <MobileStickyCTA />
-      <ExitIntent />
-    </>
-  );
+  return <ConversionHomepage />;
 }
 
 export function LandingPage({ variant = "full" }: { variant?: LandingVariant }) {

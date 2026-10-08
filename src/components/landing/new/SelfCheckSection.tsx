@@ -35,7 +35,7 @@ const CHECK_ITEMS = [
   {
     id: "rto",
     label: "RTO rate hasn't moved despite trying everything",
-    detail: "Typical brands see 24% → 11% RTO shift in 60 days",
+    detail: "Confirm intent before fulfilment and keep exception outcomes visible",
   },
   {
     id: "languages",

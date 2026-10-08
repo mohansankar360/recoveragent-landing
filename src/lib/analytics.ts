@@ -2,7 +2,12 @@ import { trackMetaEvent, trackMetaPageView } from "./meta-pixel";
 
 export type AnalyticsEvent =
   | "hero_demo_click"
+  | "hero_book_demo_clicked"
   | "hero_video_play"
+  | "cta_clicked"
+  | "call_sample_played"
+  | "call_sample_completed"
+  | "integration_viewed"
   | "calculator_started"
   | "calculator_completed"
   | "calculator_cta_clicked"

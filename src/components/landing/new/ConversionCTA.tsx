@@ -15,7 +15,7 @@ export function ConversionCTA({
   title,
   subtitle,
   primaryHref = "/book-demo",
-  primaryLabel = "Book a 15-min demo",
+  primaryLabel = "Book a 30-min demo",
   secondaryHref = "/new#calc",
   secondaryLabel = "Calculate my gap →",
   source,
@@ -36,7 +36,7 @@ export function ConversionCTA({
             <Link className="btn btn-ghost" href={secondaryHref}>
               {secondaryLabel}
             </Link>
-            <p className="new-trust-line">Live in 3 days · No setup fee · Cancel anytime</p>
+            <p className="new-trust-line">Shopify &amp; WooCommerce · Voice + WhatsApp workflows</p>
           </div>
         </div>
       </div>

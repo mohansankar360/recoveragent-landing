@@ -32,17 +32,17 @@ const TIER_META: Record<
   { tagline: string; icon: Icon; tone: string }
 > = {
   starter: {
-    tagline: "Perfect to get started",
+    tagline: "Verify COD before dispatch",
     icon: PaperPlaneTilt,
     tone: "starter",
   },
   growth: {
-    tagline: "Built for growing brands",
+    tagline: "COD + checkout calling",
     icon: ChartLineUp,
     tone: "growth",
   },
   scale: {
-    tagline: "For high-volume stores",
+    tagline: "All three calling workflows",
     icon: RocketLaunch,
     tone: "scale",
   },
@@ -148,7 +148,7 @@ function MobilePlanCard({
 
       <dl className="plans-mobile-features">
         <div className="plans-mobile-row">
-          <dt>AI voice calls</dt>
+          <dt>Orders included</dt>
           <dd>{tier.includedCalls.toLocaleString("en-IN")} orders</dd>
         </div>
         <div className="plans-mobile-row">
@@ -213,7 +213,7 @@ export function PlanComparisonTable({
 
           <div className="plans-grid-row" role="row">
             <div className="plans-grid-label" role="rowheader">
-              AI voice calls included
+              Orders included
             </div>
             {PRICING_TIERS.map((tier) => (
               <div
@@ -293,7 +293,7 @@ export function PlanComparisonTable({
             <div>
               <p className="plans-all-included-title">WhatsApp available in all plans</p>
               <p className="plans-all-included-lead">
-                D2C essential WhatsApp flows on every tier
+                WhatsApp flows on every tier; checkout AI calling starts with Growth
               </p>
             </div>
           </div>

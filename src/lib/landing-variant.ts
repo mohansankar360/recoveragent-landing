@@ -32,8 +32,8 @@ export const LANDING_VARIANTS: {
 
 /** FAQ question keys shown on the cold-traffic variant. */
 export const COLD_FAQ_QUESTIONS = new Set([
-  "What if the AI annoys my customer and I lose the sale?",
-  "How is this different from the confirmation calls my ops team already makes?",
-  "What if it doesn't move my RTO?",
-  "Which brands does this not work for?",
+  "Is Recover Agent just an AI calling tool?",
+  "What happens when the customer asks something unexpected?",
+  "Does my team need to listen to every call?",
+  "Does Recover Agent work with Shopify and WooCommerce?",
 ]);

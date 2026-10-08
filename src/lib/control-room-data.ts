@@ -46,8 +46,8 @@ export const CONTROL_MODULES: ControlModule[] = [
   {
     id: "cod",
     tab: "COD confirmation",
-    title: "Stop junk before it ships",
-    subtitle: "Tap a funnel stage to drill into live orders.",
+    title: "Review COD orders before dispatch",
+    subtitle: "Select a funnel stage to inspect sample orders.",
     stages: [
       { id: "total", label: "Total COD orders", count: 1960, pct: "100%", tone: "neutral" },
       {
@@ -484,7 +484,7 @@ export const CONTROL_MODULES: ControlModule[] = [
 
 export const AUTOMATION_STEPS = [
   { label: "Shopify order", detail: "Webhook fires" },
-  { label: "Voice call", detail: "< 30 sec" },
+  { label: "Voice call", detail: "Configured timing" },
   { label: "Shopify tag", detail: "Verified / RTO hold" },
 ];
 

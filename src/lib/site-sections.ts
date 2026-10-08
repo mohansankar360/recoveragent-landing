@@ -39,9 +39,9 @@ export const SITE_SECTIONS = [
     slug: "why-calling",
     anchorId: "call-versus",
     navLabel: "Why calling",
-    title: "Why voice calls beat email and WhatsApp for order recovery",
+    title: "How voice and WhatsApp work together for order recovery",
     description:
-      "Compare recovery rates: email ~10%, WhatsApp 40–50%, voice call + WhatsApp 70–80%. Why Indian D2C brands use AI voice for COD and NDR recovery.",
+      "Use voice to understand customer intent, then use WhatsApp to deliver links, details, confirmations, and recovery follow-up.",
     sitemapPriority: 0.75,
   },
   {
@@ -57,9 +57,9 @@ export const SITE_SECTIONS = [
     slug: "go-live",
     anchorId: "go-live",
     navLabel: "Go live",
-    title: "Go live in 3 days — Recover Agent onboarding",
+    title: "Recover Agent onboarding — connect, configure, review",
     description:
-      "Connect Shopify or WooCommerce, configure AI recovery flows, and go live in three days. No integration project, no IT ticket.",
+      "Connect Shopify or WooCommerce, configure the relevant recovery flows, review outcomes, and expand coverage with merchant controls in place.",
     sitemapPriority: 0.7,
   },
   {
@@ -75,18 +75,18 @@ export const SITE_SECTIONS = [
     slug: "faq",
     anchorId: "faq",
     navLabel: "FAQ",
-    title: "Recover Agent FAQ — COD, WhatsApp, RTO & data privacy",
+    title: "Recover Agent FAQ — COD, WhatsApp, RTO & workflows",
     description:
-      "Answers founders ask before booking: AI call quality, WhatsApp compliance, Shopify support, DPDP data handling, and what happens if RTO doesn't move.",
+      "Answers founders ask before booking: AI call quality, unexpected questions, languages, Shopify and WooCommerce support, and rollout planning.",
     sitemapPriority: 0.85,
   },
   {
     slug: "book-demo",
     anchorId: "demo-booking",
     navLabel: "Book a demo",
-    title: "Book a Recover Agent demo — 15-minute walkthrough",
+    title: "Book a Recover Agent demo — 30-minute walkthrough",
     description:
-      "Book a free 15-minute demo. See Recover Agent verify COD, recover abandoned carts, and re-attempt NDR for your Indian D2C brand.",
+      "Book a free 30-minute demo. See Recover Agent verify COD, recover abandoned carts, and re-attempt NDR for your Indian D2C brand.",
     sitemapPriority: 1,
   },
 ] as const;

@@ -6,7 +6,7 @@ import { trackEvent } from "@/lib/analytics";
 export function PlansCTA() {
   return (
     <div className="plans-cta">
-      <p className="plans-cta-note">Zero setup fee · Live in 3 days · No annual lock-in</p>
+      <p className="plans-cta-note">Zero setup fee · Rollout mapped to your store · No annual lock-in</p>
       <div className="plans-cta-btns">
         <Link
           className="btn btn-ghost plans-calc-cta"

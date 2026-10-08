@@ -4,16 +4,16 @@ import { siteUrl } from "@/lib/site-url";
 export const SITE_NAME = "Recover Agent";
 
 export const DEFAULT_TITLE =
-  "Recover Agent — Ship fewer orders back. Bank more of what you sell.";
+  "Recover Agent: Revenue Recovery for Indian D2C";
 
 export const DEFAULT_DESCRIPTION =
-  "AI voice + WhatsApp agent for Indian D2C brands on Shopify. Verify COD before dispatch, re-attempt NDR, recover abandoned checkouts — in your customer's own language.";
+  "Recover at-risk COD orders, abandoned checkouts, and failed deliveries with AI voice, WhatsApp follow-up, and one recovery operations dashboard.";
 
 export const OG_IMAGE = {
   url: "/og-image.png",
   width: 1024,
   height: 640,
-  alt: "Recover Agent — AI voice agent for D2C brands: COD confirmation, abandoned checkout recovery, and NDR follow-up",
+  alt: "Recover Agent: revenue recovery for COD, abandoned checkouts, and NDR",
 } as const;
 
 export const rootMetadata: Metadata = {
@@ -30,11 +30,14 @@ export const rootMetadata: Metadata = {
     "AI voice agent ecommerce",
     "COD to prepaid",
     "Shopify COD India",
+    "D2C revenue recovery",
+    "abandoned checkout calling",
+    "NDR recovery software",
   ],
   openGraph: {
     title: DEFAULT_TITLE,
     description:
-      "AI voice + WhatsApp agent for Indian D2C brands. Verify COD, re-attempt NDR, recover abandoned checkouts.",
+      "Recover at-risk COD orders, abandoned checkouts, and failed deliveries with AI voice, WhatsApp follow-up, and one operations dashboard.",
     type: "website",
     siteName: SITE_NAME,
     url: siteUrl,
@@ -42,9 +45,9 @@ export const rootMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recover Agent — Ship fewer orders back.",
+    title: "Recover Agent: Revenue Recovery for Indian D2C",
     description:
-      "AI voice + WhatsApp recovery for Indian D2C brands on Shopify.",
+      "AI voice, WhatsApp follow-up, and recovery operations for COD, checkout, and NDR.",
     images: [OG_IMAGE.url],
   },
   robots: { index: true, follow: true },

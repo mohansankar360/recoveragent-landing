@@ -12,6 +12,7 @@ import {
   type StageTone,
 } from "@/lib/control-room-data";
 import { formatInr } from "@/lib/calculator";
+import styles from './ControlRoomDemo.module.css';
 
 function toneClass(tone: StageTone) {
   return `cr-tone-${tone}`;
@@ -69,14 +70,14 @@ export function ControlRoomDemo() {
   };
 
   return (
-    <section className="sec sec-alt" id="control-room">
+    <section className={`${styles.preview} sec sec-alt`} id="control-room">
       <div className="wrap">
         <Reveal className="sec-head">
-          <div className="eyebrow">The control room behind the manifest</div>
-          <h2>One dashboard for every rupee you&apos;re leaking.</h2>
+          <div className="eyebrow">Dashboard preview · Sample data</div>
+          <h2>See what needs attention.</h2>
           <p>
-            COD confirmation, abandoned checkout, and NDR re-attempts — same funnel logic
-            your ops team would build in spreadsheets, except it runs itself.
+            Track COD confirmations, checkout follow-ups, and delivery issues in one place.
+            Choose a workflow to explore sample orders.
           </p>
         </Reveal>
 
@@ -84,12 +85,16 @@ export function ControlRoomDemo() {
           <div className="cr-shell">
             <div className="cr-top">
               <div className="cr-tabs" role="tablist" aria-label="Recovery modules">
-                {CONTROL_MODULES.map((m) => (
+                {CONTROL_MODULES.map((m, index) => (
                   <button
                     key={m.id}
                     type="button"
                     role="tab"
                     aria-selected={moduleId === m.id}
+                    aria-controls="control-room-panel"
+                    id={`control-room-tab-${m.id}`}
+                    tabIndex={moduleId === m.id ? 0 : -1}
+                    onKeyDown={(event) => { let next: number | undefined; if (event.key === 'ArrowRight') next = (index + 1) % CONTROL_MODULES.length; if (event.key === 'ArrowLeft') next = (index + CONTROL_MODULES.length - 1) % CONTROL_MODULES.length; if (event.key === 'Home') next = 0; if (event.key === 'End') next = CONTROL_MODULES.length - 1; if (next !== undefined) { event.preventDefault(); switchModule(CONTROL_MODULES[next].id); document.getElementById(`control-room-tab-${CONTROL_MODULES[next].id}`)?.focus(); } }}
                     className={`cr-tab${moduleId === m.id ? " active" : ""}`}
                     onClick={() => switchModule(m.id)}
                   >
@@ -103,7 +108,7 @@ export function ControlRoomDemo() {
               </div>
             </div>
 
-            <div className="cr-grid">
+            <div className="cr-grid" role="tabpanel" id="control-room-panel" aria-labelledby={`control-room-tab-${moduleId}`}>
               <aside className="cr-funnel" aria-label="Recovery funnel">
                 <div className="cr-funnel-head">
                   <span className="cr-funnel-label">Funnel</span>
@@ -117,6 +122,7 @@ export function ControlRoomDemo() {
                       <button
                         key={stage.id}
                         type="button"
+                        aria-pressed={stageId === stage.id}
                         className={`cr-stage ${toneClass(stage.tone)}${stageId === stage.id ? " active" : ""}`}
                         onClick={() => pickStage(stage.id)}
                       >
@@ -153,7 +159,7 @@ export function ControlRoomDemo() {
                   <input
                     className="cr-search"
                     type="search"
-                    placeholder="Search name, phone, order…"
+                    placeholder="Search name or order…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     aria-label="Search orders"

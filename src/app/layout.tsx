@@ -1,4 +1,4 @@
-import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Archivo, Geist, Geist_Mono, JetBrains_Mono, Manrope } from "next/font/google";
 import { MetaPixelHead } from "@/components/analytics/MetaPixel";
 import { MetaPageView } from "@/components/analytics/MetaPageView";
 import { faqStructuredData } from "@/lib/faq-data";
@@ -8,6 +8,7 @@ import {
   websiteStructuredData,
 } from "@/lib/structured-data";
 import "./globals.css";
+import "./page-theme.css";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -21,6 +22,24 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist",
+  display: "swap",
+});
+
 export const metadata = rootMetadata;
 
 export default function RootLayout({
@@ -29,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${jetbrains.variable}`}
+      className={`${archivo.variable} ${jetbrains.variable} ${manrope.variable} ${geistMono.variable} ${geist.variable}`}
     >
       <head>
         <MetaPixelHead />

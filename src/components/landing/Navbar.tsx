@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CaretDown, List, X } from "@phosphor-icons/react";
-import { SITE_SECTIONS } from "@/lib/site-sections";
 import { appleSpring } from "@/lib/motion";
 import { useMobileNav } from "@/lib/use-mobile-nav";
-import { useStickyBarVisible } from "@/lib/use-sticky-bar-visible";
 
 const navActionSwap = {
   initial: { opacity: 0, scale: 0.94 },
@@ -17,35 +16,23 @@ const navActionSwap = {
   transition: appleSpring.ui,
 };
 
-const HIDDEN_NAV_SLUGS = new Set(["go-live", "faq", "book-demo"]);
-const PRIMARY_NAV_SLUGS = new Set([
-  "loss-calculator",
-  "plans",
-  "how-it-works",
-  "hear-a-call",
-]);
+const PRIMARY_NAV_LINKS = [
+  { href: '/#workflows', label: 'How it works' },
+  { href: '/hear-a-call', label: 'Hear a call' },
+  { href: '/#results', label: 'Results' },
+  { href: '/control-room', label: 'Dashboard' },
+  { href: '/loss-calculator', label: 'Loss calculator' },
+  { href: '/plans', label: 'Pricing' },
+];
 
-const ALL_NAV_LINKS = SITE_SECTIONS.filter(
-  (section) => !HIDDEN_NAV_SLUGS.has(section.slug)
-).map((section) => ({
-  href: `/${section.slug}`,
-  label: section.navLabel,
-}));
-
-const PRIMARY_NAV_LINKS = ALL_NAV_LINKS.filter((link) =>
-  PRIMARY_NAV_SLUGS.has(link.href.slice(1))
-);
-
-const MORE_NAV_LINKS = ALL_NAV_LINKS.filter(
-  (link) => !PRIMARY_NAV_SLUGS.has(link.href.slice(1))
-);
+const MORE_NAV_LINKS: { href: string; label: string }[] = [];
 
 export function Navbar() {
   const isMobile = useMobileNav();
-  const stickyBarVisible = useStickyBarVisible();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const showHamburger = isMobile && stickyBarVisible;
+  const showHamburger = isMobile;
 
   useEffect(() => {
     if (!showHamburger) setMenuOpen(false);
@@ -66,7 +53,7 @@ export function Navbar() {
   }, [menuOpen, moreOpen]);
 
   return (
-    <nav className="site-nav">
+    <nav className="site-nav" aria-label="Primary navigation">
       <div className="wrap">
         <Link className="brand" href="/">
           <Image
@@ -80,7 +67,7 @@ export function Navbar() {
         </Link>
         <div className="nav-links">
           {PRIMARY_NAV_LINKS.map((link) => (
-            <a key={link.href} href={link.href}>
+            <a key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined}>
               {link.label}
             </a>
           ))}
@@ -127,6 +114,7 @@ export function Navbar() {
                         <a
                           key={link.href}
                           href={link.href}
+                          aria-current={pathname === link.href ? "page" : undefined}
                           role="menuitem"
                           onClick={() => setMoreOpen(false)}
                         >
@@ -206,15 +194,19 @@ export function Navbar() {
                         transition={appleSpring.ui}
                         className="nav-mobile-menu"
                       >
-                        {ALL_NAV_LINKS.map((link) => (
+                        {PRIMARY_NAV_LINKS.map((link) => (
                           <a
                             key={link.href}
                             href={link.href}
+                            aria-current={pathname === link.href ? "page" : undefined}
                             onClick={() => setMenuOpen(false)}
                           >
                             {link.label}
                           </a>
                         ))}
+                        <Link href="/book-demo" className="nav-mobile-book" onClick={() => setMenuOpen(false)}>
+                          Book a 30-minute demo
+                        </Link>
                       </motion.div>
                     </>
                   )}
@@ -227,7 +219,7 @@ export function Navbar() {
                 href="/book-demo"
                 {...navActionSwap}
               >
-                Book a 15-min demo
+                Book a 30-min demo
               </motion.a>
             )}
           </AnimatePresence>

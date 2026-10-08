@@ -157,18 +157,18 @@ export const CALL_POINTS_BY_JOURNEY: Record<CallJourneyId, CallPoint[]> = {
     },
     {
       n: "02",
-      title: "It fires before the label prints",
-      body: "Order placed at 11:04. Call at 11:04. Confirm or cancel before freight burns both ways on a junk COD.",
+      title: "It works before fulfilment",
+      body: "Run confirmation against your configured timing so the outcome is available before an avoidable COD shipment moves forward.",
     },
     {
       n: "03",
-      title: "Every outcome writes back to Shopify",
-      body: "COD CONFIRMED, CANCELLED, UNREACHABLE, or converted-to-prepaid — tagged on the order so fulfilment rules hold or ship automatically.",
+      title: "Every outcome becomes operational data",
+      body: "COD CONFIRMED, CANCELLED, UNREACHABLE, or converted-to-prepaid is saved in the recovery dashboard and routed to configured store workflows where connected.",
     },
     {
       n: "04",
       title: "A hang-up is also an answer",
-      body: "Numbers that never connect are the cheapest RTO you'll avoid. Those orders get flagged before anyone packs them.",
+      body: "Unanswered calls are marked unreachable. Your team chooses retries, WhatsApp follow-up and fulfilment review rules.",
     },
   ],
   abandoned: [
@@ -179,13 +179,13 @@ export const CALL_POINTS_BY_JOURNEY: Record<CallJourneyId, CallPoint[]> = {
     },
     {
       n: "02",
-      title: "It fires inside 30 minutes, not tomorrow morning",
-      body: "Cart abandoned at 6:18 pm. Call at 6:22 pm — while they still remember what they wanted, not after your Promotions email dies.",
+      title: "It follows up while intent is still warm",
+      body: "Choose the delay that fits your store, then let the agent understand the question behind an unfinished checkout.",
     },
     {
       n: "03",
-      title: "Every outcome writes back to Shopify",
-      body: "ORDER PLACED, prepaid link sent, or marked cold — logged on the checkout so your team stops re-chasing the same cart.",
+      title: "Every outcome becomes operational data",
+      body: "ORDER PLACED, prepaid link sent, or marked cold is saved to the workflow so your team can avoid re-chasing the same cart.",
     },
     {
       n: "04",
@@ -197,22 +197,22 @@ export const CALL_POINTS_BY_JOURNEY: Record<CallJourneyId, CallPoint[]> = {
     {
       n: "01",
       title: "It talks like the neighbourhood, not the boardroom",
-      body: `Recording above is in Hindi. Live agents also speak ${AGENT_LANGUAGES} — so re-attempt scheduling doesn't sound like a courier robocall.`,
+      body: `Recording above is in English. Live agents also speak Hindi, Tamil, Telugu, Malayalam and Kannada — so re-attempt scheduling doesn't sound like a courier robocall.`,
     },
     {
       n: "02",
-      title: "It fires the same day, not on Monday's NDR sheet",
-      body: "Courier marks consignee unavailable at 8:50 pm. Call at 8:52 pm — new slot locked before the third attempt triggers RTO.",
+      title: "It follows the delivery exception",
+      body: "Trigger outreach from the NDR event and capture whether the customer wants a reattempt, another time, or team help.",
     },
     {
       n: "03",
-      title: "Every outcome writes back to Shopify",
-      body: "RESCHEDULED, REATTEMPT REQUESTED, or RTO HOLD — written to the order so the courier and your ops team see the same plan.",
+      title: "Every outcome becomes operational data",
+      body: "RESCHEDULED, REATTEMPT REQUESTED, or REVIEW NEEDED is saved in the dashboard and routed to connected workflows where configured.",
     },
     {
       n: "04",
       title: "A hang-up is also an answer",
-      body: "Two failed delivery calls with no pickup? Flag it early. Cheaper to hold than pay reverse logistics on a dead number.",
+      body: "If the customer does not answer, flag the delivery exception for review and apply the configured retry policy within the courier’s reattempt window.",
     },
   ],
 };

@@ -39,7 +39,7 @@ function SectionContent({ slug }: { slug: SiteSectionSlug }) {
     case "faq":
       return <FAQ />;
     case "book-demo":
-      return <DemoBooking />;
+      return <DemoBooking compact />;
   }
 }
 
@@ -92,7 +92,7 @@ export default async function PublicPage({
   const { page } = resolved;
 
   return (
-    <PageShell navLabel={page.navLabel}>
+    <PageShell navLabel={page.navLabel} title={page.title}>
       {resolved.type === "use-case" ? (
         <UseCasePageContent path={getRecoveryPathForUseCase(resolved.page)} />
       ) : (

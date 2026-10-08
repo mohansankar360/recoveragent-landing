@@ -31,7 +31,7 @@ export function NewLandingPage() {
         <LossCalculator />
         <ConversionCTA
           title="Know your gap? See it recover."
-          subtitle="Book 15 minutes — we'll walk through your COD volume, RTO rate, and what Recover Agent would do on your store."
+          subtitle="Book 30 minutes — we'll walk through your COD volume, RTO rate, and what Recover Agent would do on your store."
           source="post_calculator"
         />
         <ManualVsRecover />

@@ -59,7 +59,7 @@ export function CaseStudyCards() {
           <Link className="btn btn-primary" href="/book-demo">
             See if this works for my store →
           </Link>
-          <p className="new-trust-line">15-min walkthrough · No pitch deck · Your numbers</p>
+          <p className="new-trust-line">30-min walkthrough · No pitch deck · Your numbers</p>
         </Reveal>
       </div>
     </section>

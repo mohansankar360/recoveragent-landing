@@ -124,7 +124,7 @@ export function NewNavbar() {
                 href="/book-demo"
                 {...navActionSwap}
               >
-                Book a 15-min demo
+                Book a 30-min demo
               </motion.a>
             )}
           </AnimatePresence>

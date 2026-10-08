@@ -2,7 +2,7 @@ import { siteUrl } from "@/lib/site-url";
 
 const SITE_NAME = "Recover Agent";
 const SITE_DESCRIPTION =
-  "AI voice + WhatsApp agent for Indian D2C brands on Shopify and WooCommerce. Verify COD before dispatch, re-attempt NDR, and recover abandoned checkouts.";
+  "Revenue recovery operations for Indian D2C brands using AI voice, WhatsApp follow-up, and a dashboard for COD, abandoned checkout, and NDR workflows.";
 
 export function websiteStructuredData() {
   return {

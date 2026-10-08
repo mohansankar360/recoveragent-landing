@@ -72,7 +72,7 @@ export function Pricing() {
                   <span className="text-ink-muted"> / month</span>
                 </div>
                 <p className="mt-2 font-mono text-sm text-ink-muted">
-                  {plan.includedCalls.toLocaleString("en-IN")} AI voice calls included
+                  {plan.includedCalls.toLocaleString("en-IN")} Orders included
                 </p>
                 <p className="mt-1 font-mono text-sm text-ink-muted">
                   + ₹{plan.overagePerOrder} per additional order

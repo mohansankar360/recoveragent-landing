@@ -19,17 +19,17 @@ export const DEMO_LANGUAGE_OPTIONS = [
 ] as const;
 
 export const MONTHLY_ORDERS_OPTIONS = [
-  { value: "0-500", label: "0 to 500" },
-  { value: "500-2000", label: "500 to 2,000" },
-  { value: "2000-5000", label: "2,000 to 5,000" },
-  { value: "5000-10000", label: "5,000 to 10,000" },
+  { value: "0-500", label: "Under 500" },
+  { value: "500-2000", label: "500 to 1,999" },
+  { value: "2000-5000", label: "2,000 to 4,999" },
+  { value: "5000-10000", label: "5,000 to 9,999" },
   { value: "10000-plus", label: "10,000 +" },
 ] as const;
 
 export const STORE_PLATFORM_OPTIONS = [
   { value: "shopify", label: "Shopify" },
-  { value: "woocommerce", label: "Woocommerce" },
-  { value: "other", label: "Other platform - currently not supported" },
+  { value: "woocommerce", label: "WooCommerce" },
+  { value: "other", label: "Other platform" },
 ] as const;
 
 export const UNSUPPORTED_PLATFORM_MESSAGE =
@@ -67,6 +67,7 @@ export function qualifiesForDemoCalendar(
   data: Pick<DemoFormData, "monthlyOrders" | "storePlatform">
 ): boolean {
   return (
+    isValidMonthlyOrders(data.monthlyOrders) &&
     data.monthlyOrders !== "0-500" &&
     (data.storePlatform === "shopify" || data.storePlatform === "woocommerce")
   );

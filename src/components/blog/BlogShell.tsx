@@ -13,13 +13,13 @@ export function BlogShell({
   return (
     <>
       <Navbar />
-      <main>
-        <div className="wrap" style={{ paddingTop: "1.25rem", paddingBottom: "0.5rem" }}>
-          <nav aria-label="Breadcrumb" className="mono" style={{ fontSize: 12, opacity: 0.72 }}>
+      <main className="themed-page">
+        <div className="wrap page-breadcrumb">
+          <nav aria-label="Breadcrumb">
             {crumbs.map((crumb, index) => (
               <span key={crumb.label}>
                 {index > 0 && <span aria-hidden="true"> / </span>}
-                {crumb.href ? <Link href={crumb.href}>{crumb.label}</Link> : crumb.label}
+                {crumb.href ? <Link href={crumb.href}>{crumb.label}</Link> : <span aria-current="page">{crumb.label}</span>}
               </span>
             ))}
           </nav>

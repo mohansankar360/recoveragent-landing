@@ -37,16 +37,16 @@ export function NewHero() {
               Hear an actual call
             </Link>
           </div>
-          <p className="new-trust-line hero-trust">Live in 3 days · No setup fee · Cancel anytime</p>
+          <p className="new-trust-line hero-trust">Shopify &amp; WooCommerce · Voice + WhatsApp workflows</p>
           <div className="tick">
             <div>
               <b>6</b>Indian languages
             </div>
             <div>
-              <b>24% → 11%</b>Typical RTO shift
+              <b>3</b>Recovery journeys
             </div>
             <div>
-              <b>70–80%</b>Recovery with voice + WA
+              <b>1</b>Recovery control room
             </div>
           </div>
           <PricingValueStack variant="hero" />

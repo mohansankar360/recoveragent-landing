@@ -54,7 +54,7 @@ const steps = [
   {
     id: "05",
     title: "COD → Prepaid",
-    summary: "Offer prepaid conversion",
+    summary: "Optional: offer prepaid conversion",
     detail:
       "Give customers an opportunity to pay online, reducing COD risk before dispatch.",
     panel: {
@@ -65,7 +65,7 @@ const steps = [
   {
     id: "06",
     title: "NDR",
-    summary: "Automatic follow-up on failed delivery",
+    summary: "If delivery fails: follow up",
     detail:
       "If delivery fails, RecoverAgent follows up automatically to understand why and trigger reattempt.",
     panel: {
@@ -102,6 +102,7 @@ export function RecoveryJourney() {
         <Reveal className="sec-head">
           <div className="eyebrow">How it works</div>
           <h2>One COD order. Multiple chances to save it.</h2>
+          <p>Explore each step directly. Prepaid conversion is optional; NDR follow-up runs only when delivery fails.</p>
         </Reveal>
 
         <div className="recovery-workflow">

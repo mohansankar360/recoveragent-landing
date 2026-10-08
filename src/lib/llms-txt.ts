@@ -56,7 +56,7 @@ export function buildLlmsTxt(): string {
 
   return `# Recover Agent
 
-Recover Agent is an AI voice and WhatsApp automation product for Indian D2C ecommerce brands on Shopify and WooCommerce. It helps merchants verify COD orders before dispatch, recover abandoned checkouts, and re-attempt failed deliveries (NDR) to reduce return-to-origin (RTO) losses.
+Recover Agent is a revenue recovery and ecommerce operations product for Indian D2C brands on Shopify and WooCommerce. AI voice and WhatsApp help merchants understand customer intent across COD orders, abandoned checkouts, and failed deliveries (NDR), while the dashboard makes outcomes and next steps visible to the team.
 
 ## What Recover Agent does
 
@@ -66,7 +66,7 @@ Recover Agent is an AI voice and WhatsApp automation product for Indian D2C ecom
 - AI voice calling in Indian languages (including Hindi, Tamil, Telugu, Malayalam, Kannada, and English)
 - WhatsApp automation for confirmations, payment links, and follow-ups via the official WhatsApp Business API
 - Recovery control room to track COD, cart, and NDR workflows and order outcomes
-- Outcomes written back to the connected store (e.g. Shopify tags and order updates)
+- Outcomes saved to the recovery dashboard and routed to configured store or team workflows where connected
 - Pricing tiers (Starter, Growth, Scale) with voice-call allotments and WhatsApp flows on every plan
 
 ## Who it is for
@@ -75,7 +75,7 @@ Recover Agent is an AI voice and WhatsApp automation product for Indian D2C ecom
 - Shopify merchants running COD-heavy order volumes
 - WooCommerce merchants with similar COD, cart, and delivery recovery needs
 - Operations teams that currently rely on manual confirmation calls or inconsistent WhatsApp follow-up
-- Brands doing roughly 500+ orders per month (live product demos on the site target this range)
+- Brands with meaningful COD, checkout, or failed-delivery follow-up volume
 
 ## Problems it solves
 
@@ -84,18 +84,18 @@ Recover Agent is an AI voice and WhatsApp automation product for Indian D2C ecom
 | Unconfirmed or fake COD orders shipping and returning as RTO | AI calls customers before dispatch to confirm purchase intent and address details |
 | COD cancellations and unwanted orders | Captures customer intent before shipping; flags orders that should not ship |
 | High RTO (return to origin) | Verifies COD upfront and follows up on failed deliveries before they become returns |
-| Failed delivery / NDR | Calls the customer after a failed delivery to understand the issue and schedule re-attempt |
+| Failed delivery / NDR | Calls the customer after a failed delivery to understand the issue and capture a requested re-attempt |
 | Abandoned checkouts | AI voice outreach to customers who added to cart but did not complete payment |
 | Manual customer follow-up | Automates voice and WhatsApp recovery workflows and tracks outcomes in one dashboard |
 
 ## How it works
 
-1. **Connect the store** — Shopify or WooCommerce is connected along with checkout, shipping, and WhatsApp (onboarding described as a 3-day go-live on the site).
+1. **Connect the store** — Shopify or WooCommerce is connected with the relevant checkout, shipping, payment, and WhatsApp workflows.
 2. **Configure recovery flows** — COD confirmation, abandoned checkout, and NDR flows are set up for the brand's tone and rules.
 3. **Order or checkout triggers recovery** — A COD order, abandoned checkout, or failed delivery enters the recovery workflow (store webhooks and automation steps shown in the control room demo).
 4. **Customer is contacted** — Recover Agent places an AI voice call and/or sends WhatsApp messages (confirmations, payment links, follow-ups).
 5. **Response is captured** — Customer intent (confirm, reschedule, cancel, pay prepaid, etc.) is recorded from the conversation.
-6. **Outcome is applied and tracked** — Results are written back to the store where applicable; calls, confirmations, recoveries, and revenue are tracked in the control room dashboard.
+6. **Outcome is routed and tracked** — Results are saved in the recovery dashboard and sent to configured store or team workflows where applicable.
 
 Full workflow: [How it works](${sectionUrl("how-it-works")})
 
@@ -119,7 +119,7 @@ WhatsApp flows included on all plans:
 
 ${whatsappFlows}
 
-Go-live onboarding also references connecting checkout and shipping tools alongside the store and WhatsApp.
+Implementation scope and timing depend on the merchant's store, workflow complexity, and connected tools.
 
 ## Product pages
 
@@ -147,8 +147,8 @@ Public information available on the website:
 
 - Product name: Recover Agent
 - Audience: Indian D2C ecommerce (AI voice and WhatsApp recovery)
-- Data handling: customer data stays within the encrypted pipe between the store, WhatsApp, and the voice system; site states compliance with India's DPDP Act 2023 and GDPR for merchants shipping internationally
-- WhatsApp: uses the official WhatsApp Business API only
+- Data handling and workflow controls are reviewed during implementation for the merchant's specific setup
+- WhatsApp: the product repository uses the official Meta WhatsApp Cloud API
 
 No public email address, phone number, or physical office address appears on the current site.
 

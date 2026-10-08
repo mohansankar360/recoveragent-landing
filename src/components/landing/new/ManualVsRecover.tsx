@@ -5,7 +5,7 @@ const ROWS = [
     feature: "COD confirmation before dispatch",
     manual: "Team calls manually · misses evening orders",
     generic: "IVR menu · customers hang up",
-    recover: "AI voice call in customer's language · 70–80% reach",
+    recover: "AI voice call in the customer's language · outcome saved for the team",
     win: true,
   },
   {
@@ -26,7 +26,7 @@ const ROWS = [
     feature: "Cost at 700 orders/month",
     manual: "₹40,000+ (2–3 callers + manager)",
     generic: "₹8,000–15,000 (limited channels)",
-    recover: "From ₹4,999/mo · 700 calls included",
+    recover: "From ₹4,999/mo · 700 orders included",
     win: true,
   },
   {

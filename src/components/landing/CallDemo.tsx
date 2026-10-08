@@ -303,8 +303,8 @@ export function CallDemo({
         {variant !== "full" && (
           <Reveal>
             <p className="call-proof-line">
-              Messages get ignored. Calls get answered. Voice + WhatsApp:{" "}
-              <b>70–80% response</b> vs WhatsApp alone at 40–50%.
+              Use voice to understand the customer&apos;s intent in real time, then use
+              WhatsApp for the link, confirmation, or follow-up.
             </p>
           </Reveal>
         )}

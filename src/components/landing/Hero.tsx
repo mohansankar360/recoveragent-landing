@@ -10,40 +10,30 @@ export function Hero({ variant: _variant = "full" }: { variant?: LandingVariant 
           <div className="eyebrow">
             Built by a D2C founder · For D2C Ops
           </div>
-          <h1 className="display">
-            Shopify says
-            <br />
-            ₹10,00,000.
-            <br />
-            <span className="red">
-              Your bank says
-              <br />
-              ₹6,80,000.
-            </span>
-          </h1>
+          <h1 className="display">Turn at-risk orders into confirmed revenue.</h1>
           <p className="hero-sub">
-            The <strong>revenue gap hiding</strong> inside your ecommerce operations.
+            Revenue recovery operations for Indian D2C.
           </p>
           <p className="hero-sub">
-            Recover Agent uses <strong>AI voice agents</strong> to recover abandoned checkouts,
-            confirm COD orders, and save failed deliveries — <strong>automatically</strong>.
+            Recover Agent uses <strong>AI voice + WhatsApp</strong> to recover abandoned checkouts,
+            confirm COD orders, and capture the next step after failed deliveries.
           </p>
           <div className="hero-cta">
-            <Link className="btn btn-primary" href="/loss-calculator">
-              Find my gap in 30 seconds →
+            <Link className="btn btn-primary" href="/book-demo">
+              Book a 30-minute demo →
             </Link>
             <Link className="btn btn-ghost" href="/hear-a-call">
               <Play size={16} weight="fill" aria-hidden />
               Hear an actual call
             </Link>
           </div>
-          <p className="hero-note">Live on your store in 3 days. No call centre. No coding required.</p>
+          <p className="hero-note">See the product workflow on your recovery use cases.</p>
           <div className="tick">
             <div>
               <b>6</b>Indian languages
             </div>
             <div>
-              <b>24% → 11%</b>Typical RTO shift
+              <b>3</b>Recovery journeys
             </div>
           </div>
         </div>

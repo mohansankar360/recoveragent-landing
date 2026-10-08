@@ -1,12 +1,12 @@
-import { LeadCaptureForm } from "@/components/landing/LeadCaptureForm";
+import { LeadCapturePage } from "@/components/landing/LeadCapturePage";
 import { SITE_NAME } from "@/lib/site-metadata";
 import { siteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: `${SITE_NAME} — Get your free demo`,
+  title: `${SITE_NAME} — Reduce RTO. Recover More Revenue.`,
   description:
-    "Share your details to continue to Recover Agent with your demo form prefilled.",
+    "Get a free Recover Agent demo. Share your store details and continue to the booking page with your info pre-filled.",
   alternates: {
     canonical: `${siteUrl}/lead`,
   },
@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 export default function LeadPage() {
   return (
-    <main className="lead-capture-page">
-      <LeadCaptureForm />
+    <main>
+      <LeadCapturePage />
     </main>
   );
 }

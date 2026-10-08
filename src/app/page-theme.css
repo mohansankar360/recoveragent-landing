@@ -1,0 +1,88 @@
+/* Secondary pages share the active homepage's type, surfaces, and blue accent. */
+.page-breadcrumb { padding-top: 32px; padding-bottom: 8px; }
+.page-breadcrumb nav { color: var(--ink-soft); font-size: 12px; }
+.page-breadcrumb a { text-decoration: none; transition: color .2s ease; }
+.page-breadcrumb a:hover, .page-breadcrumb [aria-current="page"] { color: var(--brand); }
+.themed-page .sec { padding-block: clamp(56px, 7vw, 100px); }
+.themed-page .sec-head h1,
+.themed-page .sec-head h2,
+.blog-article-head h1 {
+  font-size: clamp(34px, 4.7vw, 64px);
+  font-weight: 650;
+  line-height: 1.04;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+.themed-page .sec-head { max-width: 780px; margin-bottom: 46px; }
+.themed-page .eyebrow { color: var(--brand); }
+.nav-links a[aria-current="page"], .nav-mobile-menu a[aria-current="page"] { color: var(--brand); opacity: 1; }
+.nav-mobile-menu a.nav-mobile-book { margin-top: 8px; background: var(--brand); color: #fff; }
+.btn { border-radius: 10px; font-weight: 650; }
+.btn-primary { box-shadow: 0 12px 28px var(--cta-shadow); }
+.btn:focus-visible, a:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 3px solid rgba(21, 89, 197, .35);
+  outline-offset: 4px;
+}
+.blog-card { padding: 32px; border-radius: 16px; box-shadow: none; transition: border-color .2s ease, transform .2s ease; }
+.blog-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+.blog-card-title { font-weight: 650; letter-spacing: -.035em; }
+.blog-article-wrap { max-width: 840px; }
+.blog-prose h2, .blog-prose h3 { font-weight: 650; }
+footer.site-footer { background: var(--paper-2); color: var(--ink-soft); border-top: 1px solid var(--line); padding-block: 40px; }
+.site-footer b { color: var(--ink); }
+.site-footer-link { color: var(--brand); }
+.site-footer-platforms { font-size: 11px; }
+.lead-page-copy h1 { font-weight: 650; letter-spacing: -.055em; font-size: clamp(38px, 4.8vw, 64px); }
+.lead-page-pill { border: 0; padding: 0; border-radius: 0; background: transparent; color: var(--brand); }
+.lead-form-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 70px rgba(23, 51, 66, .08); }
+.lead-form-head h2 { font-weight: 650; letter-spacing: -.035em; }
+.lead-page-phone-live, .lead-page-rto-delta { background: var(--brand-wash); }
+.lead-result-note { display: block; margin-top: 10px; max-width: 38ch; font-size: 12px; line-height: 1.5; color: var(--ink-soft); }
+.themed-page .vscard .big { font-family: var(--font-geist), sans-serif; font-size: clamp(28px, 3vw, 40px); letter-spacing: -.035em; line-height: 1.15; }
+.lead-page-visual-note { font-style: normal; transform: none; }
+.calendar-header { margin: 14px auto 0; width: min(1240px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: 15px; background: var(--paper); }
+.calendar-brand img { width: 174px; height: auto; }
+.calendar-header-inner { align-items: center; }
+.calendar-intro { max-width: 720px; padding-block: 12px 36px; }
+.calendar-back { display: inline-block; margin-bottom: 30px; color: var(--ink-soft); font-size: 13px; text-decoration: none; }
+.calendar-intro .eyebrow { margin-bottom: 12px; color: var(--brand); }
+.calendar-intro h1 { font-size: clamp(36px, 4.7vw, 60px); font-weight: 650; letter-spacing: -.055em; }
+.calendar-intro > p:last-child { margin-top: 18px; color: var(--ink-soft); }
+.calendar-embed-shell { border-radius: 18px; box-shadow: 0 20px 70px rgba(23, 51, 66, .08); }
+/* Green remains an outcome color in the product preview. */
+.cr-stage-bar.cr-tone-success, .cr-flow-dot { background: var(--success); }
+.cr-tone-success.active { box-shadow: inset 3px 0 0 var(--success); }
+.cr-status.cr-tone-success { color: var(--success); background: #eff7f3; }
+.demo-eligibility { margin: 0 0 18px; padding: 12px 14px; border-radius: 8px; background: var(--brand-wash); color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
+.demo-eligibility p { margin: 0; }
+.demo-eligibility p + p { margin-top: 8px; color: var(--ink); }
+.use-case-outcomes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.use-case-outcomes article { padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.use-case-outcomes small { color: var(--brand); font-size: 13px; }
+.use-case-outcomes h3 { margin-top: 12px; font-size: 20px; line-height: 1.4; }
+.use-case-requirement { max-width: 76ch; margin-top: 20px; color: var(--ink-soft); line-height: 1.6; }
+footer.site-footer .wrap { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; align-items: start; }
+footer.site-footer p { margin-top: 10px; font-size: 14px; line-height: 1.6; }
+footer.site-footer nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 24px; }
+footer.site-footer a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; text-decoration: none; }
+.themed-page #demo-booking > .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.themed-page #demo-booking .sec-head { margin-bottom: 0; }
+.themed-page #demo-booking .demo-panel { margin: 0; }
+.themed-page .sec { padding-block: clamp(40px, 5vw, 64px); }
+.calendar-intro { padding-bottom: 20px; }
+.calendar-back { margin-bottom: 18px; }
+.calendar-intro h1 { font-size: clamp(30px, 3vw, 42px); }
+.calendar-fallback { margin: 20px 0; color: var(--ink-soft); font-size: 14px; }
+.calendar-fallback a { color: var(--brand); }
+@media (max-width: 900px) {
+  .use-case-outcomes, .themed-page #demo-booking > .wrap, footer.site-footer .wrap { grid-template-columns: 1fr; gap: 20px; }
+  footer.site-footer nav { justify-content: flex-start; }
+  footer.site-footer { padding-bottom: 96px; }
+}
+@media (max-width: 600px) {
+  nav.site-nav .wrap { padding-inline: 14px; }
+  .page-breadcrumb { padding-top: 24px; }
+  .blog-card { padding: 24px; }
+  .calendar-header-copy { font-size: 12px; }
+  .calendar-intro { padding-bottom: 28px; }
+}

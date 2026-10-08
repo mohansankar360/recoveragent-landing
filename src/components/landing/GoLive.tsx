@@ -2,22 +2,22 @@ import { Reveal } from "@/components/ui/Reveal";
 
 const STEPS = [
   {
-    when: "Day 1",
-    title: "Connect your entire commerce stack",
+    when: "Step 1",
+    title: "Connect the relevant commerce tools",
     tags: "Shopify · Checkout · Shipping · WhatsApp",
-    body: "We connect the tools you already use so RecoverAgent can trigger the right recovery action at the right stage of the customer journey.",
+    body: "Share your store, shipping tools and WhatsApp setup. Together we map the available connections and the events that should start recovery.",
   },
   {
-    when: "Day 2",
+    when: "Step 2",
     title: "Configure your AI recovery flows",
-    body: "We set up your COD confirmation, abandoned checkout and NDR flows around your brand, tone and business rules.",
+    body: "Share your brand policies, languages, dispatch cutoffs and retry rules. We configure the first recovery workflow and agree what needs your team’s approval.",
     note: "Your brand. Your rules. Your recovery strategy.",
   },
   {
-    when: "Day 3",
-    title: "Go live & recover",
-    body: "Your AI agents start engaging eligible customers, while RecoverAgent tracks calls, confirmations, recoveries and revenue from one dashboard.",
-    note: "From signup to live recovery in 3 days.",
+    when: "Step 3",
+    title: "Test, review, then expand",
+    body: "Review sample calls, recorded outcomes and exception routing with us. Approve the customer experience before expanding coverage and monitor the results in your dashboard.",
+    note: "Rollout timing depends on your store and workflow complexity.",
   },
 ];
 
@@ -26,8 +26,8 @@ export function GoLive({ compact = false }: { compact?: boolean }) {
     <section className="sec sec-alt" id="go-live">
       <div className="wrap">
         <Reveal className="sec-head">
-          <div className="eyebrow">No integration project. No IT ticket.</div>
-          <h2>From signup to live recovery in 3 days.</h2>
+          <div className="eyebrow">A practical implementation path</div>
+          <h2>Connect, configure, review, then scale.</h2>
         </Reveal>
         <Reveal className={`steps${compact ? " steps-compact" : ""}`}>
           {STEPS.map((step) => (

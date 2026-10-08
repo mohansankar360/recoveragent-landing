@@ -31,7 +31,7 @@ export function PlanHighlight() {
               <span>/ month</span>
             </div>
             <p className="plan-highlight-meta">
-              {GROWTH.includedCalls.toLocaleString("en-IN")} AI voice calls included · +₹
+              {GROWTH.includedCalls.toLocaleString("en-IN")} Orders included · +₹
               {GROWTH.overagePerOrder}/order after
             </p>
             <ul className="plan-highlight-list">

@@ -5,21 +5,24 @@ import { MobileStickyCTA } from "./MobileStickyCTA";
 
 export function PageShell({
   navLabel,
+  title,
   children,
 }: {
   navLabel: string;
+  title?: string;
   children: React.ReactNode;
 }) {
   return (
     <>
       <Navbar />
-      <main>
-        <div className="wrap" style={{ paddingTop: "1.25rem", paddingBottom: "0.5rem" }}>
-          <nav aria-label="Breadcrumb" className="mono" style={{ fontSize: 12, opacity: 0.72 }}>
+      <main className="themed-page">
+        <div className="wrap page-breadcrumb">
+          <nav aria-label="Breadcrumb">
             <Link href="/">Home</Link>
             <span aria-hidden="true"> / </span>
-            <span>{navLabel}</span>
+            <span aria-current="page">{navLabel}</span>
           </nav>
+          <h1 className="sr-only">{title ?? navLabel}</h1>
         </div>
         {children}
       </main>
