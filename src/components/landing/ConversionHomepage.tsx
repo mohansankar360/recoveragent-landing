@@ -259,7 +259,6 @@ function RecoveryRun({ playRef }: { playRef: React.MutableRefObject<(() => void)
   return <div id="call" className={styles.heroProduct} aria-label="Interactive recovery workflow">
     <div className={styles.productTop}>
       <span><i /> AI voice agent preview</span>
-      <span>Example workflow</span>
     </div>
     <div className={styles.journeyTabs} role="tablist" aria-label="Recovery journey">
       {(Object.keys(journeys) as JourneyKey[]).map((key, index, keys) => <button key={key} id={`hero-tab-${key}`} type="button" role="tab" aria-controls="hero-flow-panel" aria-selected={journey === key} tabIndex={journey === key ? 0 : -1} onClick={() => selectJourney(key)} onKeyDown={(event) => {
