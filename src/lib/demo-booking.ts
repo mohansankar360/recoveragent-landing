@@ -13,6 +13,7 @@ export interface DemoFormData {
 }
 
 export const DEMO_LANGUAGE_OPTIONS = [
+  { value: "english", label: "English" },
   { value: "english-or-hindi", label: "English or Hindi" },
   { value: "hindi-only", label: "Hindi only" },
   { value: "tamil", label: "Tamil" },

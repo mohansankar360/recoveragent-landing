@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { BookingPicker } from "@/components/calendar/BookingPicker";
+import type { DemoFormData } from "@/lib/demo-booking";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ChartBar,
@@ -16,7 +18,6 @@ import {
   UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { saveDemoBookingSession } from '@/lib/demo-booking-session';
-import { DemoEligibilityNotice } from './DemoEligibilityNotice';
 import { getDisqualificationMessage, qualifiesForDemoCalendar } from '@/lib/demo-booking';
 import { generateMetaEventId } from "@/lib/meta-pixel";
 import { appleFade, appleSpring } from "@/lib/motion";
@@ -30,7 +31,7 @@ interface LeadFormData {
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const REDIRECT_DELAY_MS = 280;
+
 
 function validateField(
   field: keyof LeadFormData,
@@ -85,7 +86,7 @@ export function LeadCaptureForm() {
     Partial<Record<keyof LeadFormData, boolean>>
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [calendarPrefill, setCalendarPrefill] = useState<DemoFormData | null>(null);
   const [isUnsupportedPlatform, setIsUnsupportedPlatform] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -113,7 +114,7 @@ export function LeadCaptureForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (isSubmitting || isRedirecting) return;
+    if (isSubmitting || calendarPrefill) return;
 
     const nextErrors = validateAll(form);
     setErrors(nextErrors);
@@ -154,6 +155,7 @@ export function LeadCaptureForm() {
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Could not save your details. Please try again.');
       if (!qualifiesForDemoCalendar(payload)) { setOnboardingRequested(true); setIsSubmitting(false); return; }
       saveDemoBookingSession(payload);
+      setCalendarPrefill(payload);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Could not save your details. Please try again.');
       setIsSubmitting(false);
@@ -167,11 +169,9 @@ export function LeadCaptureForm() {
     });
 
     setIsSubmitting(false);
-    setIsRedirecting(true);
 
-    window.setTimeout(() => {
-      window.location.href = "/calendar";
-    }, REDIRECT_DELAY_MS);
+
+
   };
 
   return (
@@ -191,21 +191,9 @@ export function LeadCaptureForm() {
             <p className="lead-form-success-title">This platform is not supported.</p>
             <p className="lead-form-success-copy">{UNSUPPORTED_PLATFORM_MESSAGE}</p>
           </motion.div>
-        ) : isRedirecting ? (
-          <motion.div
-            key="redirect"
-            className="lead-form-success"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={appleFade}
-            role="status"
-            aria-live="polite"
-          >
-            <p className="lead-form-success-title">Taking you to the calendar…</p>
-            <p className="lead-form-success-copy">
-              Choose a time. Your details are already saved.
-            </p>
+        ) : calendarPrefill ? (
+          <motion.div key="calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={appleFade}>
+            <BookingPicker prefill={calendarPrefill} onEdit={() => setCalendarPrefill(null)} />
           </motion.div>
         ) : (
           <motion.div
@@ -221,7 +209,6 @@ export function LeadCaptureForm() {
                 Share your details, then choose a time for your 30-minute demo.
               </p>
             </div>
-            <DemoEligibilityNotice monthlyOrders={form.monthlyOrders} storePlatform={form.storePlatform} />
 
             <form onSubmit={handleSubmit} noValidate className="lead-form-fields">
               <IconSelectField
@@ -291,7 +278,7 @@ export function LeadCaptureForm() {
               <button
                 type="submit"
                 className="btn btn-green lead-form-submit"
-                disabled={isSubmitting || isRedirecting || form.storePlatform === 'other'}
+                disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}
               >
                 {isSubmitting ? "Saving…" : form.monthlyOrders === '0-500' ? 'Request an onboarding call' : 'Continue to choose a time →'}
               </button>

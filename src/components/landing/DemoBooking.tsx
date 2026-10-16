@@ -6,7 +6,6 @@ import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
 import { generateMetaEventId } from "@/lib/meta-pixel";
 import {
-  DEMO_LANGUAGE_OPTIONS,
   getDisqualificationMessage,
   MONTHLY_ORDERS_OPTIONS,
   getStoreUrlInlineError,
@@ -23,9 +22,8 @@ import {
   readLeadPrefill,
 } from "@/lib/lead-prefill";
 import { appleFade, appleSpring } from "@/lib/motion";
-import { DemoEligibilityNotice } from './DemoEligibilityNotice';
-import { CalEmbed } from '@/components/calendar/CalEmbed';
-import { DEMO_URL } from '@/lib/constants';
+import { BookingPicker } from "@/components/calendar/BookingPicker";
+
 
 interface FormData {
   name: string;
@@ -120,7 +118,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
     storeUrl: "",
     storePlatform: "",
     monthlyOrders: "",
-    preferredLanguage: "",
+    preferredLanguage: "english",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormData, boolean>>>(
@@ -194,7 +192,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
       ? {
           ...form,
           storeUrl: normalizeStoreUrl(form.storeUrl),
-          preferredLanguage: form.preferredLanguage || "english-or-hindi",
+          preferredLanguage: "english",
         }
       : {
           ...form,
@@ -265,20 +263,10 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
           <div className="demo-panel">
             <AnimatePresence mode="wait" initial={false}>
               {submitOutcome === "calendar" ? (
-                <motion.div
-                  key="calendar"
-                  className="demo-inline-calendar"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={appleFade}
-                >
-                  <h3 className="demo-success-title">Choose your demo time.</h3>
-                  <p className="demo-success-copy">
-                    Your details are prefilled. Pick a time that works for you.
-                  </p>
-                  <CalEmbed prefill={calendarPrefill} />
-                  <p className="demo-success-copy">Calendar not loading? <a href={DEMO_URL} target="_blank" rel="noopener noreferrer">Open scheduling in a new tab</a>.</p>
+                <motion.div key="calendar" ref={outcomeRef} tabIndex={-1}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={appleFade}
+                  onAnimationComplete={() => { outcomeRef.current?.focus({ preventScroll: true }); }}>
+                  <BookingPicker prefill={calendarPrefill} onEdit={() => setSubmitOutcome(null)} />
                 </motion.div>
               ) : submitOutcome === "disqualified" ? (
                 <motion.div
@@ -311,9 +299,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                 >
                   <div className="demo-form-head">
                     <h3 className="demo-form-title">Book your demo</h3>
-                    <p className="demo-form-note mono">
-                      30-minute walkthrough. Next, choose your time.
-                    </p>
+                    <p className="demo-form-note">Please note that the demo will be conducted in English.</p>
                     {hasPrefill && (
                       <p className="demo-prefill-note" role="status">
                         We&apos;ve prefilled your details from earlier. Review
@@ -322,7 +308,6 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                     )}
                   </div>
 
-                  <DemoEligibilityNotice monthlyOrders={form.monthlyOrders} storePlatform={form.storePlatform} />
 
                   <div className="demo-fields">
                     <div className="demo-contact-row">
@@ -397,23 +382,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                           autoComplete="url"
                           inputMode="url"
                         />
-                    {!compact && (
-                      <>
-                        <SelectField
-                          id={`${fieldId}-language`}
-                          label="Preferred Language for Demo"
-                          value={form.preferredLanguage}
-                          error={errors.preferredLanguage}
-                          onChange={(v) => handleChange("preferredLanguage", v)}
-                          onBlur={() => handleBlur("preferredLanguage")}
-                          placeholder="Select a language"
-                          options={DEMO_LANGUAGE_OPTIONS.map((option) => ({
-                            value: option.value,
-                            label: option.label,
-                          }))}
-                        />
-                      </>
-                    )}
+
                   </div>
 
                   {submitError && (

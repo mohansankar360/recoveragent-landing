@@ -459,7 +459,7 @@ function PricingSection({ onBook }: { onBook: () => void }) {
 
 function Objections() {
   const items = faqs.map(item => ({ q: item.question, a: item.answer }));
-  return <section className={`${styles.section} ${styles.objectionSection}`}>
+  return <section id="faq" className={`${styles.section} ${styles.objectionSection}`}>
     <div className={styles.sectionHeading} data-reveal><h2>Common questions.</h2></div>
     <div className={styles.objectionGrid} data-reveal>{items.map((item) => <details key={item.q}><summary>{item.q}<span><CaretDown size={18} /></span></summary><p>{item.a}</p></details>)}</div>
   </section>;
@@ -508,11 +508,13 @@ export function ConversionHomepage() {
 
   useEffect(() => {
     const boundaries = Array.from(document.querySelectorAll<HTMLElement>('#top, #demo-booking'));
+    const faq = pageRef.current?.querySelector<HTMLElement>('#faq');
     if (!boundaries.length) return;
     let frame = 0;
     const update = () => {
       frame = 0;
-      setShowSticky(!boundaries.some((element) => {
+      const pastFaq = Boolean(faq && faq.getBoundingClientRect().bottom <= window.innerHeight);
+      setShowSticky(!pastFaq && !boundaries.some((element) => {
         const rect = element.getBoundingClientRect();
         return rect.top < window.innerHeight && rect.bottom > 0;
       }));
@@ -521,10 +523,13 @@ export function ConversionHomepage() {
     schedule();
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
+    const resizeObserver = new ResizeObserver(schedule);
+    if (pageRef.current) resizeObserver.observe(pageRef.current);
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
+      resizeObserver.disconnect();
     };
   }, []);
 

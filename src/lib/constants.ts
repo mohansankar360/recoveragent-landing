@@ -1,4 +1,4 @@
-export const CAL_EVENT_LINK = "recoveragent/product-demo-recover-agent";
+export const CAL_EVENT_LINK = "recoveragent/recover-agent-discovery-call";
 
 export const DEMO_URL = `https://cal.com/${CAL_EVENT_LINK}`;
 
@@ -7,7 +7,7 @@ export const DEMO_URL = `https://cal.com/${CAL_EVENT_LINK}`;
  * Update these if prefills do not appear on the confirm step.
  */
 export const CAL_BOOKING_FIELDS = {
-  websiteUrl: "website-url",
-  preferredLanguage: "preferred-language-for-demo",
-  storePlatform: "which-platform-your-store-is-in",
+  websiteUrl: "Website-url",
+  preferredLanguage: "Preferred-Language-for-Demo",
+  storePlatform: "Which-platform-your-store-is-in",
 } as const;

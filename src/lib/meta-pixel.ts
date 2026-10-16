@@ -92,7 +92,8 @@ function mapAnalyticsEventToMeta(
         kind: "standard",
         name: "Lead",
         params: {
-          content_name: "lead_capture",
+          content_name: properties?.product === "whatsapp" ? "whatsapp_onboarding" : "lead_capture",
+          ...(properties?.product === "whatsapp" ? { value: 999, currency: "INR" } : {}),
           ...(properties?.monthly_orders
             ? { monthly_orders: properties.monthly_orders }
             : {}),

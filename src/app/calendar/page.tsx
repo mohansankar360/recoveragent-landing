@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarPageClient } from "@/components/calendar/CalendarPageClient";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Book a demo — Recover Agent",
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function CalendarPage() {
-  return <CalendarPageClient />;
+  redirect("/book-demo");
 }
