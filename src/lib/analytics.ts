@@ -1,3 +1,4 @@
+import { trackOpenAIBooking } from "./openai-pixel";
 import { trackMetaEvent, trackMetaPageView } from "./meta-pixel";
 
 export type AnalyticsEvent =
@@ -38,6 +39,10 @@ export function trackEvent(
   // eslint-disable-next-line no-console
   console.debug("[analytics]", event, properties);
 
+  if (event === "demo_scheduled") {
+    const id = properties?.event_id;
+    trackOpenAIBooking(typeof id === "string" ? id : undefined);
+  }
   trackMetaEvent(event, properties);
 }
 

@@ -1,3 +1,5 @@
+import { OpenAIPixelHead } from "@/components/analytics/OpenAIPixel";
+import { OpenAIPageView } from "@/components/analytics/OpenAIPageView";
 import { Archivo, Geist, Geist_Mono, JetBrains_Mono, Manrope } from "next/font/google";
 import { MetaPixelHead } from "@/components/analytics/MetaPixel";
 import { MetaPageView } from "@/components/analytics/MetaPageView";
@@ -51,6 +53,7 @@ export default function RootLayout({
       className={`${archivo.variable} ${jetbrains.variable} ${manrope.variable} ${geistMono.variable} ${geist.variable}`}
     >
       <head>
+        <OpenAIPixelHead />
         <MetaPixelHead />
         <script
           type="application/ld+json"
@@ -70,6 +73,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <OpenAIPageView />
         <MetaPageView />
         {children}
       </body>
