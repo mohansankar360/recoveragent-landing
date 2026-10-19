@@ -11,6 +11,7 @@ import {
 } from "@/lib/blog";
 import { OG_IMAGE, SITE_NAME } from "@/lib/site-metadata";
 import { siteUrl } from "@/lib/site-url";
+import styles from "@/components/landing/TrialHomepage.module.css";
 
 export function generateStaticParams() {
   return getAllBlogSlugs().map((slug) => ({ slug }));
@@ -64,38 +65,30 @@ export default async function BlogPostPage({
     <BlogShell
       crumbs={[
         { href: "/", label: "Home" },
-        { href: "/blog", label: "Blog" },
+        { href: "/blog", label: "Guides" },
         { label: post.title },
       ]}
+      eyebrow={formatBlogDate(post.publishedAt)}
+      title={post.title}
+      description={post.description}
     >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <article className="sec">
-        <div className="wrap blog-article-wrap">
-          <header className="blog-article-head">
-            <time className="blog-card-date mono" dateTime={post.publishedAt}>
-              {formatBlogDate(post.publishedAt)}
-            </time>
-            <h1>{post.title}</h1>
-            <p className="blog-article-deck">{post.description}</p>
-          </header>
-
-          <BlogMarkdown content={post.content} />
-
-          <footer className="blog-article-footer">
-            <p>Ready to see this on your store?</p>
-            <div className="btns">
-              <Link className="btn btn-primary" href="/book-demo">
-                Book a demo
-              </Link>
-              <Link className="btn btn-ghost" href="/loss-calculator">
-                Run the loss calculator →
-              </Link>
-            </div>
-          </footer>
-        </div>
+      <article className={styles.blogArticle}>
+        <BlogMarkdown content={post.content} />
+        <footer className={styles.blogArticleCta}>
+          <p>Want to see this on your own orders?</p>
+          <div>
+            <Link className={styles.trialButton} href="/book-demo">
+              Start 14-day free trial →
+            </Link>
+            <Link className={styles.outlineButton} href="/loss-calculator">
+              Check your RTO cost
+            </Link>
+          </div>
+        </footer>
       </article>
     </BlogShell>
   );

@@ -17,6 +17,7 @@ import { ExitIntent } from "./ExitIntent";
 import { MobileStickyCTA } from "./MobileStickyCTA";
 import { VersionSwitcher } from "./VersionSwitcher";
 import { ConversionHomepage } from "./ConversionHomepage";
+import { TrialHomepage } from "./TrialHomepage";
 
 function WarmPage() {
   return (
@@ -67,11 +68,12 @@ function ColdPage() {
 }
 
 function FullPage() {
-  return <ConversionHomepage />;
+  return <TrialHomepage />;
 }
 
-export function LandingPage({ variant = "full" }: { variant?: LandingVariant }) {
+export function LandingPage({ variant = "full" }: { variant?: LandingVariant | "classic" }) {
   if (variant === "warm") return <WarmPage />;
   if (variant === "cold") return <ColdPage />;
+  if (variant === "classic") return <ConversionHomepage />;
   return <FullPage />;
 }

@@ -108,7 +108,8 @@ function buildTouchedState(compact: boolean): Partial<Record<keyof FormData, boo
   );
 }
 
-export function DemoBooking({ compact = false, sectionId = "demo-booking", onEligibilityChange }: { compact?: boolean; sectionId?: string; onEligibilityChange?: (excluded: boolean) => void }) {
+export function DemoBooking({ compact = false, sectionId = "demo-booking", onEligibilityChange, mode = "demo" }: { compact?: boolean; sectionId?: string; onEligibilityChange?: (excluded: boolean) => void; mode?: "demo" | "trial" }) {
+  const isTrial = mode === "trial";
   const fieldId = useId();
   const outcomeRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState<FormData>({
@@ -298,8 +299,8 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                   transition={appleFade}
                 >
                   <div className="demo-form-head">
-                    <h3 className="demo-form-title">Book your demo</h3>
-                    <p className="demo-form-note">Please note that the demo will be conducted in English.</p>
+                    <h3 className="demo-form-title">{isTrial ? "Start your 14-day free trial" : "Book your demo"}</h3>
+                    <p className="demo-form-note">{isTrial ? "Next, pick a time for your setup call. It is conducted in English." : "Please note that the demo will be conducted in English."}</p>
                     {hasPrefill && (
                       <p className="demo-prefill-note" role="status">
                         We&apos;ve prefilled your details from earlier. Review
@@ -396,7 +397,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                     className="btn btn-green demo-submit"
                     disabled={Boolean(submitOutcome) || isSubmitting || form.storePlatform === 'other'}
                   >
-                    {isSubmitting ? "Saving your details…" : form.monthlyOrders === '0-500' ? "Request an onboarding call" : "Continue to choose a time"}
+                    {isSubmitting ? "Saving your details…" : form.monthlyOrders === '0-500' ? "Request an onboarding call" : isTrial ? "Start free trial: choose setup time" : "Continue to choose a time"}
                   </button>
                 </motion.form>
               )}

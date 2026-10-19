@@ -32,7 +32,7 @@ export const SITE_SECTIONS = [
     navLabel: "Hear a call",
     title: "Hear a Recover Agent AI voice call demo",
     description:
-      "Listen to real Recover Agent call scripts for COD confirmation, cart recovery, and NDR re-attempt — in Hindi, English, and regional languages.",
+      "Listen to real recordings of our AI agent confirming COD orders, recovering checkouts and rescheduling failed deliveries. Calls run in English, Hindi, Tamil, Telugu, Kannada and Malayalam.",
     sitemapPriority: 0.8,
   },
   {
@@ -50,7 +50,7 @@ export const SITE_SECTIONS = [
     navLabel: "Plans",
     title: "Recover Agent pricing — COD, cart & NDR recovery plans",
     description:
-      "Simple pricing tiers for AI voice COD verification, abandoned checkout recovery, and NDR re-attempts. WhatsApp flows included on every plan.",
+      "Simple per-order pricing for COD verification, abandoned checkout recovery and failed delivery recovery. WhatsApp flows are included and every plan starts with a 14-day free trial.",
     sitemapPriority: 0.95,
   },
   {
@@ -68,7 +68,7 @@ export const SITE_SECTIONS = [
     navLabel: "How it works",
     title: "How Recover Agent works — order to recovery lifecycle",
     description:
-      "From store order through AI voice call, WhatsApp follow-up, prepaid conversion, and NDR re-attempt — the full Recover Agent recovery workflow.",
+      "From the moment an order is placed to the AI call, the WhatsApp follow-up and the Shopify update: the full RecoverAgent workflow, step by step.",
     sitemapPriority: 0.82,
   },
   {
@@ -77,16 +77,16 @@ export const SITE_SECTIONS = [
     navLabel: "FAQ",
     title: "Recover Agent FAQ — COD, WhatsApp, RTO & workflows",
     description:
-      "Answers founders ask before booking: AI call quality, unexpected questions, languages, Shopify and WooCommerce support, and rollout planning.",
+      "Answers founders and ops teams ask before starting a trial: call quality, unexpected questions, languages, integrations and what happens after 14 days.",
     sitemapPriority: 0.85,
   },
   {
     slug: "book-demo",
     anchorId: "demo-booking",
-    navLabel: "Book a demo",
-    title: "Book a Recover Agent demo — 30-minute walkthrough",
+    navLabel: "Free trial",
+    title: "Start your 14-day free trial",
     description:
-      "Book a free 30-minute demo. See Recover Agent verify COD, recover abandoned carts, and re-attempt NDR for your Indian D2C brand.",
+      "Connect your store, set up your first workflow on a short call, and see verified, cancelled and unreachable COD orders from your own store. Zero setup fee, no annual lock-in.",
     sitemapPriority: 1,
   },
 ] as const;

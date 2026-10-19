@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { LossCalculator } from "@/components/landing/LossCalculator";
 import { PageShell } from "@/components/landing/PageShell";
+import { CaseStudySection, LossSection } from "@/components/landing/TrialHomepage";
 import { siteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -12,8 +12,13 @@ export const metadata: Metadata = {
 
 export default function AuditPage() {
   return (
-    <PageShell navLabel="Loss calculator">
-      <LossCalculator />
+    <PageShell
+      navLabel="RTO calculator"
+      title="What is RTO costing your store?"
+      description="Move the sliders to see your monthly RTO bill, and what a call before dispatch could save."
+    >
+      <LossSection />
+      <CaseStudySection />
     </PageShell>
   );
 }

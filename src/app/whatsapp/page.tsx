@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { WhatsAppLanding } from "@/components/whatsapp/WhatsAppLanding";
 
-const title = "WhatsApp for D2C Brands — All Features at ₹999/month | Recover Agent";
-const description = "Broadcast campaigns, recover abandoned checkouts, send order updates and manage customer conversations. All Recover Agent WhatsApp features for ₹999/month.";
+const title = "WhatsApp for D2C Brands — 14 Days Free, then ₹999/month | Recover Agent";
+const description = "Recover carts, confirm COD orders, send order updates and sell inside the chat. Shared inbox, flows, AI replies, payment links and WhatsApp Coexistence. Free for 14 days, then ₹999/month.";
 
 export const metadata: Metadata = {
   title,

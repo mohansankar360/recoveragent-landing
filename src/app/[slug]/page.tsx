@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CallDemo } from "@/components/landing/CallDemo";
-import { CallVersus } from "@/components/landing/CallVersus";
-import { ControlRoomDemo } from "@/components/landing/ControlRoomDemo";
-import { DemoBooking } from "@/components/landing/DemoBooking";
-import { FAQ } from "@/components/landing/FAQ";
-import { GoLive } from "@/components/landing/GoLive";
-import { LossCalculator } from "@/components/landing/LossCalculator";
 import { PageShell } from "@/components/landing/PageShell";
-import { PlansSection } from "@/components/landing/PlansSection";
-import { RecoveryJourney } from "@/components/landing/RecoveryJourney";
-import { RecoveryPaths } from "@/components/landing/RecoveryPaths";
-import { UseCasePageContent } from "@/components/landing/UseCasePageContent";
+import {
+  CallShowcase,
+  CaseStudySection,
+  FaqSection,
+  IntegrationStrip,
+  LossSection,
+  PricingSection,
+  ProblemSection,
+  SafetySection,
+  ShipOrHoldGame,
+  StorySection,
+  TrialSection,
+  WhatsAppSection,
+} from "@/components/landing/TrialHomepage";
+import { LeakCards, UseCaseContent } from "@/components/landing/TrialSubPages";
 import { getAllPublicSlugs, resolvePublicPage } from "@/lib/site-pages";
 import type { SiteSectionSlug } from "@/lib/site-sections";
 import { getRecoveryPathForUseCase } from "@/lib/site-use-cases";
@@ -21,25 +25,25 @@ import { siteUrl } from "@/lib/site-url";
 function SectionContent({ slug }: { slug: SiteSectionSlug }) {
   switch (slug) {
     case "where-you-leak":
-      return <RecoveryPaths />;
+      return <><LeakCards /><ProblemSection /><ShipOrHoldGame /></>;
     case "loss-calculator":
-      return <LossCalculator />;
+      return <><LossSection /><CaseStudySection /></>;
     case "control-room":
-      return <ControlRoomDemo />;
+      return <><CaseStudySection /><WhatsAppSection /><SafetySection /></>;
     case "hear-a-call":
-      return <CallDemo />;
+      return <><CallShowcase /><StorySection /></>;
     case "why-calling":
-      return <CallVersus />;
+      return <><StorySection /><WhatsAppSection /></>;
     case "plans":
-      return <PlansSection />;
+      return <><PricingSection /><TrialSection /><FaqSection /></>;
     case "go-live":
-      return <GoLive />;
+      return <><TrialSection /><IntegrationStrip /><SafetySection /></>;
     case "how-it-works":
-      return <RecoveryJourney />;
+      return <><StorySection /><CallShowcase /><SafetySection /></>;
     case "faq":
-      return <FAQ />;
+      return <FaqSection />;
     case "book-demo":
-      return <DemoBooking compact />;
+      return <TrialSection />;
   }
 }
 
@@ -92,9 +96,15 @@ export default async function PublicPage({
   const { page } = resolved;
 
   return (
-    <PageShell navLabel={page.navLabel} title={page.title}>
+    <PageShell
+      navLabel={page.navLabel}
+      title={page.title}
+      description={page.description}
+      showCtas={page.slug !== "book-demo"}
+      finalFirst={page.slug === "book-demo"}
+    >
       {resolved.type === "use-case" ? (
-        <UseCasePageContent path={getRecoveryPathForUseCase(resolved.page)} />
+        <UseCaseContent path={getRecoveryPathForUseCase(resolved.page)} />
       ) : (
         <SectionContent slug={resolved.page.slug} />
       )}

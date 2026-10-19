@@ -1,33 +1,30 @@
-import Link from "next/link";
-import { Navbar } from "./Navbar";
-import { Footer } from "./Footer";
-import { MobileStickyCTA } from "./MobileStickyCTA";
+import { SubPage } from "./TrialSubPages";
 
 export function PageShell({
   navLabel,
   title,
+  description,
+  showCtas,
+  finalFirst,
   children,
 }: {
   navLabel: string;
   title?: string;
+  description?: string;
+  showCtas?: boolean;
+  finalFirst?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Navbar />
-      <main className="themed-page">
-        <div className="wrap page-breadcrumb">
-          <nav aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <span aria-hidden="true"> / </span>
-            <span aria-current="page">{navLabel}</span>
-          </nav>
-          <h1 className="sr-only">{title ?? navLabel}</h1>
-        </div>
-        {children}
-      </main>
-      <Footer />
-      <MobileStickyCTA />
-    </>
+    <SubPage
+      crumbs={[{ href: "/", label: "Home" }, { label: navLabel }]}
+      eyebrow={navLabel}
+      title={title ?? navLabel}
+      description={description}
+      showCtas={showCtas}
+      finalFirst={finalFirst}
+    >
+      {children}
+    </SubPage>
   );
 }

@@ -4,6 +4,7 @@ import { BlogShell } from "@/components/blog/BlogShell";
 import { OG_IMAGE, SITE_NAME } from "@/lib/site-metadata";
 import { formatBlogDate, getAllBlogPosts } from "@/lib/blog";
 import { siteUrl } from "@/lib/site-url";
+import styles from "@/components/landing/TrialHomepage.module.css";
 
 export const metadata: Metadata = {
   title: `Blog — ${SITE_NAME}`,
@@ -25,34 +26,26 @@ export default function BlogIndexPage() {
   const posts = getAllBlogPosts();
 
   return (
-    <BlogShell crumbs={[{ href: "/", label: "Home" }, { label: "Blog" }]}>
-      <section className="sec">
-        <div className="wrap">
-          <div className="sec-head">
-            <div className="eyebrow">Resources</div>
-            <h1>RTO, COD &amp; recovery guides</h1>
-            <p>
-              Practical notes for Indian D2C operators on Shopify and WooCommerce — from
-              pre-dispatch COD confirmation to NDR follow-up.
-            </p>
-          </div>
-
-          <div className="blog-index">
-            {posts.map((post) => (
-              <article key={post.slug} className="blog-card">
-                <time className="blog-card-date mono" dateTime={post.publishedAt}>
-                  {formatBlogDate(post.publishedAt)}
-                </time>
-                <h2 className="blog-card-title">
-                  <Link href={`/blog/${post.slug}`}>{post.title}</Link>
-                </h2>
-                <p className="blog-card-desc">{post.description}</p>
-                <Link href={`/blog/${post.slug}`} className="blog-card-link">
-                  Read guide →
-                </Link>
-              </article>
-            ))}
-          </div>
+    <BlogShell
+      crumbs={[{ href: "/", label: "Home" }, { label: "Guides" }]}
+      eyebrow="Guides"
+      title="RTO, COD and recovery guides"
+      description="Practical notes for Indian D2C founders and ops teams on Shopify and WooCommerce, from COD confirmation before dispatch to failed delivery follow-up."
+    >
+      <section className={styles.blogSection}>
+        <div className={styles.blogGrid}>
+          {posts.map((post) => (
+            <article key={post.slug} className={styles.blogCard}>
+              <time dateTime={post.publishedAt}>{formatBlogDate(post.publishedAt)}</time>
+              <h2>
+                <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+              </h2>
+              <p>{post.description}</p>
+              <Link href={`/blog/${post.slug}`} className={styles.leakLink}>
+                Read guide →
+              </Link>
+            </article>
+          ))}
         </div>
       </section>
     </BlogShell>
