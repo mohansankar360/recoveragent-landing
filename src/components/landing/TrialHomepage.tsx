@@ -35,6 +35,7 @@ import {
   PhoneDisconnect,
   Play,
   ShieldCheck,
+  SpeakerHigh,
   Storefront,
   Tag,
   Truck,
@@ -48,6 +49,7 @@ import { faqs } from '@/lib/faq-data';
 import { PRICING_TIERS, calculateRecoveryEstimate, formatInr } from '@/lib/calculator';
 import { ALL_PLANS_WHATSAPP, PLAN_FEATURE_ROWS, PLAN_FEATURES } from '@/lib/pricing-plans';
 import { CUSTOMER_LOGOS, CUSTOMER_QUOTES } from '@/lib/customer-proof';
+import { CALL_CAPTIONS } from '@/lib/call-captions';
 import { trackEvent } from '@/lib/analytics';
 import styles from './TrialHomepage.module.css';
 
@@ -55,6 +57,7 @@ export type ScenarioKey = 'cod' | 'checkout' | 'ndr';
 
 const scenarios: Record<ScenarioKey, {
   label: string;
+  short: string;
   caller: string;
   context: string;
   audio: string;
@@ -66,6 +69,7 @@ const scenarios: Record<ScenarioKey, {
 }> = {
   cod: {
     label: 'COD confirmation',
+    short: 'COD',
     caller: 'Order #1042 · ₹1,499 COD',
     context: 'Confirming the order and address before dispatch',
     audio: '/audio/COD_hindi.mp4',
@@ -77,6 +81,7 @@ const scenarios: Record<ScenarioKey, {
   },
   checkout: {
     label: 'Abandoned checkout',
+    short: 'Cart',
     caller: 'Checkout · ₹3,450 left in cart',
     context: 'Answering questions and resending the checkout link',
     audio: '/audio/abandoned_hindi.mp3',
@@ -88,6 +93,7 @@ const scenarios: Record<ScenarioKey, {
   },
   ndr: {
     label: 'Failed delivery',
+    short: 'Delivery',
     caller: 'Shipment #NDR-82 · Delivery failed',
     context: 'Finding out what went wrong and rescheduling',
     audio: '/audio/NDR_english.mp4',
@@ -293,9 +299,29 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
   const live = player.status === 'live';
   const ended = player.status === 'ended';
   const percent = player.duration ? (player.progress / player.duration) * 100 : 0;
+  // "Not now" skips to the next sample call instead of doing nothing.
+  const nextScenario = () => {
+    const index = scenarioKeys.indexOf(scenario);
+    player.hangUp();
+    setScenario(scenarioKeys[(index + 1) % scenarioKeys.length]);
+  };
+  const caption = live || player.status === 'paused'
+    ? [...CALL_CAPTIONS[scenario]].reverse().find((line) => line.at <= player.progress)
+    : undefined;
 
   return <div className={styles.heroStage} ref={stageRef} onPointerMove={onPointerMove} onPointerLeave={() => { pointerX.set(0); pointerY.set(0); }}>
         <motion.div className={styles.stageGlow} style={glowLayer} aria-hidden="true" />
+
+        <div className={styles.scenarioTabs} role="tablist" aria-label="Choose a call to hear">
+          {scenarioKeys.map((key) => {
+            const Icon = scenarios[key].icon;
+            return <button key={key} type="button" role="tab" aria-selected={scenario === key} aria-label={scenarios[key].label} onClick={() => { player.hangUp(); setScenario(key); }}>
+              <Icon size={16} weight={scenario === key ? 'fill' : 'regular'} aria-hidden="true" />
+              <span className={styles.tabLong}>{scenarios[key].label}</span>
+              <span className={styles.tabShort}>{scenarios[key].short}</span>
+            </button>;
+          })}
+        </div>
 
         <motion.div className={styles.phoneWrap} style={phoneLayer} id="hero-phone">
           <div className={`${styles.phone} ${player.status === 'ringing' ? styles.phoneRinging : ''}`}>
@@ -308,16 +334,23 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
               <Waveform active={live} />
               <div className={styles.callProgress} aria-hidden="true"><i style={{ width: `${percent}%` }} /></div>
               <p className={styles.callTime}>{player.duration ? `${formatTime(player.progress)} / ${formatTime(player.duration)}` : item.context}</p>
+              {caption && <p className={styles.caption} aria-live="polite">{caption.text}</p>}
               <AnimatePresence mode="wait">
                 {ended
                   ? <motion.div key="outcome" className={styles.callOutcome} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                     <CheckCircle size={20} weight="fill" aria-hidden="true" /><span><strong>{item.outcome}</strong><small>Sample outcome · saved to your dashboard</small></span>
                   </motion.div>
                   : <motion.div key="controls" className={styles.callControls} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <button type="button" className={styles.declineButton} onClick={player.hangUp} aria-label="Reset call"><PhoneDisconnect size={22} weight="fill" /></button>
-                    <button type="button" className={styles.answerButton} onClick={answer} aria-label={live ? 'Pause call' : 'Answer and play the real AI call'}>
-                      {live ? <span className={styles.pauseBars}><i /><i /></span> : <Phone size={24} weight="fill" />}
-                    </button>
+                    <span className={styles.callAction}>
+                      <button type="button" className={styles.declineButton} onClick={nextScenario} aria-label="Not now, play the next sample call"><PhoneDisconnect size={22} weight="fill" /></button>
+                      <small aria-hidden="true">Not now</small>
+                    </span>
+                    <span className={styles.callAction}>
+                      <button type="button" className={styles.answerButton} onClick={answer} aria-label={live ? 'Pause call' : 'Answer and play the real AI call'}>
+                        {live ? <span className={styles.pauseBars}><i /><i /></span> : <Phone size={24} weight="fill" />}
+                      </button>
+                      <small aria-hidden="true">{live ? 'Pause' : 'Answer'}</small>
+                    </span>
                   </motion.div>}
               </AnimatePresence>
               {ended && <button type="button" className={styles.replayLink} onClick={player.play}>Play again</button>}
@@ -325,7 +358,11 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
             </div>
             <audio {...player.audioProps} />
           </div>
-          <p className={styles.phoneHint}>{live ? 'This is a real recording of our AI agent' : 'Tap the green button to answer'}</p>
+          <p className={styles.phoneHint}>{live ? 'Real recording of our AI voice agent' : ended ? 'What happened next:' : <><SpeakerHigh size={15} weight="fill" aria-hidden="true" />Turn your sound on</>}</p>
+          {ended && <div className={styles.outcomeChips}>
+            <span><WhatsappLogo size={15} weight="fill" aria-hidden="true" />WhatsApp follow-up sent</span>
+            <span><Tag size={15} weight="fill" aria-hidden="true" />Shopify tag: {item.tag}</span>
+          </div>}
         </motion.div>
 
         <motion.div className={`${styles.floatCard} ${styles.floatWhatsapp}`} style={cardA} aria-hidden="true">
@@ -340,15 +377,6 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
           <small>Average RTO</small>
           <strong>32% <ArrowRight size={14} weight="bold" /> <em>17%</em></strong>
         </motion.div>
-
-        <div className={styles.scenarioTabs} role="tablist" aria-label="Choose a call to hear">
-          {scenarioKeys.map((key) => {
-            const Icon = scenarios[key].icon;
-            return <button key={key} type="button" role="tab" aria-selected={scenario === key} onClick={() => { player.hangUp(); setScenario(key); }}>
-              <Icon size={16} weight={scenario === key ? 'fill' : 'regular'} aria-hidden="true" />{scenarios[key].label}
-            </button>;
-          })}
-        </div>
       </div>;
 }
 

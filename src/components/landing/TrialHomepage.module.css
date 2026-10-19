@@ -166,9 +166,19 @@
 .floatIconGreen, .floatIconBlue { display: grid; flex-shrink: 0; place-items: center; width: 36px; height: 36px; border-radius: 10px; color: #fff; }
 .floatIconGreen { background: #25d366; }
 .floatIconBlue { background: var(--blue); }
-.scenarioTabs { position: relative; z-index: 4; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 20px; padding: 6px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; }
-.scenarioTabs button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; font: 600 13px var(--font-geist), sans-serif; color: #b9c6e4; background: none; border: 0; border-radius: 10px; cursor: pointer; }
-.scenarioTabs button[aria-selected='true'] { color: var(--ink); background: #fff; }
+.scenarioTabs { position: relative; z-index: 4; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; width: min(460px, 100%); margin-bottom: 18px; padding: 5px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 14px; }
+.scenarioTabs button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 8px 10px; font: 600 13px var(--font-geist), sans-serif; color: #b9c6e4; white-space: nowrap; background: none; border: 0; border-radius: 10px; cursor: pointer; transition: background 0.18s ease, color 0.18s ease; }
+.scenarioTabs button[aria-selected='true'] { color: var(--ink); background: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); }
+.tabShort { display: none; }
+.callAction { display: grid; justify-items: center; gap: 8px; }
+.callAction small { font-size: 12px; font-weight: 600; color: #c8d3ec; }
+.caption { min-height: 40px; margin-top: 6px !important; padding: 8px 10px; font-size: 13px; line-height: 1.4; color: #fff; background: rgba(0, 0, 0, 0.35); border-radius: 10px; }
+.phoneHint { display: inline-flex; align-items: center; gap: 6px; }
+.phoneHint svg { color: var(--cyan); }
+.outcomeChips { display: none; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.outcomeChips span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; font-size: 12.5px; font-weight: 600; color: var(--ink); background: #fff; border-radius: 999px; }
+.outcomeChips span:first-child svg { color: #25d366; }
+.outcomeChips span:last-child svg { color: var(--blue); }
 .scrollCue { position: absolute; bottom: 24px; left: 50%; display: block; width: 26px; height: 42px; margin-left: -13px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 14px; }
 .scrollCue span { position: absolute; top: 8px; left: 50%; width: 4px; height: 8px; margin-left: -2px; background: #fff; border-radius: 2px; animation: cue 1.6s ease-in-out infinite; }
 @keyframes cue { 0% { opacity: 0; transform: translateY(0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(14px); } }
@@ -645,9 +655,20 @@
   .heroLead { margin-top: 18px !important; font-size: 17px; }
   .heroActions { display: grid; grid-template-columns: 1fr; margin-top: 26px; }
   .heroStage { min-height: 0; }
-  .phone { width: 272px; height: 540px; }
-  .phoneScreen { padding-top: 58px; }
-  .callerAvatar { margin-top: 20px; }
+  .phone { width: 250px; height: 468px; border-radius: 40px; padding: 10px; }
+  .phoneScreen { padding: 48px 18px 20px; border-radius: 31px; }
+  .phoneNotch { top: 18px; width: 80px; height: 22px; margin-left: -40px; }
+  .callerAvatar { width: 70px; height: 70px; margin-top: 14px; }
+  .callerAvatar svg { width: 26px; height: 26px; }
+  .callerName { margin-top: 14px !important; font-size: 21px; }
+  .waveform { height: 40px; margin-top: 14px; }
+  .callProgress { margin-top: 10px; }
+  .declineButton, .answerButton { width: 56px; height: 56px; }
+  .callControls { gap: 40px; }
+  .scenarioTabs { width: 100%; }
+  .tabLong { display: none; }
+  .tabShort { display: inline; }
+  .outcomeChips { display: flex; }
   .floatCard { display: none; }
   .scrollCue { display: none; }
 
@@ -749,7 +770,7 @@
   .mobileSticky a { background: var(--green); box-shadow: 0 16px 36px rgba(34, 197, 94, 0.35); }
 }
 @media (max-width: 380px) {
-  .phone { width: 252px; height: 510px; }
+  .phone { width: 240px; height: 456px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .page *, .page *::before, .page *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
