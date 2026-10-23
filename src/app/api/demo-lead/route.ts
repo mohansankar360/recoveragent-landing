@@ -86,8 +86,10 @@ export async function POST(request: Request) {
     );
   }
 
+  // Only stores that qualify for the calendar count as a Lead, so ads optimised
+  // for Lead don't learn to find stores below 500 orders a month.
   await sendMetaServerEvent({
-    eventName: "Lead",
+    eventName: payload.qualifiesForCalendar ? "Lead" : "LowVolumeLead",
     eventId: metaEventId ?? crypto.randomUUID(),
     eventSourceUrl: request.headers.get("referer") ?? undefined,
     clientIpAddress:

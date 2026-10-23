@@ -64,6 +64,21 @@ function mapAnalyticsEventToMeta(
   event: AnalyticsEvent,
   properties?: EventProperties
 ): MetaEventMapping | null {
+  // Must match the server event name in /api/demo-lead so Meta deduplicates.
+  if (
+    (event === "demo_form_submitted" || event === "lead_form_submitted") &&
+    properties?.qualifies === false
+  ) {
+    return {
+      kind: "custom",
+      name: "LowVolumeLead",
+      params: {
+        content_name: event === "demo_form_submitted" ? "demo_booking" : "lead_capture",
+        ...(properties.monthly_orders ? { monthly_orders: properties.monthly_orders } : {}),
+      },
+    };
+  }
+
   switch (event) {
     case "demo_form_submitted":
       return {
