@@ -20,6 +20,7 @@ All active pages use the homepage's off-white surfaces, Geist typography, blue p
 | NDR recovery | `/ndr-recovery` |
 | Revenue audit / loss calculator | `/audit` |
 | Lead capture | `/lead` |
+| Lead capture (Meta ads, AI voice agent) | `/leads` |
 | Booking calendar | `/calendar` |
 | Blog index | `/blog` |
 | Reduce RTO on Shopify | `/blog/reduce-rto-shopify-india` |

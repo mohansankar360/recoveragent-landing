@@ -1,11 +1,74 @@
-// Live captions for the sample call recordings shown on the site.
-// `at` is the second in the recording when the line starts. Add the real transcript of each
-// recording here (Hindi line plus an English translation works well); captions only show for
-// scenarios that have lines, so leaving a list empty simply hides captions for that call.
-export type CallCaption = { at: number; text: string };
+// Live captions for the sample call recordings in public/audio.
+// Transcribed with Whisper; the Hindi calls are shown as English translations.
+// `at` is the second in the recording when the line starts.
+export type CallCaption = { at: number; speaker: 'agent' | 'buyer'; text: string };
+
+export const CALL_CAPTION_NOTES: Record<'cod' | 'checkout' | 'ndr', string> = {
+  cod: 'From Hindi',
+  checkout: 'From Hindi',
+  ndr: 'Transcript',
+};
 
 export const CALL_CAPTIONS: Record<'cod' | 'checkout' | 'ndr', CallCaption[]> = {
-  cod: [],
-  checkout: [],
-  ndr: [],
+  cod: [
+    { at: 0, speaker: 'agent', text: 'Mr. Veeral, I’m calling from TTF Clothing.' },
+    { at: 2.9, speaker: 'agent', text: 'It’s about the men’s cotton boxer shorts, pack of 3, that you ordered.' },
+    { at: 7.6, speaker: 'agent', text: 'We’re calling to confirm it.' },
+    { at: 9.4, speaker: 'agent', text: 'Shall we send your order?' },
+    { at: 13.7, speaker: 'buyer', text: 'I didn’t order anything.' },
+    { at: 18.3, speaker: 'agent', text: 'That’s okay.' },
+    { at: 20.3, speaker: 'agent', text: 'Maybe someone in your family placed it using your number.' },
+    { at: 25.4, speaker: 'agent', text: 'Could you check once?' },
+    { at: 27.4, speaker: 'buyer', text: 'Boxer shorts?' },
+    { at: 31.8, speaker: 'agent', text: 'Yes, men’s cotton boxer shorts, a pack of three.' },
+    { at: 36.8, speaker: 'agent', text: 'Do you remember it now?' },
+    { at: 42.7, speaker: 'buyer', text: 'I didn’t order anything.' },
+    { at: 46.7, speaker: 'agent', text: 'Okay. Please check your order history on the website,' },
+    { at: 50.7, speaker: 'agent', text: 'or I can send you the product link on WhatsApp.' },
+    { at: 53.7, speaker: 'agent', text: 'Thank you for your time. Have a nice day.' },
+  ],
+  checkout: [
+    { at: 0, speaker: 'agent', text: 'I’m calling from Gifting Studio.' },
+    { at: 2, speaker: 'agent', text: 'I saw you added a personalised baby birth frame to your cart,' },
+    { at: 9, speaker: 'agent', text: 'but didn’t complete the order.' },
+    { at: 11, speaker: 'agent', text: 'Was there an issue or a question I can help with?' },
+    { at: 14, speaker: 'buyer', text: 'No, not now. When I have time, I’ll do it.' },
+    { at: 21.2, speaker: 'agent', text: 'Okay Rajni, no problem.' },
+    { at: 26.6, speaker: 'agent', text: 'If you need help or want to place the order,' },
+    { at: 30.6, speaker: 'agent', text: 'you can reach us on WhatsApp.' },
+    { at: 33.6, speaker: 'agent', text: 'I can send you a secure checkout link,' },
+    { at: 36.6, speaker: 'agent', text: 'so you can pay whenever it’s convenient.' },
+    { at: 39.6, speaker: 'agent', text: 'Shall I send you the link?' },
+    { at: 41.6, speaker: 'buyer', text: 'Send it. But is cash on delivery not available?' },
+    { at: 48.9, speaker: 'agent', text: 'Rajni, we have two payment options.' },
+    { at: 51.9, speaker: 'agent', text: 'Prepaid, which costs ₹799,' },
+    { at: 56.9, speaker: 'agent', text: 'or cash on delivery with a ₹100 COD charge,' },
+    { at: 60.9, speaker: 'agent', text: 'so the total would be ₹899.' },
+    { at: 63.9, speaker: 'agent', text: 'Which payment option do you prefer?' },
+    { at: 66.9, speaker: 'buyer', text: 'COD.' },
+    { at: 68.9, speaker: 'agent', text: 'Okay Rajni, your total will be ₹899.' },
+    { at: 74.9, speaker: 'agent', text: 'Delivery usually takes 7 to 9 days.' },
+    { at: 77.9, speaker: 'agent', text: 'I’ll place your order now. You can pay at delivery.' },
+    { at: 82.9, speaker: 'agent', text: 'Shall I go ahead?' },
+    { at: 84.9, speaker: 'buyer', text: 'Yes, go ahead. I’ll share the address details.' },
+    { at: 90.6, speaker: 'agent', text: 'Perfect, I’m placing your order now.' },
+    { at: 98.8, speaker: 'agent', text: 'You’ll get a confirmation message on WhatsApp.' },
+    { at: 101.8, speaker: 'buyer', text: 'Okay.' },
+    { at: 104.2, speaker: 'agent', text: 'Thank you Rajni, your cash on delivery order has been placed.' },
+    { at: 111.8, speaker: 'agent', text: 'You’ll get a confirmation message on WhatsApp.' },
+  ],
+  ndr: [
+    { at: 0, speaker: 'agent', text: 'Calling from Gifting Studio.' },
+    { at: 2.5, speaker: 'agent', text: 'Your order was marked out for delivery today,' },
+    { at: 6.5, speaker: 'agent', text: 'but it looks like the delivery couldn’t be completed.' },
+    { at: 9, speaker: 'agent', text: 'Did you get a call from the delivery person?' },
+    { at: 16.7, speaker: 'agent', text: 'I’m sorry about that, Mohan. No worries.' },
+    { at: 19.5, speaker: 'agent', text: 'Will you be available tomorrow to receive the parcel?' },
+    { at: 23.4, speaker: 'buyer', text: 'Yes, I’ll be available. Please send it.' },
+    { at: 29.9, speaker: 'agent', text: 'Perfect. I’ll go ahead and reschedule the delivery for tomorrow.' },
+    { at: 34, speaker: 'agent', text: 'Thank you Mohan. Your delivery has been rescheduled.' },
+    { at: 37.4, speaker: 'agent', text: 'When the delivery person arrives,' },
+    { at: 39.5, speaker: 'agent', text: 'please pay ₹778 in cash to receive the parcel.' },
+    { at: 44.1, speaker: 'agent', text: 'Have a wonderful day. Goodbye.' },
+  ],
 };
