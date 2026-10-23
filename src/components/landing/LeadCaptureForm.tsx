@@ -34,6 +34,9 @@ interface LeadFormData {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Shown on the trial form to stores below 500 orders a month.
+const TRIAL_LOW_VOLUME_MESSAGE =
+  "The 14-day free trial is for stores doing 500+ orders a month. We can still help you reduce RTO with our WhatsApp service — our team will call you soon.";
 
 function validateField(
   field: keyof LeadFormData,
@@ -193,7 +196,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
   return (
     <div className="lead-form-card">
       <AnimatePresence mode="wait" initial={false}>
-        {onboardingRequested ? <div className="lead-form-success" role="status"><p className="lead-form-success-title">Your onboarding request is received.</p><p>{getDisqualificationMessage(form)}</p></div> : isUnsupportedPlatform ? (
+        {onboardingRequested ? <div className="lead-form-success" role="status"><p className="lead-form-success-title">Your onboarding request is received.</p><p>{isTrial ? TRIAL_LOW_VOLUME_MESSAGE : getDisqualificationMessage(form)}</p></div> : isUnsupportedPlatform ? (
           <motion.div
             key="unsupported-platform"
             className="lead-form-success"
