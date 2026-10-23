@@ -222,6 +222,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
       trackEvent("demo_form_submitted", {
         monthly_orders: form.monthlyOrders,
         store_platform: form.storePlatform,
+        qualifies,
         event_id: metaEventId,
       });
       clearLeadPrefill();

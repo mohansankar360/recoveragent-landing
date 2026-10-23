@@ -160,7 +160,15 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
       const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Could not save your details. Please try again.');
-      if (!qualifiesForDemoCalendar(payload)) { setOnboardingRequested(true); setIsSubmitting(false); return; }
+      if (!qualifiesForDemoCalendar(payload)) {
+        trackEvent("lead_form_submitted", {
+          monthly_orders: form.monthlyOrders,
+          store_platform: form.storePlatform,
+          qualifies: false,
+          event_id: metaEventId,
+        });
+        setOnboardingRequested(true); setIsSubmitting(false); return;
+      }
       saveDemoBookingSession(payload);
       setCalendarPrefill(payload);
     } catch (error) {
@@ -172,6 +180,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
     trackEvent("lead_form_submitted", {
       monthly_orders: form.monthlyOrders,
       store_platform: form.storePlatform,
+      qualifies: true,
       event_id: metaEventId,
     });
 
