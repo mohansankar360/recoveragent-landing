@@ -82,8 +82,8 @@ const TRAITS = [
 
 const STEPS = [
   { icon: IdentificationCard, title: 'Share your details', detail: 'Takes under 30 seconds.' },
-  { icon: CalendarCheck, title: 'Pick a demo time', detail: 'The calendar opens right after the form.' },
-  { icon: Phone, title: 'Hear it on your orders', detail: 'We show the AI agent calling for your store, in your buyers’ language.' },
+  { icon: CalendarCheck, title: 'Pick a setup call', detail: 'The calendar opens right after the form. We connect your store on the call.' },
+  { icon: Phone, title: 'AI calls your real orders', detail: 'For 14 days the agent calls your buyers and you see every result in the dashboard.' },
 ] as const;
 
 const FAQS = [
@@ -93,20 +93,24 @@ const FAQS = [
   },
   {
     q: 'Which stores is this for?',
-    a: 'Shopify and WooCommerce brands in India. Live demos are for stores doing 500+ orders a month; smaller stores can request an onboarding call.',
+    a: 'Shopify and WooCommerce brands in India. Stores doing 500+ orders a month go straight to a trial setup call; smaller stores can request an onboarding call.',
   },
   {
     q: 'What if the buyer doesn’t pick up?',
     a: 'The call is marked unreachable. You set retry timing and WhatsApp follow-up, and your team decides what happens to the order.',
   },
   {
-    q: 'Is the demo free?',
-    a: 'Yes. It is a free 30-minute call — no credit card and no commitment.',
+    q: 'What do I get in the 14-day free trial?',
+    a: 'AI calls on your real COD orders, WhatsApp follow-up and the full dashboard, set up with your team on a short call. No setup fee.',
+  },
+  {
+    q: 'What happens after 14 days?',
+    a: 'We review your trial results with you. If the numbers work, you choose a plan and continue. There is no annual lock-in.',
   },
 ] as const;
 
 function scrollToForm(source: string) {
-  trackEvent('cta_clicked', { location: source, page: 'leads' });
+  trackEvent('cta_clicked', { cta: 'start_trial', source, page: 'leads' });
   document.getElementById('book')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -242,7 +246,7 @@ export function LeadsLanding() {
         <div className={styles.wrap}>
           <Image src="/recover-agent-logo-transparent.png" alt="Recover Agent" width={152} height={38} priority className={styles.logo} />
           <button type="button" className={styles.headerCta} onClick={() => scrollToForm('header')}>
-            Book free demo
+            Start free trial
           </button>
         </div>
       </header>
@@ -262,13 +266,13 @@ export function LeadsLanding() {
           <ul className={styles.ticks}>
             <li><CheckCircle size={18} weight="fill" aria-hidden /> Works with Shopify &amp; WooCommerce</li>
             <li><CheckCircle size={18} weight="fill" aria-hidden /> Calls 24×7, follows up on WhatsApp</li>
-            <li><CheckCircle size={18} weight="fill" aria-hidden /> Free 30-minute demo on your own orders</li>
+            <li><CheckCircle size={18} weight="fill" aria-hidden /> 14-day free trial on your real orders</li>
           </ul>
           <CallPlayer />
         </div>
 
         <div id="book" className={styles.formCol}>
-          <LeadCaptureForm />
+          <LeadCaptureForm mode="trial" />
         </div>
       </section>
 
@@ -291,13 +295,13 @@ export function LeadsLanding() {
       <section className={styles.wrap}>
         <div className={styles.split}>
           <div>
-            <h2 className={styles.h2}>Sounds like your team. Works like software.</h2>
+            <h2 className={styles.h2}>Sounds like your team. Works for your team.</h2>
             <p className={styles.lead}>
               Your buyers get a polite, natural call in their own language. Your team gets a clean result on every
               order — confirmed, cancelled, rescheduled or needs review.
             </p>
             <button type="button" className={styles.primary} onClick={() => scrollToForm('traits')}>
-              Book my free demo <ArrowRight size={18} weight="bold" aria-hidden />
+              Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
             </button>
           </div>
           <ul className={styles.traits}>
@@ -313,7 +317,7 @@ export function LeadsLanding() {
 
       <section className={styles.band}>
         <div className={styles.wrap}>
-          <h2 className={styles.h2}>How the demo works</h2>
+          <h2 className={styles.h2}>How the free trial works</h2>
           <ol className={styles.steps}>
             {STEPS.map(({ icon: Icon, title, detail }, index) => (
               <li key={title}>
@@ -342,10 +346,10 @@ export function LeadsLanding() {
       <section className={styles.final}>
         <div className={styles.wrap}>
           <ChatCircleText size={32} weight="duotone" aria-hidden />
-          <h2>Hear the AI agent call for your store.</h2>
-          <p>Free 30-minute demo. No credit card. Pick a time that suits you.</p>
+          <h2>Let the AI agent call your buyers for 14 days, free.</h2>
+          <p>No setup fee. See the results on your own orders.</p>
           <button type="button" className={styles.primary} onClick={() => scrollToForm('final')}>
-            Book my free demo <ArrowRight size={18} weight="bold" aria-hidden />
+            Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
           </button>
         </div>
       </section>
@@ -356,7 +360,7 @@ export function LeadsLanding() {
 
       <div className={styles.sticky} data-show={showSticky || undefined}>
         <button type="button" className={styles.primary} onClick={() => { trackEvent('sticky_cta_clicked', { page: 'leads' }); scrollToForm('sticky'); }}>
-          Book free demo <ArrowRight size={18} weight="bold" aria-hidden />
+          Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
         </button>
       </div>
     </main>

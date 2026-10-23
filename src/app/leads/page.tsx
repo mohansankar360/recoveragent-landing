@@ -7,7 +7,7 @@ import { siteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: `AI Voice Agent for COD, Carts & NDR — ${SITE_NAME}`,
   description:
-    "An AI voice agent that calls your buyers to confirm COD orders, recover abandoned checkouts and reschedule failed deliveries. Hear a real call and book a free demo.",
+    "An AI voice agent that calls your buyers to confirm COD orders, recover abandoned checkouts and reschedule failed deliveries. Hear a real call and start a 14-day free trial.",
   alternates: {
     canonical: `${siteUrl}/leads`,
   },

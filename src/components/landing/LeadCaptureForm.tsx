@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ChartBar,
   EnvelopeSimple,
+  Globe,
   Phone,
   Storefront,
   User,
@@ -18,7 +19,7 @@ import {
   UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { saveDemoBookingSession } from '@/lib/demo-booking-session';
-import { getDisqualificationMessage, qualifiesForDemoCalendar } from '@/lib/demo-booking';
+import { getDisqualificationMessage, getStoreUrlValidationError, normalizeStoreUrl, qualifiesForDemoCalendar } from '@/lib/demo-booking';
 import { generateMetaEventId } from "@/lib/meta-pixel";
 import { appleFade, appleSpring } from "@/lib/motion";
 
@@ -28,6 +29,7 @@ interface LeadFormData {
   email: string;
   monthlyOrders: string;
   storePlatform: string;
+  storeUrl: string;
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +37,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateField(
   field: keyof LeadFormData,
-  value: string
+  value: string,
+  collectStoreUrl: boolean
 ): string | undefined {
   const trimmed = value.trim();
 
@@ -59,27 +62,31 @@ function validateField(
     case "storePlatform":
       if (!trimmed) return "Select your store platform";
       return undefined;
+    case "storeUrl":
+      return collectStoreUrl ? getStoreUrlValidationError(value) : undefined;
     default:
       return undefined;
   }
 }
 
-function validateAll(form: LeadFormData): Partial<LeadFormData> {
+function validateAll(form: LeadFormData, collectStoreUrl: boolean): Partial<LeadFormData> {
   const next: Partial<LeadFormData> = {};
   (Object.keys(form) as (keyof LeadFormData)[]).forEach((field) => {
-    const error = validateField(field, form[field]);
+    const error = validateField(field, form[field], collectStoreUrl);
     if (error) next[field] = error;
   });
   return next;
 }
 
-export function LeadCaptureForm() {
+export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) {
+  const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>({
     name: "",
     whatsapp: "",
     email: "",
     monthlyOrders: "",
     storePlatform: "",
+    storeUrl: "",
   });
   const [errors, setErrors] = useState<Partial<LeadFormData>>({});
   const [touched, setTouched] = useState<
@@ -101,14 +108,14 @@ export function LeadCaptureForm() {
     setForm((prev) => ({ ...prev, [field]: value }));
 
     if (errors[field] || touched[field]) {
-      const error = validateField(field, value);
+      const error = validateField(field, value, isTrial);
       setErrors((prev) => ({ ...prev, [field]: error }));
     }
   };
 
   const handleBlur = (field: keyof LeadFormData) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    const error = validateField(field, form[field]);
+    const error = validateField(field, form[field], isTrial);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
@@ -116,7 +123,7 @@ export function LeadCaptureForm() {
     e.preventDefault();
     if (isSubmitting || calendarPrefill) return;
 
-    const nextErrors = validateAll(form);
+    const nextErrors = validateAll(form, isTrial);
     setErrors(nextErrors);
     setTouched(
       (Object.keys(form) as (keyof LeadFormData)[]).reduce(
@@ -145,7 +152,7 @@ export function LeadCaptureForm() {
       whatsapp: form.whatsapp.replace(/\D/g, "").slice(0, 10),
       monthlyOrders: form.monthlyOrders,
       storePlatform: form.storePlatform,
-      storeUrl: 'To be shared on call',
+      storeUrl: isTrial ? normalizeStoreUrl(form.storeUrl) : 'To be shared on call',
       preferredLanguage: 'english-or-hindi',
     };
     setSubmitError(null);
@@ -202,11 +209,13 @@ export function LeadCaptureForm() {
             exit={{ opacity: 0 }}
             transition={appleFade}
           >
-            <div className="lead-form-badge">Free demo</div>
+            <div className="lead-form-badge">{isTrial ? "No setup fee" : "Free demo"}</div>
             <div className="lead-form-head">
-              <h2>See Recover Agent in Action</h2>
+              <h2>{isTrial ? "Start your 14-day free trial" : "See Recover Agent in Action"}</h2>
               <p>
-                Share your details, then choose a time for your 30-minute demo.
+                {isTrial
+                  ? "Share your details, then pick a time for your setup call."
+                  : "Share your details, then choose a time for your 30-minute demo."}
               </p>
             </div>
 
@@ -240,6 +249,20 @@ export function LeadCaptureForm() {
                   label: option.label,
                 }))}
               />
+              {isTrial && (
+                <IconField
+                  id="lead-store-url"
+                  label="Store website"
+                  icon={Globe}
+                  value={form.storeUrl}
+                  error={errors.storeUrl}
+                  onChange={(v) => handleChange("storeUrl", v)}
+                  onBlur={() => handleBlur("storeUrl")}
+                  placeholder="yourstore.com"
+                  autoComplete="url"
+                  inputMode="url"
+                />
+              )}
               <IconField
                 id="lead-name"
                 label="Full name"
@@ -280,13 +303,13 @@ export function LeadCaptureForm() {
                 className="btn btn-green lead-form-submit"
                 disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}
               >
-                {isSubmitting ? "Saving…" : form.monthlyOrders === '0-500' ? 'Request an onboarding call' : 'Continue to choose a time →'}
+                {isSubmitting ? "Saving…" : form.monthlyOrders === '0-500' ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue to choose a time →'}
               </button>
 
               <p className="lead-form-privacy">
                 <span aria-hidden>✓</span>
                 Your information is safe with us and will only be used to
-                schedule your demo.
+                {isTrial ? " set up your trial." : " schedule your demo."}
               </p>
             </form>
           </motion.div>
