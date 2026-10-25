@@ -5,6 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
 import { generateMetaEventId } from "@/lib/meta-pixel";
+import { identifyClarityLead } from "@/lib/clarity";
+import { getEngagementSnapshot } from "@/lib/visitor-engagement";
 import {
   getDisqualificationMessage,
   MONTHLY_ORDERS_OPTIONS,
@@ -207,17 +209,23 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
       const response = await fetch("/api/demo-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, metaEventId }),
+        body: JSON.stringify({
+          ...payload,
+          metaEventId,
+          engagement: getEngagementSnapshot(),
+        }),
       });
 
       const result = (await response.json()) as {
         ok?: boolean;
         error?: string;
+        leadId?: string;
       };
 
       if (!response.ok || !result.ok) {
         throw new Error(result.error ?? "Could not save your details");
       }
+      identifyClarityLead(result.leadId ?? metaEventId, form.name.trim());
 
       trackEvent("demo_form_submitted", {
         monthly_orders: form.monthlyOrders,

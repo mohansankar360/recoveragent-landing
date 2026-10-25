@@ -9,6 +9,7 @@ import {
   storePlatformLabel,
   type DemoFormData,
 } from "./demo-booking";
+import type { LeadEngagement } from "./visitor-engagement";
 
 export interface DemoLeadPayload {
   source: "recover-agent-landing";
@@ -25,9 +26,13 @@ export interface DemoLeadPayload {
   qualifiesForCalendar: boolean;
   calBookingUrl: string;
   submittedAt: string;
+  engagement?: LeadEngagement;
 }
 
-export function buildDemoLeadPayload(data: DemoFormData): DemoLeadPayload {
+export function buildDemoLeadPayload(
+  data: DemoFormData,
+  engagement?: LeadEngagement
+): DemoLeadPayload {
   return {
     source: "recover-agent-landing",
     name: data.name.trim(),
@@ -45,6 +50,7 @@ export function buildDemoLeadPayload(data: DemoFormData): DemoLeadPayload {
       (data.storePlatform === "shopify" || data.storePlatform === "woocommerce"),
     calBookingUrl: buildDemoBookingUrl(data),
     submittedAt: new Date().toISOString(),
+    ...(engagement ? { engagement } : {}),
   };
 }
 
@@ -70,4 +76,40 @@ export function isValidDemoFormData(data: unknown): data is DemoFormData {
     typeof form.preferredLanguage === "string" &&
     form.preferredLanguage.trim().length > 0
   );
+}
+
+function cleanText(value: unknown, max = 300): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const text = value.trim().slice(0, max);
+  return text || undefined;
+}
+
+function cleanNumber(value: unknown, max: number): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(max, Math.max(0, Math.round(value)))
+    : 0;
+}
+
+/** Engagement comes from the browser, so only keep known, bounded fields. */
+export function parseLeadEngagement(value: unknown): LeadEngagement | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const visitorId = cleanText(raw.visitorId, 64);
+  if (!visitorId) return undefined;
+  return {
+    visitorId,
+    visitCount: cleanNumber(raw.visitCount, 10_000),
+    firstSeenAt: cleanText(raw.firstSeenAt, 40) ?? "",
+    clarityUserId: cleanText(raw.clarityUserId, 64),
+    claritySessionId: cleanText(raw.claritySessionId, 64),
+    landingPage: cleanText(raw.landingPage) ?? "",
+    referrer: cleanText(raw.referrer),
+    utmSource: cleanText(raw.utmSource, 100),
+    utmMedium: cleanText(raw.utmMedium, 100),
+    utmCampaign: cleanText(raw.utmCampaign, 150),
+    pagePath: cleanText(raw.pagePath) ?? "",
+    scrollDepthPercent: cleanNumber(raw.scrollDepthPercent, 100),
+    activeTimeSeconds: cleanNumber(raw.activeTimeSeconds, 86_400),
+    pagesViewed: cleanNumber(raw.pagesViewed, 1_000),
+  };
 }

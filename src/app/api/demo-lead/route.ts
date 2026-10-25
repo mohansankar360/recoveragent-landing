@@ -1,4 +1,4 @@
-import { buildDemoLeadPayload, isValidDemoFormData } from "@/lib/demo-lead";
+import { buildDemoLeadPayload, isValidDemoFormData, parseLeadEngagement } from "@/lib/demo-lead";
 import { sendMetaServerEvent } from "@/lib/meta-conversions-api";
 import { buildDashboardLeadRequest, isDashboardLeadEndpoint, readDashboardLeadReceipt } from "@/lib/demo-crm";
 
@@ -23,7 +23,10 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, skipped: true });
   }
 
-  const payload = buildDemoLeadPayload(body);
+  const payload = buildDemoLeadPayload(
+    body,
+    parseLeadEngagement((body as { engagement?: unknown }).engagement)
+  );
   const webhookUrl = process.env.CRM_WEBHOOK_URL;
 
   if (!webhookUrl) {
