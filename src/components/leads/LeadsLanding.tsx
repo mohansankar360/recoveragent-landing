@@ -290,7 +290,7 @@ export function LeadsLanding() {
       <section className={`${styles.wrap} ${styles.hero}`}>
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>
-            <Phone size={14} weight="fill" aria-hidden /> AI voice agent for Indian D2C brands
+            <Phone size={14} weight="fill" aria-hidden /> For Indian D2C brands selling on COD
           </p>
           <h1>
             An AI voice agent that <em>calls your buyers</em> before you lose the order.
