@@ -21,10 +21,13 @@ import {
 } from '@phosphor-icons/react';
 import { LeadCaptureForm } from '@/components/landing/LeadCaptureForm';
 import { CALL_CAPTIONS, CALL_CAPTION_NOTES } from '@/lib/call-captions';
+import { CASE_STUDY, COST_PER_RTO } from '@/lib/case-study';
+import { PRICING_TIERS, formatInr } from '@/lib/calculator';
+import { PLAN_FEATURES, PLAN_FEATURE_ROWS } from '@/lib/pricing-plans';
 import { trackEvent } from '@/lib/analytics';
 import styles from './LeadsLanding.module.css';
 
-type CallKey = 'cod' | 'checkout' | 'ndr';
+type CallKey = 'cod' | 'checkout' | 'ndr' | 'regional';
 
 const CALLS: Record<CallKey, { tab: string; title: string; audio: string; language: string; outcome: string }> = {
   cod: {
@@ -48,9 +51,29 @@ const CALLS: Record<CallKey, { tab: string; title: string; audio: string; langua
     language: 'English',
     outcome: 'Delivery rescheduled for the next day',
   },
+  // Tab appears only once this recording exists in public/audio; add its captions in call-captions.ts.
+  regional: {
+    tab: 'Tamil',
+    title: 'Confirming a COD order in Tamil',
+    audio: '/audio/COD_tamil.mp3',
+    language: 'Tamil',
+    outcome: 'Order and address confirmed — ready to ship',
+  },
 };
 
 const CALL_KEYS = Object.keys(CALLS) as CallKey[];
+const BASE_CALL_KEYS = CALL_KEYS.filter((key) => key !== 'regional');
+
+// Same live dashboard data as the homepage case study.
+const PROOF = [
+  { value: CASE_STUDY.orders.toLocaleString('en-IN'), label: 'COD orders called in 30 days' },
+  { value: CASE_STUDY.cancelled.toLocaleString('en-IN'), label: 'Unwanted orders stopped before shipping' },
+  { value: formatInr(CASE_STUDY.cancelled * COST_PER_RTO), label: 'RTO cost avoided in a month' },
+  { value: '32% → 17%', label: 'Average RTO across brands on Recover Agent' },
+] as const;
+
+const STARTER = PRICING_TIERS[0];
+const BREAK_EVEN_RTOS = Math.ceil(STARTER.base / COST_PER_RTO);
 
 const JOBS = [
   {
@@ -105,7 +128,7 @@ const FAQS = [
   },
   {
     q: 'What happens after 14 days?',
-    a: 'We review your trial results with you. If the numbers work, you choose a plan and continue. There is no annual lock-in.',
+    a: `We review your trial results with you. If the numbers work, you choose a plan — from ${formatInr(STARTER.base)}/month — and continue. There is no annual lock-in.`,
   },
 ] as const;
 
@@ -123,10 +146,18 @@ function CallPlayer() {
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState('');
+  const [keys, setKeys] = useState<CallKey[]>(BASE_CALL_KEYS);
   const call = CALLS[active];
   const captions = CALL_CAPTIONS[active];
   const captionIndex = captions.reduce((found, line, index) => (line.at <= time ? index : found), 0);
   const caption = captions[captionIndex];
+
+  useEffect(() => {
+    // Show the regional-language tab only when its recording has been added.
+    fetch(CALLS.regional.audio, { method: 'HEAD' })
+      .then((res) => { if (res.ok) setKeys(CALL_KEYS); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setPlaying(false); setTime(0); setError('');
@@ -161,7 +192,7 @@ function CallPlayer() {
       </div>
 
       <div className={styles.tabs} role="tablist" aria-label="Sample calls">
-        {CALL_KEYS.map((key) => (
+        {keys.map((key) => (
           <button
             key={key}
             type="button"
@@ -201,11 +232,13 @@ function CallPlayer() {
       </div>
 
       <div className={styles.caption} aria-live="polite">
-        <span className={styles.speaker} data-agent={caption.speaker === 'agent' || undefined}>
-          {caption.speaker === 'agent' ? 'AI agent' : 'Buyer'}
-        </span>
-        <p>{time > 0 || playing ? caption.text : 'Press play to hear the call with live captions.'}</p>
-        <small>{CALL_CAPTION_NOTES[active] === 'From Hindi' ? 'Captions translated from Hindi' : 'Transcript'}</small>
+        {caption && (
+          <span className={styles.speaker} data-agent={caption.speaker === 'agent' || undefined}>
+            {caption.speaker === 'agent' ? 'AI agent' : 'Buyer'}
+          </span>
+        )}
+        <p>{caption && (time > 0 || playing) ? caption.text : 'Press play to hear the call with live captions.'}</p>
+        <small>{CALL_CAPTION_NOTES[active].startsWith('From ') ? `Captions translated ${CALL_CAPTION_NOTES[active].toLowerCase()}` : 'Transcript'}</small>
       </div>
 
       <p className={styles.outcome}>
@@ -276,6 +309,22 @@ export function LeadsLanding() {
         </div>
       </section>
 
+      <section className={styles.proof} aria-labelledby="proof-title">
+        <div className={styles.wrap}>
+          <p id="proof-title" className={styles.proofTitle}>
+            Live results from a men’s apparel D2C brand, last 30 days
+          </p>
+          <dl className={styles.proofStats}>
+            {PROOF.map(({ value, label }) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
       <section className={styles.band}>
         <div className={styles.wrap}>
           <h2 className={styles.h2}>One AI agent, three calls that save you money</h2>
@@ -329,6 +378,38 @@ export function LeadsLanding() {
             ))}
           </ol>
         </div>
+      </section>
+
+      <section className={styles.wrap} id="pricing">
+        <h2 className={styles.h2}>Simple pricing after your free trial</h2>
+        <p className={styles.lead}>Monthly plans priced per order. No setup fee and no annual lock-in.</p>
+        <div className={styles.plans}>
+          {PRICING_TIERS.map((tier) => (
+            <article key={tier.id} className={styles.plan} data-recommended={tier.recommended || undefined}>
+              <div className={styles.planHead}>
+                <h3>{tier.name}</h3>
+                {tier.recommended && <span>Recommended</span>}
+              </div>
+              <p className={styles.planPrice}>{formatInr(tier.base)}<small>/month</small></p>
+              <p className={styles.planMeta}>
+                {tier.includedCalls.toLocaleString('en-IN')} orders included, then ₹{tier.overagePerOrder.toFixed(Number.isInteger(tier.overagePerOrder) ? 0 : 2)} per order
+              </p>
+              <ul>
+                {PLAN_FEATURE_ROWS.filter(({ key }) => PLAN_FEATURES[tier.id][key]).map(({ label }) => (
+                  <li key={label}><CheckCircle size={16} weight="fill" aria-hidden /> {label}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+        <p className={styles.planNote}>
+          <strong>Starter pays for itself if it stops {BREAK_EVEN_RTOS} returned orders a month</strong>{' '}
+          (about ₹{COST_PER_RTO} lost per RTO in shipping, packaging and ad spend). Taxes and WhatsApp messaging charges
+          are confirmed on your setup call.
+        </p>
+        <button type="button" className={styles.primary} onClick={() => scrollToForm('pricing')}>
+          Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
+        </button>
       </section>
 
       <section className={styles.wrap}>

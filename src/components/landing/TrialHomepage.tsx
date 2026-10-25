@@ -52,6 +52,7 @@ import { CUSTOMER_LOGOS, CUSTOMER_QUOTES } from '@/lib/customer-proof';
 import { CALL_CAPTION_NOTES, CALL_CAPTIONS } from '@/lib/call-captions';
 import { trackEvent } from '@/lib/analytics';
 import styles from './TrialHomepage.module.css';
+import { CASE_STUDY, COST_PER_RTO, RTO_COST } from '@/lib/case-study';
 
 export type ScenarioKey = 'cod' | 'checkout' | 'ndr';
 
@@ -115,8 +116,6 @@ const partnerLogos: Array<{ name: string; src?: string; width: number; height?: 
   { name: 'Delhivery', src: '/logos/delhivery.webp', width: 107, height: 18 },
 ];
 
-const RTO_COST = { forward: 60, return: 60, packaging: 50, acquisition: 180 };
-const COST_PER_RTO = RTO_COST.forward + RTO_COST.return + RTO_COST.packaging + RTO_COST.acquisition;
 
 // Any section can open the trial sign-up dialog owned by TrialSiteFrame.
 const TrialContext = createContext<() => void>(() => {});
@@ -498,9 +497,7 @@ export function ProofBand() {
 
 /* ───────────────────────── Case study (anonymised live data) ───────────────────────── */
 
-// 30 days of live dashboard data from one customer, shown without the brand name.
-// Cancelled is set to 16% of orders; escalations are the remainder so the rows add up to the total.
-const caseStudy = { orders: 785, verified: 581, cancelled: 126, duplicates: 16, escalated: 62, abandoned: 1000, ndr: 338 };
+const caseStudy = CASE_STUDY;
 
 export function CaseStudySection() {
   const onTrial = useTrial();
@@ -918,8 +915,8 @@ export function LossSection() {
   };
   const estimate = calculateRecoveryEstimate({ cod, rtoPct: rto, cart: 0, aov, forwardCost: RTO_COST.forward, returnCost: RTO_COST.return, packagingCost: RTO_COST.packaging, acquisitionCost: RTO_COST.acquisition, extraMonthlyCost: 0 });
   const monthlyLoss = estimate.rtoCost;
-  // Savings use only the avoidable shipping, return and acquisition cost per prevented RTO, minus the plan fee.
-  const savingsRange = estimate.outcomes.map((outcome) => Math.max(0, outcome.preventedRtos * COST_PER_RTO - estimate.plan.cost));
+  // Savings use only the shipping and packaging avoided per prevented RTO, minus the plan fee. Ad spend is already paid.
+  const savingsRange = estimate.outcomes.map((outcome) => Math.max(0, outcome.rtoSavings - estimate.plan.cost));
   const parcels = 24;
   const redCount = Math.round((rto / 100) * parcels);
   const savedCount = withAgent ? Math.round(redCount * 0.3) : 0;
@@ -934,12 +931,16 @@ export function LossSection() {
         <Slider label="COD orders per month" value={cod} min={200} max={20000} step={100} onChange={touch(setCod)} format={(value) => value.toLocaleString('en-IN')} />
         <Slider label="RTO rate on COD" value={rto} min={5} max={50} step={1} onChange={touch(setRto)} format={(value) => `${value}%`} />
         <Slider label="Average order value" value={aov} min={300} max={5000} step={50} onChange={touch(setAov)} format={(value) => formatInr(value)} />
-        <p className={styles.lossAssumption}>Assumes ₹{COST_PER_RTO} lost per RTO (shipping both ways, packaging and ad spend) and a 20–40% reduction in RTO. Every store is different. The trial measures yours.</p>
+        <p className={styles.lossAssumption}>Assumes ₹{COST_PER_RTO} lost per RTO (₹{estimate.costPerRto} shipping both ways and packaging, ₹{RTO_COST.acquisition} ad spend) and a 20–40% reduction in RTO. Savings count only shipping and packaging, because ad spend is already paid. Every store is different. The trial measures yours.</p>
       </div>
       <div className={styles.lossResult}>
         <p className={styles.lossLabel}>RTO is costing you</p>
         <p className={styles.lossBig}>{formatInr(monthlyLoss)}<small>/month</small></p>
         <p className={styles.lossYear}>{formatInr(monthlyLoss * 12)} a year · {Math.round(estimate.rtoOrders).toLocaleString('en-IN')} parcels coming back every month</p>
+        {estimate.adCostPerDeliveredOrder !== undefined && estimate.reportedRoas !== undefined && estimate.realRoas !== undefined && <dl className={styles.adReality}>
+          <div><dt>Ad cost per delivered order</dt><dd>{formatInr(estimate.adCostPerDeliveredOrder)}<small>not {formatInr(RTO_COST.acquisition)}</small></dd></div>
+          <div><dt>Real ROAS on COD</dt><dd>{estimate.realRoas.toFixed(1)}x<small>Meta shows {estimate.reportedRoas.toFixed(1)}x</small></dd></div>
+        </dl>}
         <div className={styles.parcelGrid} aria-hidden="true">
           {Array.from({ length: parcels }, (_, index) => {
             const isRed = index < redCount;
