@@ -7,9 +7,9 @@ import {
   CalendarCheck,
   ChatCircleText,
   CheckCircle,
-  ClockCountdown,
   CurrencyInr,
   IdentificationCard,
+  ListChecks,
   Package,
   Pause,
   Phone,
@@ -101,7 +101,7 @@ const JOBS = [
 
 const TRAITS = [
   { icon: Translate, title: 'Speaks your buyer’s language', detail: 'Hindi, English and other Indian languages, including mixed Hinglish.' },
-  { icon: ClockCountdown, title: 'Calls within minutes', detail: 'Starts calling as soon as an order, cart or NDR event comes in.' },
+  { icon: ListChecks, title: 'No order slips through', detail: 'Every COD order, abandoned cart and NDR case is called. Unreachable buyers get retries and a WhatsApp follow-up.' },
   { icon: WhatsappLogo, title: 'Follows up on WhatsApp', detail: 'Sends product links, payment links and confirmations after the call.' },
   { icon: ShieldCheck, title: 'Your team stays in control', detail: 'Every call is recorded, tagged and visible. You decide what ships.' },
 ] as const;
@@ -301,8 +301,8 @@ export function LeadsLanding() {
           </p>
           <ul className={styles.ticks}>
             <li><CheckCircle size={18} weight="fill" aria-hidden /> Works with Shopify &amp; WooCommerce</li>
-            <li><CheckCircle size={18} weight="fill" aria-hidden /> Calls 24×7, follows up on WhatsApp</li>
-            <li><CheckCircle size={18} weight="fill" aria-hidden /> 14-day free trial on your real orders</li>
+            <li><CheckCircle size={18} weight="fill" aria-hidden /> Calls every COD order before it ships</li>
+            <li><CheckCircle size={18} weight="fill" aria-hidden /> Talks in Hindi, English, Tamil, Telugu, Malayalam and Kannada</li>
           </ul>
           <CallPlayer />
         </div>
