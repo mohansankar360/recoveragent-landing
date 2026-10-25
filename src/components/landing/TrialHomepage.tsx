@@ -919,7 +919,17 @@ export function LossSection() {
     forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition),
   }));
   const [withAgent, setWithAgent] = useState(false);
+  const savingsRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
+  // Bring the savings box into view when the toggle is switched on, so it isn't hidden below the fold on mobile.
+  useEffect(() => {
+    if (!withAgent) return;
+    const frame = requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      savingsRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [withAgent]);
   const markStarted = () => {
     if (!started.current) { started.current = true; trackEvent('calculator_started', { source: 'live_sliders' }); }
   };
@@ -977,7 +987,7 @@ export function LossSection() {
           <span className={styles.toggleKnob} />{withAgent ? 'With RecoverAgent' : 'Show me with RecoverAgent'}
         </button>
         <AnimatePresence>
-          {withAgent && <motion.div className={styles.savings} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+          {withAgent && <motion.div ref={savingsRef} className={styles.savings} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <dl className={styles.savingsRows}>
               <div><dt>RTO shipping & packaging saved</dt><dd>{formatInr(low.rtoSavings)} – {formatInr(high.rtoSavings)}</dd></div>
               {cart > 0 && <div><dt>Abandoned carts recovered ({Math.round(low.recoveredCheckouts).toLocaleString('en-IN')}–{Math.round(high.recoveredCheckouts).toLocaleString('en-IN')} orders)</dt><dd>{formatInr(low.recoveredRevenue)} – {formatInr(high.recoveredRevenue)} in sales</dd></div>}
