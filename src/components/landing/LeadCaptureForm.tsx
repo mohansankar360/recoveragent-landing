@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useState } from "react";
 import { BookingPicker } from "@/components/calendar/BookingPicker";
 import type { DemoFormData } from "@/lib/demo-booking";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -21,6 +21,8 @@ import {
 import { saveDemoBookingSession } from '@/lib/demo-booking-session';
 import { getDisqualificationMessage, getStoreUrlValidationError, normalizeStoreUrl, qualifiesForDemoCalendar } from '@/lib/demo-booking';
 import { generateMetaEventId } from "@/lib/meta-pixel";
+import { identifyClarityLead } from "@/lib/clarity";
+import { getEngagementSnapshot } from "@/lib/visitor-engagement";
 import { appleFade, appleSpring } from "@/lib/motion";
 
 interface LeadFormData {
@@ -160,9 +162,10 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
     };
     setSubmitError(null);
     try {
-      const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId }) });
+      const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId, engagement: getEngagementSnapshot() }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Could not save your details. Please try again.');
+      identifyClarityLead(result.leadId ?? metaEventId, payload.name);
       if (!qualifiesForDemoCalendar(payload)) {
         trackEvent("lead_form_submitted", {
           monthly_orders: form.monthlyOrders,
@@ -193,12 +196,38 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
 
   };
 
+  // The success message is much shorter than the form, so the page shrinks
+  // when it swaps in. Bring it into view so the user doesn't land below it.
+  const revealOutcome = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    node.focus({ preventScroll: true });
+    node.scrollIntoView({ block: "center", behavior: "instant" });
+  }, []);
+
   return (
     <div className="lead-form-card">
       <AnimatePresence mode="wait" initial={false}>
-        {onboardingRequested ? <div className="lead-form-success" role="status"><p className="lead-form-success-title">Your onboarding request is received.</p><p>{isTrial ? TRIAL_LOW_VOLUME_MESSAGE : getDisqualificationMessage(form)}</p></div> : isUnsupportedPlatform ? (
+        {onboardingRequested ? (
+          <motion.div
+            key="onboarding-requested"
+            ref={revealOutcome}
+            tabIndex={-1}
+            className="lead-form-success"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={appleFade}
+            role="status"
+            aria-live="polite"
+          >
+            <p className="lead-form-success-title">Your onboarding request is received.</p>
+            <p>{isTrial ? TRIAL_LOW_VOLUME_MESSAGE : getDisqualificationMessage(form)}</p>
+          </motion.div>
+        ) : isUnsupportedPlatform ? (
           <motion.div
             key="unsupported-platform"
+            ref={revealOutcome}
+            tabIndex={-1}
             className="lead-form-success"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

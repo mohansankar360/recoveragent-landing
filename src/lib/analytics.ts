@@ -1,5 +1,6 @@
 import { trackOpenAIBooking } from "./openai-pixel";
 import { trackMetaEvent, trackMetaPageView } from "./meta-pixel";
+import { trackClarityEvent } from "./clarity";
 
 export type AnalyticsEvent =
   | "hero_demo_click"
@@ -44,6 +45,7 @@ export function trackEvent(
     trackOpenAIBooking(typeof id === "string" ? id : undefined);
   }
   trackMetaEvent(event, properties);
+  trackClarityEvent(event);
 }
 
 export function trackPageView(path: string): void {

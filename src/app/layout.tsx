@@ -2,6 +2,7 @@ import { OpenAIPixelHead } from "@/components/analytics/OpenAIPixel";
 import { OpenAIPageView } from "@/components/analytics/OpenAIPageView";
 import { Archivo, Geist, Geist_Mono, JetBrains_Mono, Manrope } from "next/font/google";
 import { MetaPixelHead } from "@/components/analytics/MetaPixel";
+import { ClarityHead, VisitorEngagement } from "@/components/analytics/Clarity";
 import { MetaPageView } from "@/components/analytics/MetaPageView";
 import { faqStructuredData } from "@/lib/faq-data";
 import { rootMetadata } from "@/lib/site-metadata";
@@ -55,6 +56,7 @@ export default function RootLayout({
       <head>
         <OpenAIPixelHead />
         <MetaPixelHead />
+        <ClarityHead />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData()) }}
@@ -75,6 +77,7 @@ export default function RootLayout({
       <body>
         <OpenAIPageView />
         <MetaPageView />
+        <VisitorEngagement />
         {children}
       </body>
     </html>
