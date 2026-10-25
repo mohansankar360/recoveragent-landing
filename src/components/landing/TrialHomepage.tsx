@@ -49,7 +49,7 @@ import { faqs } from '@/lib/faq-data';
 import { PRICING_TIERS, calculateRecoveryEstimate, formatInr } from '@/lib/calculator';
 import { ALL_PLANS_WHATSAPP, PLAN_FEATURE_ROWS, PLAN_FEATURES } from '@/lib/pricing-plans';
 import { CUSTOMER_LOGOS, CUSTOMER_QUOTES } from '@/lib/customer-proof';
-import { CALL_CAPTIONS } from '@/lib/call-captions';
+import { CALL_CAPTION_NOTES, CALL_CAPTIONS } from '@/lib/call-captions';
 import { trackEvent } from '@/lib/analytics';
 import styles from './TrialHomepage.module.css';
 
@@ -70,37 +70,37 @@ const scenarios: Record<ScenarioKey, {
   cod: {
     label: 'COD confirmation',
     short: 'COD',
-    caller: 'Order #1042 · ₹1,499 COD',
-    context: 'Confirming the order and address before dispatch',
+    caller: 'COD order · Boxer shorts, pack of 3',
+    context: 'Confirming the order before dispatch',
     audio: '/audio/COD_hindi.mp4',
     language: 'Hindi',
-    outcome: 'Order confirmed · Ready to dispatch',
-    tag: 'COD-Verified',
-    whatsapp: 'Your order #1042 is confirmed ✅ It ships today.',
+    outcome: 'Buyer denied the order · Held before dispatch',
+    tag: 'RTO-Hold',
+    whatsapp: 'Here is the product from your order, so you can check it 👇',
     icon: Package,
   },
   checkout: {
     label: 'Abandoned checkout',
     short: 'Cart',
-    caller: 'Checkout · ₹3,450 left in cart',
-    context: 'Answering questions and resending the checkout link',
+    caller: 'Checkout · Baby birth frame · ₹799',
+    context: 'Answering questions and helping the buyer finish the order',
     audio: '/audio/abandoned_hindi.mp3',
     language: 'Hindi',
-    outcome: 'Checkout link sent on WhatsApp',
-    tag: 'Cart-Recovery',
-    whatsapp: 'Here is your link to complete the order 🛍️',
+    outcome: 'Order placed on the call · ₹899 COD',
+    tag: 'Cart-Recovered',
+    whatsapp: 'Your order is placed 🎉 Confirmation details inside.',
     icon: Storefront,
   },
   ndr: {
     label: 'Failed delivery',
     short: 'Delivery',
-    caller: 'Shipment #NDR-82 · Delivery failed',
+    caller: 'Shipment · Delivery attempt failed',
     context: 'Finding out what went wrong and rescheduling',
     audio: '/audio/NDR_english.mp4',
     language: 'English',
-    outcome: 'Reattempt requested',
+    outcome: 'Delivery rescheduled for tomorrow',
     tag: 'NDR-Reattempt',
-    whatsapp: 'Your delivery is rescheduled. We will keep you posted.',
+    whatsapp: 'Your delivery is rescheduled for tomorrow 🚚',
     icon: Truck,
   },
 };
@@ -334,7 +334,10 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
               <Waveform active={live} />
               <div className={styles.callProgress} aria-hidden="true"><i style={{ width: `${percent}%` }} /></div>
               <p className={styles.callTime}>{player.duration ? `${formatTime(player.progress)} / ${formatTime(player.duration)}` : item.context}</p>
-              {caption && <p className={styles.caption} aria-live="polite">{caption.text}</p>}
+              {caption && <p className={styles.caption} aria-live="polite">
+                <small>{caption.speaker === 'agent' ? 'AI agent' : 'Buyer'} · {CALL_CAPTION_NOTES[scenario]}</small>
+                <span>{caption.text}</span>
+              </p>}
               <AnimatePresence mode="wait">
                 {ended
                   ? <motion.div key="outcome" className={styles.callOutcome} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>

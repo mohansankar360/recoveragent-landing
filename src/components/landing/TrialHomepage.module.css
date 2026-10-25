@@ -172,7 +172,12 @@
 .tabShort { display: none; }
 .callAction { display: grid; justify-items: center; gap: 8px; }
 .callAction small { font-size: 12px; font-weight: 600; color: #c8d3ec; }
-.caption { min-height: 40px; margin-top: 6px !important; padding: 8px 10px; font-size: 13px; line-height: 1.4; color: #fff; background: rgba(0, 0, 0, 0.35); border-radius: 10px; }
+.caption { width: 100%; margin-top: 4px !important; padding: 8px 10px; font-size: 13px; line-height: 1.38; color: #fff; text-align: left; background: rgba(0, 0, 0, 0.38); border-radius: 10px; }
+.caption small { display: block; margin-bottom: 2px; overflow: hidden; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; text-overflow: ellipsis; color: var(--cyan); }
+.caption span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* While captions show, drop the order line so the controls still fit. */
+.phoneScreen:has(.caption) .callerMeta { display: none; }
+.phoneScreen:has(.caption) .callTime { min-height: 0; }
 .phoneHint { display: inline-flex; align-items: center; gap: 6px; }
 .phoneHint svg { color: var(--cyan); }
 .outcomeChips { display: none; flex-wrap: wrap; justify-content: center; gap: 6px; }
@@ -655,7 +660,11 @@
   .heroLead { margin-top: 18px !important; font-size: 17px; }
   .heroActions { display: grid; grid-template-columns: 1fr; margin-top: 26px; }
   .heroStage { min-height: 0; }
-  .phone { width: 250px; height: 468px; border-radius: 40px; padding: 10px; }
+  .phone { width: 260px; height: 488px; border-radius: 40px; padding: 10px; }
+  .phoneScreen:has(.caption) .callerAvatar { width: 54px; height: 54px; margin-top: 8px; }
+  .phoneScreen:has(.caption) .callerName { margin-top: 8px !important; font-size: 18px; }
+  .phoneScreen:has(.caption) .waveform { height: 30px; margin-top: 8px; }
+  .caption { font-size: 12.5px; }
   .phoneScreen { padding: 48px 18px 20px; border-radius: 31px; }
   .phoneNotch { top: 18px; width: 80px; height: 22px; margin-left: -40px; }
   .callerAvatar { width: 70px; height: 70px; margin-top: 14px; }
