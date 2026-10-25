@@ -148,6 +148,11 @@ export function calculateRecoveryEstimate(inputs: RecoveryEstimateInputs) {
   const rtoRange = (inputs.rtoPreventionRange ?? RECOVERY_RANGES.rto).map(value => Math.min(100, nonnegative(value))).sort((a, b) => a - b);
   const checkoutRange = (inputs.checkoutRecoveryRange ?? RECOVERY_RANGES.checkout).map(value => Math.min(100, nonnegative(value))).sort((a, b) => a - b);
   const totalCost = plan.cost + extraCost;
+  // Meta counts a COD purchase when it is placed, so returned orders still count toward reported ROAS.
+  const deliveredShare = 1 - rtoPct / 100;
+  const adCostPerDeliveredOrder = acquisitionCostPerOrder > 0 && deliveredShare > 0 ? acquisitionCostPerOrder / deliveredShare : undefined;
+  const reportedRoas = acquisitionCostPerOrder > 0 && aov > 0 ? aov / acquisitionCostPerOrder : undefined;
+  const realRoas = reportedRoas === undefined ? undefined : reportedRoas * deliveredShare;
   const breakEvenRtos = costPerRto > 0 ? Math.ceil(totalCost / costPerRto) : undefined;
   const breakEvenRtoReductionPct = rtoOrders > 0 && costPerRto > 0 ? totalCost / (rtoOrders * costPerRto) * 100 : undefined;
   const outcomes = rtoRange.map((reduction, index) => {
@@ -169,6 +174,7 @@ export function calculateRecoveryEstimate(inputs: RecoveryEstimateInputs) {
     rtoOperatingCost: rtoOrders * costPerRto,
     rtoCost: rtoOrders * costPerRto + rtoAcquisitionCost,
     rtoRevenueAtRisk: rtoOrders * aov, checkoutValue: cart * aov,
+    adCostPerDeliveredOrder, reportedRoas, realRoas,
     billedItems, plan, extraCost, totalCost, breakEvenRtos, breakEvenRtoReductionPct, outcomes,
   };
 }

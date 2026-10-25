@@ -7,24 +7,31 @@ import {
   CalendarCheck,
   ChatCircleText,
   CheckCircle,
-  ClockCountdown,
+  CurrencyInr,
   IdentificationCard,
+  ListChecks,
   Package,
   Pause,
   Phone,
+  PhoneCall,
   Play,
+  Prohibit,
   ShieldCheck,
   Storefront,
   Translate,
+  TrendDown,
   Truck,
   WhatsappLogo,
 } from '@phosphor-icons/react';
 import { LeadCaptureForm } from '@/components/landing/LeadCaptureForm';
 import { CALL_CAPTIONS, CALL_CAPTION_NOTES } from '@/lib/call-captions';
+import { CASE_STUDY, COST_PER_RTO } from '@/lib/case-study';
+import { PRICING_TIERS, formatInr } from '@/lib/calculator';
+import { PLAN_FEATURES, PLAN_FEATURE_ROWS } from '@/lib/pricing-plans';
 import { trackEvent } from '@/lib/analytics';
 import styles from './LeadsLanding.module.css';
 
-type CallKey = 'cod' | 'checkout' | 'ndr';
+type CallKey = 'cod' | 'checkout' | 'ndr' | 'regional';
 
 const CALLS: Record<CallKey, { tab: string; title: string; audio: string; language: string; outcome: string }> = {
   cod: {
@@ -48,9 +55,28 @@ const CALLS: Record<CallKey, { tab: string; title: string; audio: string; langua
     language: 'English',
     outcome: 'Delivery rescheduled for the next day',
   },
+  // Tab appears only once this recording exists in public/audio; add its captions in call-captions.ts.
+  regional: {
+    tab: 'Tamil',
+    title: 'Confirming a COD order in Tamil',
+    audio: '/audio/COD_tamil.mp3',
+    language: 'Tamil',
+    outcome: 'Order and address confirmed — ready to ship',
+  },
 };
 
 const CALL_KEYS = Object.keys(CALLS) as CallKey[];
+const BASE_CALL_KEYS = CALL_KEYS.filter((key) => key !== 'regional');
+
+// Same live dashboard data as the homepage case study.
+const PROOF = [
+  { icon: PhoneCall, value: CASE_STUDY.orders.toLocaleString('en-IN'), label: 'COD orders called in 30 days' },
+  { icon: Prohibit, value: CASE_STUDY.cancelled.toLocaleString('en-IN'), label: 'Unwanted orders stopped before shipping' },
+  { icon: CurrencyInr, value: formatInr(CASE_STUDY.cancelled * COST_PER_RTO), label: 'RTO cost avoided in a month', tone: 'saved' },
+] as const;
+
+const STARTER = PRICING_TIERS[0];
+const BREAK_EVEN_RTOS = Math.ceil(STARTER.base / COST_PER_RTO);
 
 const JOBS = [
   {
@@ -75,7 +101,7 @@ const JOBS = [
 
 const TRAITS = [
   { icon: Translate, title: 'Speaks your buyer’s language', detail: 'Hindi, English and other Indian languages, including mixed Hinglish.' },
-  { icon: ClockCountdown, title: 'Calls within minutes', detail: 'Starts calling as soon as an order, cart or NDR event comes in.' },
+  { icon: ListChecks, title: 'No order slips through', detail: 'Every COD order, abandoned cart and NDR case is called. Unreachable buyers get retries and a WhatsApp follow-up.' },
   { icon: WhatsappLogo, title: 'Follows up on WhatsApp', detail: 'Sends product links, payment links and confirmations after the call.' },
   { icon: ShieldCheck, title: 'Your team stays in control', detail: 'Every call is recorded, tagged and visible. You decide what ships.' },
 ] as const;
@@ -105,7 +131,7 @@ const FAQS = [
   },
   {
     q: 'What happens after 14 days?',
-    a: 'We review your trial results with you. If the numbers work, you choose a plan and continue. There is no annual lock-in.',
+    a: `We review your trial results with you. If the numbers work, you choose a plan — from ${formatInr(STARTER.base)}/month — and continue. There is no annual lock-in.`,
   },
 ] as const;
 
@@ -123,10 +149,18 @@ function CallPlayer() {
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState('');
+  const [keys, setKeys] = useState<CallKey[]>(BASE_CALL_KEYS);
   const call = CALLS[active];
   const captions = CALL_CAPTIONS[active];
   const captionIndex = captions.reduce((found, line, index) => (line.at <= time ? index : found), 0);
   const caption = captions[captionIndex];
+
+  useEffect(() => {
+    // Show the regional-language tab only when its recording has been added.
+    fetch(CALLS.regional.audio, { method: 'HEAD' })
+      .then((res) => { if (res.ok) setKeys(CALL_KEYS); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setPlaying(false); setTime(0); setError('');
@@ -161,7 +195,7 @@ function CallPlayer() {
       </div>
 
       <div className={styles.tabs} role="tablist" aria-label="Sample calls">
-        {CALL_KEYS.map((key) => (
+        {keys.map((key) => (
           <button
             key={key}
             type="button"
@@ -201,11 +235,13 @@ function CallPlayer() {
       </div>
 
       <div className={styles.caption} aria-live="polite">
-        <span className={styles.speaker} data-agent={caption.speaker === 'agent' || undefined}>
-          {caption.speaker === 'agent' ? 'AI agent' : 'Buyer'}
-        </span>
-        <p>{time > 0 || playing ? caption.text : 'Press play to hear the call with live captions.'}</p>
-        <small>{CALL_CAPTION_NOTES[active] === 'From Hindi' ? 'Captions translated from Hindi' : 'Transcript'}</small>
+        {caption && (
+          <span className={styles.speaker} data-agent={caption.speaker === 'agent' || undefined}>
+            {caption.speaker === 'agent' ? 'AI agent' : 'Buyer'}
+          </span>
+        )}
+        <p>{caption && (time > 0 || playing) ? caption.text : 'Press play to hear the call with live captions.'}</p>
+        <small>{CALL_CAPTION_NOTES[active].startsWith('From ') ? `Captions translated ${CALL_CAPTION_NOTES[active].toLowerCase()}` : 'Transcript'}</small>
       </div>
 
       <p className={styles.outcome}>
@@ -254,7 +290,7 @@ export function LeadsLanding() {
       <section className={`${styles.wrap} ${styles.hero}`}>
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>
-            <Phone size={14} weight="fill" aria-hidden /> AI voice agent for Indian D2C brands
+            <Phone size={14} weight="fill" aria-hidden /> For Indian D2C brands selling on COD
           </p>
           <h1>
             An AI voice agent that <em>calls your buyers</em> before you lose the order.
@@ -265,14 +301,38 @@ export function LeadsLanding() {
           </p>
           <ul className={styles.ticks}>
             <li><CheckCircle size={18} weight="fill" aria-hidden /> Works with Shopify &amp; WooCommerce</li>
-            <li><CheckCircle size={18} weight="fill" aria-hidden /> Calls 24×7, follows up on WhatsApp</li>
-            <li><CheckCircle size={18} weight="fill" aria-hidden /> 14-day free trial on your real orders</li>
+            <li><CheckCircle size={18} weight="fill" aria-hidden /> Calls every COD order before it ships</li>
+            <li><CheckCircle size={18} weight="fill" aria-hidden /> Talks in Hindi, English, Tamil, Telugu, Malayalam and Kannada</li>
           </ul>
           <CallPlayer />
         </div>
 
         <div id="book" className={styles.formCol}>
           <LeadCaptureForm mode="trial" />
+        </div>
+      </section>
+
+      <section className={styles.proof} aria-labelledby="proof-title">
+        <div className={styles.wrap}>
+          <p id="proof-title" className={styles.proofTitle}>
+            <span className={styles.liveDot} data-on aria-hidden /> Live dashboard data · men’s apparel D2C brand, last 30 days
+          </p>
+          <ul className={styles.proofStats}>
+            {PROOF.map(({ icon: Icon, value, label, ...rest }) => (
+              <li key={label} data-tone={'tone' in rest ? rest.tone : undefined}>
+                <span className={styles.proofIcon} aria-hidden><Icon size={20} weight="duotone" /></span>
+                <strong>{value}</strong>
+                <p>{label}</p>
+              </li>
+            ))}
+            <li data-tone="rto">
+              <span className={styles.proofIcon} aria-hidden><TrendDown size={20} weight="duotone" /></span>
+              <strong>
+                <s>32%</s> <ArrowRight size={18} weight="bold" aria-label="down to" /> <em>17%</em>
+              </strong>
+              <p>Average RTO across brands on Recover Agent</p>
+            </li>
+          </ul>
         </div>
       </section>
 
@@ -329,6 +389,38 @@ export function LeadsLanding() {
             ))}
           </ol>
         </div>
+      </section>
+
+      <section className={styles.wrap} id="pricing">
+        <h2 className={styles.h2}>Simple pricing after your free trial</h2>
+        <p className={styles.lead}>Monthly plans priced per order. No setup fee and no annual lock-in.</p>
+        <div className={styles.plans}>
+          {PRICING_TIERS.map((tier) => (
+            <article key={tier.id} className={styles.plan} data-recommended={tier.recommended || undefined}>
+              <div className={styles.planHead}>
+                <h3>{tier.name}</h3>
+                {tier.recommended && <span>Recommended</span>}
+              </div>
+              <p className={styles.planPrice}>{formatInr(tier.base)}<small>/month</small></p>
+              <p className={styles.planMeta}>
+                {tier.includedCalls.toLocaleString('en-IN')} orders included, then ₹{tier.overagePerOrder.toFixed(Number.isInteger(tier.overagePerOrder) ? 0 : 2)} per order
+              </p>
+              <ul>
+                {PLAN_FEATURE_ROWS.filter(({ key }) => PLAN_FEATURES[tier.id][key]).map(({ label }) => (
+                  <li key={label}><CheckCircle size={16} weight="fill" aria-hidden /> {label}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+        <p className={styles.planNote}>
+          <strong>Starter pays for itself if it stops {BREAK_EVEN_RTOS} returned orders a month</strong>{' '}
+          (about ₹{COST_PER_RTO} lost per RTO in shipping, packaging and ad spend). Taxes and WhatsApp messaging charges
+          are confirmed on your setup call.
+        </p>
+        <button type="button" className={styles.primary} onClick={() => scrollToForm('pricing')}>
+          Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
+        </button>
       </section>
 
       <section className={styles.wrap}>

@@ -449,6 +449,10 @@
 .lossBig { font-size: clamp(44px, 5.5vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #fff; font-variant-numeric: tabular-nums; }
 .lossBig small { margin-left: 6px; font-size: 18px; font-weight: 600; color: #a8b6d6; letter-spacing: 0; }
 .lossYear { font-size: 15px; color: #a8b6d6; }
+.adReality { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.adReality dt { font-size: 13px; color: #a8b6d6; }
+.adReality dd { margin: 4px 0 0; font-size: 24px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.adReality dd small { display: block; font-size: 13px; font-weight: 500; color: #a8b6d6; }
 .parcelGrid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; width: 100%; margin: 22px 0 8px; }
 .parcel { display: grid; place-items: center; aspect-ratio: 1; color: #6f86c4; background: rgba(255, 255, 255, 0.06); border-radius: 8px; transition: color 0.35s ease, background 0.35s ease, transform 0.35s ease; }
 .parcelRed { color: #fff; background: var(--red); transform: translateY(-2px) rotate(-6deg); }
@@ -460,6 +464,26 @@
 .agentToggleOn .toggleKnob::after { transform: translateX(18px); }
 .savings { width: 100%; margin: 8px 0 14px; padding: 16px 18px; background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 16px; }
 .savings p { font-size: 14px; color: #bbf7d0; }
+.savingsRows { display: grid; gap: 6px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(34, 197, 94, 0.3); }
+.savingsRows div { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.savingsRows dt { color: #bbf7d0; }
+.savingsRows dd { margin: 0; font-weight: 700; color: #fff; text-align: right; font-variant-numeric: tabular-nums; }
+.cartLoss { display: grid; gap: 2px; width: 100%; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.cartLoss span { font-size: 15px; font-weight: 600; color: #ffd28a; }
+.cartLoss strong { font-size: 30px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.cartLoss strong small { margin-left: 6px; font-size: 15px; font-weight: 600; color: #a8b6d6; }
+.cartLoss em { font-size: 13px; font-style: normal; color: #a8b6d6; }
+.costEditor { border-top: 1px solid var(--line); padding-top: 18px; }
+.costEditor summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #36425a; cursor: pointer; list-style: none; }
+.costEditor summary::-webkit-details-marker { display: none; }
+.costEditor[open] summary svg { transform: rotate(180deg); }
+.costFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.costFields label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+.costInput { display: flex; align-items: center; gap: 6px; padding: 0 12px; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+.costInput:focus-within { border-color: var(--blue); }
+.costInput b { font-weight: 600; color: var(--muted); }
+.costInput input { width: 100%; min-width: 0; padding: 10px 0; font: 600 16px var(--font-geist), sans-serif; color: var(--ink); background: transparent; border: 0; outline: 0; }
+.costReset { margin-top: 12px; padding: 0; font: 600 13px var(--font-geist), sans-serif; color: var(--blue); background: none; border: 0; cursor: pointer; }
 .savings strong { display: block; margin-top: 4px; font-size: 30px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
 .savings small { margin-left: 4px; font-size: 15px; font-weight: 600; color: #a7d8b9; }
 .lossResult .trialButton { margin-top: 14px; }

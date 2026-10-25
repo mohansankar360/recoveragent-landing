@@ -3,13 +3,14 @@
 // `at` is the second in the recording when the line starts.
 export type CallCaption = { at: number; speaker: 'agent' | 'buyer'; text: string };
 
-export const CALL_CAPTION_NOTES: Record<'cod' | 'checkout' | 'ndr', string> = {
+export const CALL_CAPTION_NOTES: Record<'cod' | 'checkout' | 'ndr' | 'regional', string> = {
   cod: 'From Hindi',
   checkout: 'From Hindi',
   ndr: 'Transcript',
+  regional: 'From Tamil',
 };
 
-export const CALL_CAPTIONS: Record<'cod' | 'checkout' | 'ndr', CallCaption[]> = {
+export const CALL_CAPTIONS: Record<'cod' | 'checkout' | 'ndr' | 'regional', CallCaption[]> = {
   cod: [
     { at: 0, speaker: 'agent', text: 'Mr. Veeral, I’m calling from TTF Clothing.' },
     { at: 2.9, speaker: 'agent', text: 'It’s about the men’s cotton boxer shorts, pack of 3, that you ordered.' },
@@ -71,4 +72,6 @@ export const CALL_CAPTIONS: Record<'cod' | 'checkout' | 'ndr', CallCaption[]> = 
     { at: 39.5, speaker: 'agent', text: 'please pay ₹778 in cash to receive the parcel.' },
     { at: 44.1, speaker: 'agent', text: 'Have a wonderful day. Goodbye.' },
   ],
+  // Fill in once public/audio/COD_tamil.mp3 is added.
+  regional: [],
 };
