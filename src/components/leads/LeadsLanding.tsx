@@ -8,14 +8,18 @@ import {
   ChatCircleText,
   CheckCircle,
   ClockCountdown,
+  CurrencyInr,
   IdentificationCard,
   Package,
   Pause,
   Phone,
+  PhoneCall,
   Play,
+  Prohibit,
   ShieldCheck,
   Storefront,
   Translate,
+  TrendDown,
   Truck,
   WhatsappLogo,
 } from '@phosphor-icons/react';
@@ -66,10 +70,9 @@ const BASE_CALL_KEYS = CALL_KEYS.filter((key) => key !== 'regional');
 
 // Same live dashboard data as the homepage case study.
 const PROOF = [
-  { value: CASE_STUDY.orders.toLocaleString('en-IN'), label: 'COD orders called in 30 days' },
-  { value: CASE_STUDY.cancelled.toLocaleString('en-IN'), label: 'Unwanted orders stopped before shipping' },
-  { value: formatInr(CASE_STUDY.cancelled * COST_PER_RTO), label: 'RTO cost avoided in a month' },
-  { value: '32% → 17%', label: 'Average RTO across brands on Recover Agent' },
+  { icon: PhoneCall, value: CASE_STUDY.orders.toLocaleString('en-IN'), label: 'COD orders called in 30 days' },
+  { icon: Prohibit, value: CASE_STUDY.cancelled.toLocaleString('en-IN'), label: 'Unwanted orders stopped before shipping' },
+  { icon: CurrencyInr, value: formatInr(CASE_STUDY.cancelled * COST_PER_RTO), label: 'RTO cost avoided in a month', tone: 'saved' },
 ] as const;
 
 const STARTER = PRICING_TIERS[0];
@@ -312,16 +315,24 @@ export function LeadsLanding() {
       <section className={styles.proof} aria-labelledby="proof-title">
         <div className={styles.wrap}>
           <p id="proof-title" className={styles.proofTitle}>
-            Live results from a men’s apparel D2C brand, last 30 days
+            <span className={styles.liveDot} data-on aria-hidden /> Live dashboard data · men’s apparel D2C brand, last 30 days
           </p>
-          <dl className={styles.proofStats}>
-            {PROOF.map(({ value, label }) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{value}</dd>
-              </div>
+          <ul className={styles.proofStats}>
+            {PROOF.map(({ icon: Icon, value, label, ...rest }) => (
+              <li key={label} data-tone={'tone' in rest ? rest.tone : undefined}>
+                <span className={styles.proofIcon} aria-hidden><Icon size={20} weight="duotone" /></span>
+                <strong>{value}</strong>
+                <p>{label}</p>
+              </li>
             ))}
-          </dl>
+            <li data-tone="rto">
+              <span className={styles.proofIcon} aria-hidden><TrendDown size={20} weight="duotone" /></span>
+              <strong>
+                <s>32%</s> <ArrowRight size={18} weight="bold" aria-label="down to" /> <em>17%</em>
+              </strong>
+              <p>Average RTO across brands on Recover Agent</p>
+            </li>
+          </ul>
         </div>
       </section>
 
