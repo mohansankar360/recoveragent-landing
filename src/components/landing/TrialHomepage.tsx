@@ -902,21 +902,34 @@ function Slider({ label, value, min, max, step, onChange, format }: { label: str
   </label>;
 }
 
+const COST_FIELDS = [
+  { key: 'forward', label: 'Outbound shipping' },
+  { key: 'return', label: 'Return shipping' },
+  { key: 'packaging', label: 'Lost packaging' },
+  { key: 'acquisition', label: 'Ad cost per order' },
+] as const;
+
 export function LossSection() {
   const onTrial = useTrial();
   const [cod, setCod] = useState(1500);
   const [rto, setRto] = useState(25);
   const [aov, setAov] = useState(1200);
+  const [cart, setCart] = useState(600);
+  const [costs, setCosts] = useState<Record<keyof typeof RTO_COST, string>>(() => ({
+    forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition),
+  }));
   const [withAgent, setWithAgent] = useState(false);
   const started = useRef(false);
-  const touch = <T,>(setter: (value: T) => void) => (value: T) => {
+  const markStarted = () => {
     if (!started.current) { started.current = true; trackEvent('calculator_started', { source: 'live_sliders' }); }
-    setter(value);
   };
-  const estimate = calculateRecoveryEstimate({ cod, rtoPct: rto, cart: 0, aov, forwardCost: RTO_COST.forward, returnCost: RTO_COST.return, packagingCost: RTO_COST.packaging, acquisitionCost: RTO_COST.acquisition, extraMonthlyCost: 0 });
+  const touch = <T,>(setter: (value: T) => void) => (value: T) => { markStarted(); setter(value); };
+  const cost = (key: keyof typeof RTO_COST) => Math.max(0, Number(costs[key]) || 0);
+  const costsEdited = COST_FIELDS.some(({ key }) => cost(key) !== RTO_COST[key]);
+  const estimate = calculateRecoveryEstimate({ cod, rtoPct: rto, cart, aov, forwardCost: cost('forward'), returnCost: cost('return'), packagingCost: cost('packaging'), acquisitionCost: cost('acquisition'), extraMonthlyCost: 0 });
   const monthlyLoss = estimate.rtoCost;
-  // Savings use only the shipping and packaging avoided per prevented RTO, minus the plan fee. Ad spend is already paid.
-  const savingsRange = estimate.outcomes.map((outcome) => Math.max(0, outcome.rtoSavings - estimate.plan.cost));
+  // Shipping and packaging avoided per prevented RTO. Ad spend is already paid, so it is never counted as a saving.
+  const [low, high] = estimate.outcomes;
   const parcels = 24;
   const redCount = Math.round((rto / 100) * parcels);
   const savedCount = withAgent ? Math.round(redCount * 0.3) : 0;
@@ -928,19 +941,31 @@ export function LossSection() {
     </div>
     <div className={styles.lossGrid} id="calc-sliders">
       <div className={styles.lossControls}>
-        <Slider label="COD orders per month" value={cod} min={200} max={20000} step={100} onChange={touch(setCod)} format={(value) => value.toLocaleString('en-IN')} />
-        <Slider label="RTO rate on COD" value={rto} min={5} max={50} step={1} onChange={touch(setRto)} format={(value) => `${value}%`} />
-        <Slider label="Average order value" value={aov} min={300} max={5000} step={50} onChange={touch(setAov)} format={(value) => formatInr(value)} />
-        <p className={styles.lossAssumption}>Assumes ₹{COST_PER_RTO} lost per RTO (₹{estimate.costPerRto} shipping both ways and packaging, ₹{RTO_COST.acquisition} ad spend) and a 20–40% reduction in RTO. Savings count only shipping and packaging, because ad spend is already paid. Every store is different. The trial measures yours.</p>
+        <Slider label="COD orders per month" value={cod} min={200} max={10000} step={100} onChange={touch(setCod)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
+        <Slider label="RTO rate on COD" value={rto} min={5} max={60} step={1} onChange={touch(setRto)} format={(value) => `${value}%`} />
+        <Slider label="Average order value" value={aov} min={300} max={3000} step={50} onChange={touch(setAov)} format={(value) => `${formatInr(value)}${value >= 3000 ? '+' : ''}`} />
+        <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={touch(setCart)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
+        <details className={styles.costEditor}>
+          <summary>Cost per RTO: {formatInr(estimate.costPerRto + estimate.acquisitionCostPerOrder)}{costsEdited ? ' · your numbers' : ' · sample'}<CaretDown size={14} aria-hidden="true" /></summary>
+          <div className={styles.costFields}>
+            {COST_FIELDS.map(({ key, label }) => <label key={key}>
+              <span>{label}</span>
+              <span className={styles.costInput}><b aria-hidden="true">₹</b><input type="number" inputMode="numeric" min={0} step={1} value={costs[key]} onChange={(event) => { markStarted(); setCosts((old) => ({ ...old, [key]: event.target.value })); }} /></span>
+            </label>)}
+          </div>
+          {costsEdited && <button type="button" className={styles.costReset} onClick={() => setCosts({ forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition) })}>Reset to sample costs</button>}
+        </details>
+        <p className={styles.lossAssumption}>Savings count only shipping and packaging, because ad spend is already paid. Assumes a {low.reduction}–{high.reduction}% reduction in RTO{cart > 0 ? ` and ${low.checkoutRecoveryPct}–${high.checkoutRecoveryPct}% of abandoned checkouts recovered` : ''}. Every store is different. The trial measures yours.</p>
       </div>
       <div className={styles.lossResult}>
         <p className={styles.lossLabel}>RTO is costing you</p>
         <p className={styles.lossBig}>{formatInr(monthlyLoss)}<small>/month</small></p>
         <p className={styles.lossYear}>{formatInr(monthlyLoss * 12)} a year · {Math.round(estimate.rtoOrders).toLocaleString('en-IN')} parcels coming back every month</p>
         {estimate.adCostPerDeliveredOrder !== undefined && estimate.reportedRoas !== undefined && estimate.realRoas !== undefined && <dl className={styles.adReality}>
-          <div><dt>Ad cost per delivered order</dt><dd>{formatInr(estimate.adCostPerDeliveredOrder)}<small>not {formatInr(RTO_COST.acquisition)}</small></dd></div>
+          <div><dt>Ad cost per delivered order</dt><dd>{formatInr(estimate.adCostPerDeliveredOrder)}<small>not {formatInr(estimate.acquisitionCostPerOrder)}</small></dd></div>
           <div><dt>Real ROAS on COD</dt><dd>{estimate.realRoas.toFixed(1)}x<small>Meta shows {estimate.reportedRoas.toFixed(1)}x</small></dd></div>
         </dl>}
+        {cart > 0 && <p className={styles.cartLoss}><span>Carts left at checkout</span><strong>{formatInr(estimate.checkoutValue)}<small>/month</small></strong><em>{cart.toLocaleString('en-IN')} abandoned checkouts × {formatInr(aov)}</em></p>}
         <div className={styles.parcelGrid} aria-hidden="true">
           {Array.from({ length: parcels }, (_, index) => {
             const isRed = index < redCount;
@@ -948,13 +973,18 @@ export function LossSection() {
             return <span key={index} className={`${styles.parcel} ${isRed ? styles.parcelRed : ''} ${isSaved ? styles.parcelSaved : ''}`} style={{ transitionDelay: `${index * 18}ms` }}><Package size={18} weight="fill" /></span>;
           })}
         </div>
-        <button type="button" className={`${styles.agentToggle} ${withAgent ? styles.agentToggleOn : ''}`} aria-pressed={withAgent} onClick={() => { setWithAgent((value) => !value); trackEvent('calculator_completed', { source: 'live_sliders', cod, rto, aov }); }}>
+        <button type="button" className={`${styles.agentToggle} ${withAgent ? styles.agentToggleOn : ''}`} aria-pressed={withAgent} onClick={() => { setWithAgent((value) => !value); trackEvent('calculator_completed', { source: 'live_sliders', cod, rto, aov, cart, costs_edited: costsEdited }); }}>
           <span className={styles.toggleKnob} />{withAgent ? 'With RecoverAgent' : 'Show me with RecoverAgent'}
         </button>
         <AnimatePresence>
           {withAgent && <motion.div className={styles.savings} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <p>Estimated saving after the {estimate.plan.tier.name} plan fee</p>
-            <strong>{formatInr(savingsRange[0])} – {formatInr(savingsRange[1])}<small>/month</small></strong>
+            <dl className={styles.savingsRows}>
+              <div><dt>RTO shipping & packaging saved</dt><dd>{formatInr(low.rtoSavings)} – {formatInr(high.rtoSavings)}</dd></div>
+              {cart > 0 && <div><dt>Abandoned carts recovered ({Math.round(low.recoveredCheckouts).toLocaleString('en-IN')}–{Math.round(high.recoveredCheckouts).toLocaleString('en-IN')} orders)</dt><dd>{formatInr(low.recoveredRevenue)} – {formatInr(high.recoveredRevenue)} in sales</dd></div>}
+              <div><dt>{estimate.plan.tier.name} plan fee</dt><dd>− {formatInr(estimate.plan.cost)}</dd></div>
+            </dl>
+            <p>{cart > 0 ? 'Back each month, before the plan fee' : 'Estimated saving after the plan fee'}</p>
+            <strong>{cart > 0 ? `${formatInr(low.recoveryValue)} – ${formatInr(high.recoveryValue)}` : `${formatInr(Math.max(0, low.rtoSavings - estimate.plan.cost))} – ${formatInr(Math.max(0, high.rtoSavings - estimate.plan.cost))}`}<small>/month</small></strong>
           </motion.div>}
         </AnimatePresence>
         <TrialButton onClick={() => { trackEvent('calculator_cta_clicked', { source: 'live_sliders' }); onTrial(); }} source="calculator">Measure it on my orders, free</TrialButton>
