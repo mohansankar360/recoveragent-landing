@@ -165,7 +165,11 @@ export function LossCalculator({ comparePlansHref }: { showInlineDemoCta?: boole
                 </div>
               </details>
             </div>
-          <div className={`${styles.currentLoss} ${styles.lossHeader}`} aria-live="polite" aria-atomic="true"><span>RTO is costing you</span><strong>{formatInr(result.rtoCost)}<span className={styles.monthUnit}>/month</span></strong><small>{formatInr(result.rtoCost * 12)} a year</small></div>
+          <div className={`${styles.currentLoss} ${styles.lossHeader}`} aria-live="polite" aria-atomic="true"><span>RTO is costing you</span><strong>{formatInr(result.rtoCost)}<span className={styles.monthUnit}>/month</span></strong><small>{formatInr(result.rtoCost * 12)} a year</small>
+            {result.adCostPerDeliveredOrder !== undefined && <div className={styles.metrics}>
+              <div><span>Ad cost per delivered COD order</span><strong>{formatInr(result.adCostPerDeliveredOrder)}</strong><small>You pay {formatInr(result.acquisitionCostPerOrder)} per order placed; returned orders still cost ad spend.</small></div>
+              {result.reportedRoas !== undefined && result.realRoas !== undefined && <div><span>Real ROAS on COD</span><strong>{result.realRoas.toFixed(1)}x</strong><small>Meta counts returned orders as sales, so it shows {result.reportedRoas.toFixed(1)}x.</small></div>}
+            </div>}</div>
         <details className={styles.resultBreakdown} open><summary>Compare monthly outcomes<CaretDown size={16} /></summary>
           <div className={styles.comparison}>
             <table><caption className={styles.srOnly}>Monthly outcomes before and with recovery</caption><thead><tr><th scope="col">Per month</th><th scope="col">Now</th><th scope="col">With RecoverAgent</th></tr></thead><tbody>

@@ -449,6 +449,10 @@
 .lossBig { font-size: clamp(44px, 5.5vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #fff; font-variant-numeric: tabular-nums; }
 .lossBig small { margin-left: 6px; font-size: 18px; font-weight: 600; color: #a8b6d6; letter-spacing: 0; }
 .lossYear { font-size: 15px; color: #a8b6d6; }
+.adReality { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.adReality dt { font-size: 13px; color: #a8b6d6; }
+.adReality dd { margin: 4px 0 0; font-size: 24px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.adReality dd small { display: block; font-size: 13px; font-weight: 500; color: #a8b6d6; }
 .parcelGrid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; width: 100%; margin: 22px 0 8px; }
 .parcel { display: grid; place-items: center; aspect-ratio: 1; color: #6f86c4; background: rgba(255, 255, 255, 0.06); border-radius: 8px; transition: color 0.35s ease, background 0.35s ease, transform 0.35s ease; }
 .parcelRed { color: #fff; background: var(--red); transform: translateY(-2px) rotate(-6deg); }
