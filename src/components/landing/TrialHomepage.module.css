@@ -28,7 +28,7 @@
 /* ── Buttons ── */
 .trialButton {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-height: 54px; padding: 0 26px; border: 0; border-radius: 14px; cursor: pointer;
+  min-height: 56px; min-width: 220px; max-width: 100%; padding: 8px 24px; border: 0; border-radius: 14px; cursor: pointer;
   font: 700 16px/1 var(--font-geist), sans-serif; color: #fff;
   background: linear-gradient(135deg, #3d78ff 0%, #2456e6 100%);
   box-shadow: 0 14px 34px rgba(47, 107, 255, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -38,11 +38,39 @@
 .trialButton:active { transform: translateY(0); }
 .trialButton:focus-visible, .ghostButton:focus-visible, .outlineButton:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
 .trialButton svg { transition: transform 0.18s ease; }
-.ctaCopy { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; }
-.ctaSubtext { font-size: 12px; font-weight: 400; line-height: 1.2; color: inherit; opacity: 0.85; }
+.ctaCopy { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; font-weight: 750; line-height: 1.2; text-align: center; }
+.ctaSubtext { font-size: 11px; font-weight: 400; line-height: 1.25; color: inherit; opacity: 0.8; }
 .trialButton:hover svg { transform: translateX(3px); }
-.trialButtonCompact { min-height: 42px; padding: 0 18px; font-size: 14px; border-radius: 11px; }
+.trialButtonCompact { min-height: 48px; min-width: 158px; padding: 7px 18px; font-size: 14px; border-radius: 11px; }
 .trialButtonLight { color: var(--ink); background: #fff; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25); }
+
+.trialButton,
+.mobileSticky button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.trialButton::after,
+.mobileSticky button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.16) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: ctaGloss 8s ease-in-out infinite;
+}
+
+@keyframes ctaGloss {
+  0%, 78% { transform: translateX(-120%); }
+  96%, 100% { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trialButton::after,
+  .mobileSticky button::after { animation: none; display: none; }
+}
 .ghostButton {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 22px;
   font: 600 16px/1 var(--font-geist), sans-serif; color: #fff; cursor: pointer;
@@ -560,6 +588,17 @@
 .finalCall { display: inline-flex; align-items: center; gap: 8px; margin-top: 30px; font-weight: 600; color: var(--cyan); text-decoration: none; }
 .finalCall:hover { text-decoration: underline; }
 .finalForm, .dialogForm { min-width: 0; }
+.finalForm :global(.lead-form-card), .dialogForm :global(.lead-form-card) { color: var(--ink); background: #fff; }
+.finalForm :global(.lead-form-fields), .dialogForm :global(.lead-form-fields) { grid-template-columns: minmax(0, 1fr); }
+.finalForm :global(.lead-form-topline), .dialogForm :global(.lead-form-topline) { flex-wrap: wrap; gap: 8px; }
+.finalForm :global(.lead-form-step), .dialogForm :global(.lead-form-step) { white-space: nowrap; }
+.finalForm :global(.lead-form-back), .dialogForm :global(.lead-form-back) { min-width: 44px; min-height: 44px; justify-content: center; }
+.finalForm :global(.lead-input-wrap) input, .finalForm :global(.lead-input-wrap) select,
+.dialogForm :global(.lead-input-wrap) input, .dialogForm :global(.lead-input-wrap) select { font-size: 16px; }
+.dialogForm :global(.lead-form-card) { border: 0; box-shadow: none; }
+@media (max-width: 520px) {
+  .finalForm :global(.lead-form-submit), .dialogForm :global(.lead-form-submit) { padding-inline: 12px; font-size: 14px; }
+}
 .finalForm :global(.sec), .dialogForm :global(.sec) { padding: 0 !important; background: transparent !important; }
 .finalForm :global(.wrap), .dialogForm :global(.wrap) { width: 100% !important; max-width: none !important; padding: 0 !important; }
 .finalForm :global(.sec-head), .dialogForm :global(.sec-head) { display: none !important; }

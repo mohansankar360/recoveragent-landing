@@ -10,6 +10,8 @@ import {
   CurrencyInr,
   IdentificationCard,
   ListChecks,
+  List,
+  X,
   Package,
   Pause,
   Phone,
@@ -108,8 +110,8 @@ const TRAITS = [
 
 const STEPS = [
   { icon: IdentificationCard, title: 'Share your details', detail: 'Takes under 30 seconds.' },
-  { icon: CalendarCheck, title: 'Pick a setup call', detail: 'The calendar opens right after the form. We connect your store on the call.' },
-  { icon: Phone, title: 'AI calls your real orders', detail: 'For 14 days the agent calls your buyers and you see every result in the dashboard.' },
+  { icon: CalendarCheck, title: 'Choose your demo time', detail: 'See the calls, WhatsApp follow-ups and dashboard with our team.' },
+  { icon: Phone, title: 'Try it when you’re ready', detail: 'After your demo, decide whether to start a 14-day free trial. Our team helps you connect your store.' },
 ] as const;
 
 const FAQS = [
@@ -119,7 +121,7 @@ const FAQS = [
   },
   {
     q: 'Which stores is this for?',
-    a: 'Shopify and WooCommerce brands in India. Stores doing 500+ orders a month go straight to a trial setup call; smaller stores can request an onboarding call.',
+    a: 'Shopify and WooCommerce brands in India. Stores doing 500+ orders a month can book a demo; smaller stores can request an onboarding call.',
   },
   {
     q: 'What if the buyer doesn’t pick up?',
@@ -137,7 +139,8 @@ const FAQS = [
 
 function scrollToForm(source: string) {
   trackEvent('cta_clicked', { cta: 'book_demo', source, page: 'leads' });
-  document.getElementById('book')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.getElementById('book')?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' });
 }
 
 const formatTime = (value: number) => `${Math.floor(value / 60)}:${Math.floor(value % 60).toString().padStart(2, '0')}`;
@@ -266,6 +269,28 @@ function CallPlayer() {
 
 export function LeadsLanding() {
   const [showSticky, setShowSticky] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('pointerdown', dismiss);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const form = document.getElementById('book');
@@ -278,13 +303,19 @@ export function LeadsLanding() {
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
+      <header ref={headerRef} className={styles.header}>
         <div className={styles.wrap}>
           <Image src="/recover-agent-logo-transparent.png" alt="Recover Agent" width={152} height={38} priority className={styles.logo} />
           <button type="button" className={styles.headerCta} onClick={() => scrollToForm('header')}>
             <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span>
           </button>
+          <button ref={menuButtonRef} type="button" className={styles.menuButton} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="leads-navigation" onClick={() => setMenuOpen((open) => !open)}>
+            {menuOpen ? <X size={22} aria-hidden /> : <List size={22} aria-hidden />}
+          </button>
         </div>
+        {menuOpen && <nav id="leads-navigation" className={styles.pageNavigation} aria-label="Page navigation">
+          {[['Hear a real call', '#sample-calls'], ['How it works', '#how-it-works'], ['Pricing', '#pricing'], ['Questions', '#questions']].map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}<ArrowRight size={16} aria-hidden /></a>)}
+        </nav>}
       </header>
 
       <section className={`${styles.wrap} ${styles.hero}`}>
@@ -304,7 +335,7 @@ export function LeadsLanding() {
             <li><CheckCircle size={18} weight="fill" aria-hidden /> Calls every COD order before it ships</li>
             <li><CheckCircle size={18} weight="fill" aria-hidden /> Talks in Hindi, English, Tamil, Telugu, Malayalam and Kannada</li>
           </ul>
-          <CallPlayer />
+          <div id="sample-calls" className={styles.menuTarget}><CallPlayer /></div>
         </div>
 
         <div id="book" className={styles.formCol}>
@@ -377,7 +408,7 @@ export function LeadsLanding() {
 
       <section className={styles.band}>
         <div className={styles.wrap}>
-          <h2 className={styles.h2}>How the free trial works</h2>
+          <h2 id="how-it-works" className={`${styles.h2} ${styles.menuTarget}`}>From demo to your first recovered order</h2>
           <ol className={styles.steps}>
             {STEPS.map(({ icon: Icon, title, detail }, index) => (
               <li key={title}>
@@ -391,7 +422,7 @@ export function LeadsLanding() {
         </div>
       </section>
 
-      <section className={styles.wrap} id="pricing">
+      <section className={`${styles.wrap} ${styles.menuTarget}`} id="pricing">
         <h2 className={styles.h2}>Simple pricing after your free trial</h2>
         <p className={styles.lead}>Monthly plans priced per order. No setup fee and no annual lock-in.</p>
         <div className={styles.plans}>
@@ -424,7 +455,7 @@ export function LeadsLanding() {
       </section>
 
       <section className={styles.wrap}>
-        <h2 className={styles.h2}>Questions</h2>
+        <h2 id="questions" className={`${styles.h2} ${styles.menuTarget}`}>Questions</h2>
         <div className={styles.faqs}>
           {FAQS.map(({ q, a }) => (
             <details key={q} className={styles.faq} onToggle={(e) => { if (e.currentTarget.open) trackEvent('faq_opened', { question: q, page: 'leads' }); }}>
@@ -438,8 +469,8 @@ export function LeadsLanding() {
       <section className={styles.final}>
         <div className={styles.wrap}>
           <ChatCircleText size={32} weight="duotone" aria-hidden />
-          <h2>Let the AI agent call your buyers for 14 days, free.</h2>
-          <p>No setup fee. See the results on your own orders.</p>
+          <h2>See what Recover Agent can do for your store.</h2>
+          <p>Book a demo, then decide if a 14-day free trial is right for you.</p>
           <button type="button" className={styles.primary} onClick={() => scrollToForm('final')}>
             <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span> <ArrowRight size={18} weight="bold" aria-hidden />
           </button>

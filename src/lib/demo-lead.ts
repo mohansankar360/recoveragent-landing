@@ -54,6 +54,39 @@ export function buildDemoLeadPayload(
   };
 }
 
+export interface PartialLeadPayload {
+  source: "recover-agent-landing";
+  name: string;
+  phone: string;
+  submittedAt: string;
+  engagement?: LeadEngagement;
+}
+
+/** Step 1 of the demo form: only name and WhatsApp are known yet. */
+export function isValidPartialLead(data: unknown): data is Pick<DemoFormData, "name" | "whatsapp"> {
+  if (!data || typeof data !== "object") return false;
+  const form = data as DemoFormData;
+  return (
+    typeof form.name === "string" &&
+    form.name.trim().length > 0 &&
+    typeof form.whatsapp === "string" &&
+    /^[6-9]\d{9}$/.test(form.whatsapp.replace(/\D/g, ""))
+  );
+}
+
+export function buildPartialLeadPayload(
+  data: Pick<DemoFormData, "name" | "whatsapp">,
+  engagement?: LeadEngagement
+): PartialLeadPayload {
+  return {
+    source: "recover-agent-landing",
+    name: data.name.trim().slice(0, 120),
+    phone: normalizeWhatsAppNumber(data.whatsapp),
+    submittedAt: new Date().toISOString(),
+    ...(engagement ? { engagement } : {}),
+  };
+}
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidDemoFormData(data: unknown): data is DemoFormData {

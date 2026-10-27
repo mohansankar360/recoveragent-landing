@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useCallback, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { BookingPicker } from "@/components/calendar/BookingPicker";
 import type { DemoFormData } from "@/lib/demo-booking";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  ArrowLeft,
   ChartBar,
   EnvelopeSimple,
   Globe,
@@ -74,16 +75,24 @@ function validateField(
   }
 }
 
-function validateAll(form: LeadFormData, collectStoreUrl: boolean): Partial<LeadFormData> {
+// Step 1 is saved to the CRM on its own, so a visitor who drops off on step 2
+// can still be followed up. Step 2 then completes the same contact.
+const STEP_ONE_FIELDS: (keyof LeadFormData)[] = ["name", "whatsapp"];
+
+function validateAll(
+  form: LeadFormData,
+  collectStoreUrl: boolean,
+  fields = Object.keys(form) as (keyof LeadFormData)[]
+): Partial<LeadFormData> {
   const next: Partial<LeadFormData> = {};
-  (Object.keys(form) as (keyof LeadFormData)[]).forEach((field) => {
+  fields.forEach((field) => {
     const error = validateField(field, form[field], collectStoreUrl);
     if (error) next[field] = error;
   });
   return next;
 }
 
-export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) {
+export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "demo" | "trial"; idPrefix?: string }) {
   const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>({
     name: "",
@@ -103,6 +112,29 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
   const [hasStarted, setHasStarted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [onboardingRequested, setOnboardingRequested] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  // Name + number last sent to the CRM, so Back → Next without edits doesn't resend.
+  const savedStepOne = useRef<string | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const pendingFocus = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!pendingFocus.current) return;
+    const node = cardRef.current?.querySelector<HTMLElement>(`#${pendingFocus.current}`);
+    if (node) {
+      node.focus();
+      pendingFocus.current = null;
+    }
+  }, [step, errors]);
+
+  const focusFirstError = (nextErrors: Partial<LeadFormData>) => {
+    const ids: Record<keyof LeadFormData, string> = {
+      name: `${idPrefix}-name`, whatsapp: `${idPrefix}-whatsapp`, monthlyOrders: `${idPrefix}-orders`,
+      storePlatform: `${idPrefix}-platform`, storeUrl: `${idPrefix}-store-url`, email: `${idPrefix}-email`,
+    };
+    const first = (Object.keys(ids) as (keyof LeadFormData)[]).find((field) => nextErrors[field]);
+    if (first) pendingFocus.current = ids[first];
+  };
 
   const handleChange = (field: keyof LeadFormData, value: string) => {
     if (!hasStarted) {
@@ -124,23 +156,57 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
+  const markTouched = (fields: (keyof LeadFormData)[]) =>
+    setTouched((prev) => fields.reduce((acc, field) => ({ ...acc, [field]: true }), prev));
+
+  const handleNext = (e: FormEvent) => {
+    e.preventDefault();
+    const nextErrors = validateAll(form, isTrial, STEP_ONE_FIELDS);
+    setErrors(nextErrors);
+    markTouched(STEP_ONE_FIELDS);
+    if (Object.keys(nextErrors).length > 0) {
+      focusFirstError(nextErrors);
+      return;
+    }
+
+    const name = form.name.trim();
+    const whatsapp = form.whatsapp.replace(/\D/g, "").slice(0, 10);
+    const key = `${name}|${whatsapp}`;
+    if (savedStepOne.current !== key) {
+      savedStepOne.current = key;
+      trackEvent("lead_form_step1_completed");
+      // Fire-and-forget: a CRM hiccup here must never block the visitor from step 2.
+      fetch("/api/demo-lead/partial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, whatsapp, engagement: getEngagementSnapshot() }),
+        keepalive: true,
+      })
+        .then((response) => {
+          if (!response.ok) savedStepOne.current = null;
+        })
+        .catch(() => {
+          savedStepOne.current = null;
+        });
+    }
+    setSubmitError(null);
+    pendingFocus.current = `${idPrefix}-orders`;
+    setStep(2);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting || calendarPrefill) return;
 
     const nextErrors = validateAll(form, isTrial);
     setErrors(nextErrors);
-    setTouched(
-      (Object.keys(form) as (keyof LeadFormData)[]).reduce(
-        (acc, field) => {
-          acc[field] = true;
-          return acc;
-        },
-        {} as Partial<Record<keyof LeadFormData, boolean>>
-      )
-    );
+    markTouched(Object.keys(form) as (keyof LeadFormData)[]);
 
-    if (Object.keys(nextErrors).length > 0) return;
+    if (Object.keys(nextErrors).length > 0) {
+      focusFirstError(nextErrors);
+      if (STEP_ONE_FIELDS.some((field) => nextErrors[field])) setStep(1);
+      return;
+    }
 
     if (form.storePlatform === "other") {
       setIsUnsupportedPlatform(true);
@@ -205,7 +271,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
   }, []);
 
   return (
-    <div className="lead-form-card">
+    <div ref={cardRef} className="lead-form-card">
       <AnimatePresence mode="wait" initial={false}>
         {onboardingRequested ? (
           <motion.div
@@ -250,19 +316,68 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
             exit={{ opacity: 0 }}
             transition={appleFade}
           >
-            <div className="lead-form-badge">{isTrial ? "No setup fee" : "14-day free trial available"}</div>
+            <div className="lead-form-topline">
+              <div className="lead-form-badge">{isTrial ? "No setup fee" : "14-day free trial available"}</div>
+              <span className="lead-form-step" aria-live="polite">Step {step} of 2</span>
+            </div>
             <div className="lead-form-head">
               <h2>{isTrial ? "Start your 14-day free trial" : "Book a demo"}</h2>
               <p>
-                {isTrial
-                  ? "Share your details, then pick a time for your setup call."
-                  : "Share your details, then choose a time for your 30-minute demo."}
+                {step === 1
+                  ? "Start with your name and WhatsApp number."
+                  : isTrial
+                    ? "A few store details, then pick a time for your setup call."
+                    : "A few store details, then choose a time for your 30-minute demo."}
               </p>
             </div>
 
+            {step === 1 ? (
+            <form onSubmit={handleNext} noValidate className="lead-form-fields">
+              <IconField
+                id={`${idPrefix}-name`}
+                label="Full name"
+                icon={User}
+                value={form.name}
+                error={errors.name}
+                onChange={(v) => handleChange("name", v)}
+                onBlur={() => handleBlur("name")}
+                placeholder="Your name"
+                autoComplete="name"
+              />
+
+              <PhoneField
+                id={`${idPrefix}-whatsapp`}
+                label="WhatsApp number"
+                value={form.whatsapp}
+                error={errors.whatsapp}
+                onChange={(v) => handleChange("whatsapp", v)}
+                onBlur={() => handleBlur("whatsapp")}
+              />
+
+              <button type="submit" className="btn btn-green lead-form-submit">
+                Next →
+              </button>
+
+              <p className="lead-form-privacy">
+                <span aria-hidden>✓</span>
+                Your information is safe with us and will only be used to
+                {isTrial ? " set up your trial." : " schedule your demo."}
+              </p>
+            </form>
+            ) : (
             <form onSubmit={handleSubmit} noValidate className="lead-form-fields">
+              <div className="lead-form-recap">
+                <span>
+                  {form.name.trim()} · +91 {form.whatsapp}
+                </span>
+                <button type="button" className="lead-form-back" onClick={() => { pendingFocus.current = `${idPrefix}-name`; setStep(1); }}>
+                  <ArrowLeft size={14} weight="bold" aria-hidden />
+                  Edit
+                </button>
+              </div>
+
               <IconSelectField
-                id="lead-orders"
+                id={`${idPrefix}-orders`}
                 label="Monthly orders"
                 icon={ChartBar}
                 value={form.monthlyOrders}
@@ -277,7 +392,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
               />
 
               <IconSelectField
-                id="lead-platform"
+                id={`${idPrefix}-platform`}
                 label="Store platform"
                 icon={Storefront}
                 value={form.storePlatform}
@@ -292,7 +407,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
               />
               {isTrial && (
                 <IconField
-                  id="lead-store-url"
+                  id={`${idPrefix}-store-url`}
                   label="Store website"
                   icon={Globe}
                   value={form.storeUrl}
@@ -305,28 +420,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
                 />
               )}
               <IconField
-                id="lead-name"
-                label="Full name"
-                icon={User}
-                value={form.name}
-                error={errors.name}
-                onChange={(v) => handleChange("name", v)}
-                onBlur={() => handleBlur("name")}
-                placeholder="Your name"
-                autoComplete="name"
-              />
-
-              <PhoneField
-                id="lead-whatsapp"
-                label="WhatsApp number"
-                value={form.whatsapp}
-                error={errors.whatsapp}
-                onChange={(v) => handleChange("whatsapp", v)}
-                onBlur={() => handleBlur("whatsapp")}
-              />
-
-              <IconField
-                id="lead-email"
+                id={`${idPrefix}-email`}
                 label="Email"
                 icon={EnvelopeSimple}
                 value={form.email}
@@ -353,6 +447,7 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
                 {isTrial ? " set up your trial." : " schedule your demo."}
               </p>
             </form>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

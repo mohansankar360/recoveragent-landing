@@ -18,6 +18,7 @@ export type AnalyticsEvent =
   | "pricing_viewed"
   | "faq_opened"
   | "lead_form_started"
+  | "lead_form_step1_completed"
   | "lead_form_submitted"
   | "demo_form_started"
   | "demo_form_submitted"

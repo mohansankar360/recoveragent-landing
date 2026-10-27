@@ -44,7 +44,7 @@ import {
   X,
   XCircle,
 } from '@phosphor-icons/react';
-import { DemoBooking } from './DemoBooking';
+import { LeadCaptureForm } from './LeadCaptureForm';
 import { faqs } from '@/lib/faq-data';
 import { PRICING_TIERS, calculateRecoveryEstimate, formatInr } from '@/lib/calculator';
 import { ALL_PLANS_WHATSAPP, PLAN_FEATURE_ROWS, PLAN_FEATURES } from '@/lib/pricing-plans';
@@ -1141,7 +1141,7 @@ export function FinalSection() {
         </ul>
         <a className={styles.finalCall} href="tel:+919788274333"><PhoneCall size={18} weight="bold" aria-hidden="true" />Prefer to talk first? Call +91 97882 74333</a>
       </div>
-      <div className={styles.finalForm}><DemoBooking compact mode="trial" sectionId="inline-trial-signup" /></div>
+      <div className={styles.finalForm}><LeadCaptureForm idPrefix="home-inline" /></div>
     </div>
   </section>;
 }
@@ -1182,7 +1182,7 @@ function TrialDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
           <li><ChartLineUp size={17} aria-hidden="true" />Explore a 14-day free trial after your demo</li>
         </ul>
       </div>
-      <div className={styles.dialogForm}><DemoBooking compact mode="trial" sectionId="dialog-trial-signup" /></div>
+      <div className={styles.dialogForm}><LeadCaptureForm idPrefix="home-dialog" /></div>
     </motion.div>
   </motion.div>}</AnimatePresence>;
 }
