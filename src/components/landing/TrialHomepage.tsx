@@ -126,12 +126,12 @@ function smoothScrollTo(id: string, block: ScrollLogicalPosition = 'start') {
   document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block });
 }
 
-export function TrialButton({ onClick, children = 'Start 14-day free trial', variant = 'primary', source }: { onClick: () => void; children?: React.ReactNode; variant?: 'primary' | 'light' | 'compact'; source: string }) {
+export function TrialButton({ onClick, children, variant = 'primary', source }: { onClick: () => void; children?: React.ReactNode; variant?: 'primary' | 'light' | 'compact'; source: string }) {
   return <button
     type="button"
     className={`${styles.trialButton} ${variant === 'light' ? styles.trialButtonLight : ''} ${variant === 'compact' ? styles.trialButtonCompact : ''}`}
-    onClick={() => { trackEvent('cta_clicked', { cta: 'start_trial', source }); onClick(); }}
-  >{children}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
+    onClick={() => { trackEvent('cta_clicked', { cta: children ? 'start_trial' : 'book_demo', source }); onClick(); }}
+  >{children ?? <span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span>}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -170,14 +170,14 @@ function Header({ isHome }: { isHome: boolean }) {
     <nav className={styles.desktopNav} aria-label="Primary navigation">
       {links.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
     </nav>
-    <div className={styles.headerCta}><TrialButton onClick={onTrial} variant="compact" source="header">Start free trial</TrialButton></div>
+    <div className={styles.headerCta}><TrialButton onClick={onTrial} variant="compact" source="header" /></div>
     <button type="button" className={styles.menuButton} aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="trial-mobile-nav" onClick={() => setOpen((value) => !value)}>
       {open ? <X size={22} aria-hidden="true" /> : <List size={22} aria-hidden="true" />}
     </button>
     <AnimatePresence>
       {open && <motion.nav id="trial-mobile-nav" className={styles.mobileNav} aria-label="Mobile navigation" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
         {links.map(([href, label]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
-        <button type="button" onClick={() => { setOpen(false); onTrial(); }}>Start 14-day free trial <ArrowRight size={16} /></button>
+        <button type="button" onClick={() => { setOpen(false); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} /></button>
       </motion.nav>}
     </AnimatePresence>
   </header>;
@@ -1086,7 +1086,7 @@ export function PricingSection() {
             </li>;
           })}
         </ul>
-        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'start_trial', source: 'pricing', tier: tier.id }); onTrial(); }}>Start free trial <ArrowRight size={16} aria-hidden="true" /></button>
+        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'pricing', tier: tier.id }); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
       </article>)}
     </div>
     <div className={styles.whatsappIncluded}>
@@ -1175,11 +1175,11 @@ function TrialDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
       <button ref={closeRef} type="button" className={styles.dialogClose} onClick={onClose} aria-label="Close"><X size={21} /></button>
       <div className={styles.dialogIntro}>
         <p className={styles.eyebrowLight}>14-day free trial</p>
-        <h2 id="trial-dialog-title">Start recovering orders this week.</h2>
+        <h2 id="trial-dialog-title">See how it works for your store.</h2>
         <ul>
-          <li><ClockCountdown size={17} aria-hidden="true" />Short setup call with our team</li>
-          <li><PhoneCall size={17} aria-hidden="true" />AI calls on your real COD orders</li>
-          <li><ChartLineUp size={17} aria-hidden="true" />Results reviewed with you on day 14</li>
+          <li><ClockCountdown size={17} aria-hidden="true" />Live demo with our team</li>
+          <li><PhoneCall size={17} aria-hidden="true" />See AI calls and WhatsApp follow-ups</li>
+          <li><ChartLineUp size={17} aria-hidden="true" />Explore a 14-day free trial after your demo</li>
         </ul>
       </div>
       <div className={styles.dialogForm}><DemoBooking compact mode="trial" sectionId="dialog-trial-signup" /></div>
@@ -1242,7 +1242,7 @@ export function TrialSiteFrame({ children, isHome = false }: { children: React.R
         <main>{children}</main>
         <SiteFooter />
         <div className={`${styles.mobileSticky} ${showSticky ? styles.mobileStickyVisible : ''}`} aria-hidden={!showSticky}>
-          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'start_trial' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}>Start 14-day free trial <ArrowRight size={16} aria-hidden="true" /></button>
+          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
           <a href="tel:+919788274333" aria-label="Call +91 97882 74333" tabIndex={showSticky ? 0 : -1}><PhoneCall size={22} weight="bold" aria-hidden="true" /></a>
         </div>
       </div>

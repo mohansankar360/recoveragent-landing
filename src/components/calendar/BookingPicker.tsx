@@ -64,7 +64,7 @@ export function BookingPicker({ prefill, onEdit }: { prefill?: DemoFormData | nu
       <p>{formatBookingDate(booking.start)} IST</p><p>Check <strong>{details?.email}</strong> for your calendar invitation and meeting details.</p>
     </div> : <>
       <p className={styles.eyebrow}>RECOVER AGENT · DISCOVERY CALL</p><h2>Choose your demo time.</h2>
-      <p className={styles.muted}>30 minutes · Google Meet · In English<br />All times are in India Standard Time (IST).</p>
+      <p className={styles.muted}>30 minutes · Google Meet<br />All times are in India Standard Time (IST).</p>
       {details === undefined ? <p role="status">Loading your details…</p> : !details || !qualifiesForDemoCalendar(details) ? <div className={styles.notice}><p>Start with your store details so we can prepare for your call.</p><Link href="/book-demo" className={styles.confirm}>Enter demo details →</Link></div> : <>
         <fieldset disabled={busy || loading} className={styles.fieldset}><legend>1. Choose a day</legend><div className={styles.days}>
           {availability.days.map(date => { const value = new Date(`${date}T12:00:00+05:30`); const days = bookingDays(); return <button key={date} type="button" aria-pressed={day === date} onClick={() => { setDay(date); setSelected(""); }}><small>{date === days[0] ? "Today" : date === days[1] ? "Tomorrow" : value.toLocaleDateString("en-IN", { weekday: "short", timeZone: "Asia/Kolkata" })}</small><strong>{value.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}</strong></button>; })}

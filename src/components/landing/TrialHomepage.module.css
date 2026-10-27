@@ -38,6 +38,8 @@
 .trialButton:active { transform: translateY(0); }
 .trialButton:focus-visible, .ghostButton:focus-visible, .outlineButton:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
 .trialButton svg { transition: transform 0.18s ease; }
+.ctaCopy { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; }
+.ctaSubtext { font-size: 12px; font-weight: 400; line-height: 1.2; color: inherit; opacity: 0.85; }
 .trialButton:hover svg { transform: translateX(3px); }
 .trialButtonCompact { min-height: 42px; padding: 0 18px; font-size: 14px; border-radius: 11px; }
 .trialButtonLight { color: var(--ink); background: #fff; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25); }

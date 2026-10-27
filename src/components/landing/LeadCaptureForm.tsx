@@ -250,9 +250,9 @@ export function LeadCaptureForm({ mode = "demo" }: { mode?: "demo" | "trial" }) 
             exit={{ opacity: 0 }}
             transition={appleFade}
           >
-            <div className="lead-form-badge">{isTrial ? "No setup fee" : "Free demo"}</div>
+            <div className="lead-form-badge">{isTrial ? "No setup fee" : "14-day free trial available"}</div>
             <div className="lead-form-head">
-              <h2>{isTrial ? "Start your 14-day free trial" : "See Recover Agent in Action"}</h2>
+              <h2>{isTrial ? "Start your 14-day free trial" : "Book a demo"}</h2>
               <p>
                 {isTrial
                   ? "Share your details, then pick a time for your setup call."

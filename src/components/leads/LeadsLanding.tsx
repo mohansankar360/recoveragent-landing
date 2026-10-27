@@ -136,7 +136,7 @@ const FAQS = [
 ] as const;
 
 function scrollToForm(source: string) {
-  trackEvent('cta_clicked', { cta: 'start_trial', source, page: 'leads' });
+  trackEvent('cta_clicked', { cta: 'book_demo', source, page: 'leads' });
   document.getElementById('book')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -282,7 +282,7 @@ export function LeadsLanding() {
         <div className={styles.wrap}>
           <Image src="/recover-agent-logo-transparent.png" alt="Recover Agent" width={152} height={38} priority className={styles.logo} />
           <button type="button" className={styles.headerCta} onClick={() => scrollToForm('header')}>
-            Start free trial
+            <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span>
           </button>
         </div>
       </header>
@@ -308,7 +308,7 @@ export function LeadsLanding() {
         </div>
 
         <div id="book" className={styles.formCol}>
-          <LeadCaptureForm mode="trial" />
+          <LeadCaptureForm />
         </div>
       </section>
 
@@ -361,7 +361,7 @@ export function LeadsLanding() {
               order — confirmed, cancelled, rescheduled or needs review.
             </p>
             <button type="button" className={styles.primary} onClick={() => scrollToForm('traits')}>
-              Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
+              <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span> <ArrowRight size={18} weight="bold" aria-hidden />
             </button>
           </div>
           <ul className={styles.traits}>
@@ -419,7 +419,7 @@ export function LeadsLanding() {
           are confirmed on your setup call.
         </p>
         <button type="button" className={styles.primary} onClick={() => scrollToForm('pricing')}>
-          Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
+          <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span> <ArrowRight size={18} weight="bold" aria-hidden />
         </button>
       </section>
 
@@ -441,7 +441,7 @@ export function LeadsLanding() {
           <h2>Let the AI agent call your buyers for 14 days, free.</h2>
           <p>No setup fee. See the results on your own orders.</p>
           <button type="button" className={styles.primary} onClick={() => scrollToForm('final')}>
-            Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
+            <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span> <ArrowRight size={18} weight="bold" aria-hidden />
           </button>
         </div>
       </section>
@@ -452,7 +452,7 @@ export function LeadsLanding() {
 
       <div className={styles.sticky} data-show={showSticky || undefined}>
         <button type="button" className={styles.primary} onClick={() => { trackEvent('sticky_cta_clicked', { page: 'leads' }); scrollToForm('sticky'); }}>
-          Start 14-day free trial <ArrowRight size={18} weight="bold" aria-hidden />
+          <span className={styles.ctaCopy}><span>Book a demo</span><small>14-day free trial</small></span> <ArrowRight size={18} weight="bold" aria-hidden />
         </button>
       </div>
     </main>
