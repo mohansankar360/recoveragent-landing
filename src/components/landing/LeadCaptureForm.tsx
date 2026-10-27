@@ -145,14 +145,14 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     setForm((prev) => ({ ...prev, [field]: value }));
 
     if (errors[field] || touched[field]) {
-      const error = validateField(field, value, isTrial);
+      const error = validateField(field, value, true);
       setErrors((prev) => ({ ...prev, [field]: error }));
     }
   };
 
   const handleBlur = (field: keyof LeadFormData) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    const error = validateField(field, form[field], isTrial);
+    const error = validateField(field, form[field], true);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
@@ -161,7 +161,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
   const handleNext = (e: FormEvent) => {
     e.preventDefault();
-    const nextErrors = validateAll(form, isTrial, STEP_ONE_FIELDS);
+    const nextErrors = validateAll(form, true, STEP_ONE_FIELDS);
     setErrors(nextErrors);
     markTouched(STEP_ONE_FIELDS);
     if (Object.keys(nextErrors).length > 0) {
@@ -198,7 +198,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     e.preventDefault();
     if (isSubmitting || calendarPrefill) return;
 
-    const nextErrors = validateAll(form, isTrial);
+    const nextErrors = validateAll(form, true);
     setErrors(nextErrors);
     markTouched(Object.keys(form) as (keyof LeadFormData)[]);
 
@@ -223,7 +223,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       whatsapp: form.whatsapp.replace(/\D/g, "").slice(0, 10),
       monthlyOrders: form.monthlyOrders,
       storePlatform: form.storePlatform,
-      storeUrl: isTrial ? normalizeStoreUrl(form.storeUrl) : 'To be shared on call',
+      storeUrl: normalizeStoreUrl(form.storeUrl),
       preferredLanguage: 'english-or-hindi',
     };
     setSubmitError(null);
@@ -405,10 +405,9 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                   label: option.label,
                 }))}
               />
-              {isTrial && (
                 <IconField
                   id={`${idPrefix}-store-url`}
-                  label="Store website"
+                  label="Store URL"
                   icon={Globe}
                   value={form.storeUrl}
                   error={errors.storeUrl}
@@ -418,7 +417,6 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                   autoComplete="url"
                   inputMode="url"
                 />
-              )}
               <IconField
                 id={`${idPrefix}-email`}
                 label="Email"
