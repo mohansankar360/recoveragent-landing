@@ -257,7 +257,7 @@ function useParallaxLayer({ springX, springY, scrollY, disabled }: ParallaxInput
 }
 
 /** The answerable phone with parallax cards. Used in the homepage hero and on sub pages. */
-export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenario?: ScenarioKey; playRef?: React.MutableRefObject<(() => void) | null> }) {
+export function CallStage({ defaultScenario = 'cod', playRef, refined = false }: { defaultScenario?: ScenarioKey; playRef?: React.MutableRefObject<(() => void) | null>; refined?: boolean }) {
   const reduceMotion = useReducedMotion();
   const [scenario, setScenario] = useState<ScenarioKey>(defaultScenario);
   const player = useCallPlayer(scenario);
@@ -269,7 +269,7 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
   const springX = useSpring(pointerX, { stiffness: 70, damping: 18 });
   const springY = useSpring(pointerY, { stiffness: 70, damping: 18 });
   const { scrollY } = useScroll();
-  const motionInputs = { springX, springY, scrollY, disabled: Boolean(reduceMotion) };
+  const motionInputs = { springX, springY, scrollY, disabled: Boolean(reduceMotion) || refined };
   const phoneLayer = useParallaxLayer(motionInputs, 14, 0.06);
   const cardA = useParallaxLayer(motionInputs, 34, 0.16);
   const cardB = useParallaxLayer(motionInputs, -26, 0.24);
@@ -326,7 +326,7 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
           <div className={`${styles.phone} ${player.status === 'ringing' ? styles.phoneRinging : ''}`}>
             <div className={styles.phoneNotch} aria-hidden="true" />
             <div className={styles.phoneScreen}>
-              <p className={styles.phoneStatus}>{live ? <><span className={styles.liveDot} />Live call · {item.language}</> : ended ? 'Call ended' : player.status === 'paused' ? 'On hold' : 'Incoming AI call…'}</p>
+              <p className={styles.phoneStatus}>{live ? <><span className={styles.liveDot} />Live call · {item.language}</> : ended ? 'Call ended' : player.status === 'paused' ? (refined ? 'Recording paused' : 'On hold') : (refined ? 'Real AI call · ' + item.language : 'Incoming AI call…')}</p>
               <div className={`${styles.callerAvatar} ${live ? styles.callerAvatarLive : ''}`}><PhoneCall size={30} weight="duotone" aria-hidden="true" /></div>
               <p className={styles.callerName}>RecoverAgent</p>
               <p className={styles.callerMeta}>{item.caller}</p>
@@ -339,19 +339,19 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
               </p>}
               <AnimatePresence mode="wait">
                 {ended
-                  ? <motion.div key="outcome" className={styles.callOutcome} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                  ? <motion.div key="outcome" className={styles.callOutcome} initial={{ opacity: 0, y: refined && reduceMotion ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                     <CheckCircle size={20} weight="fill" aria-hidden="true" /><span><strong>{item.outcome}</strong><small>Sample outcome · saved to your dashboard</small></span>
                   </motion.div>
                   : <motion.div key="controls" className={styles.callControls} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                     <span className={styles.callAction}>
-                      <button type="button" className={styles.declineButton} onClick={nextScenario} aria-label="Not now, play the next sample call"><PhoneDisconnect size={22} weight="fill" /></button>
-                      <small aria-hidden="true">Not now</small>
+                      <button type="button" className={styles.declineButton} onClick={nextScenario} aria-label={refined ? 'Next sample call' : 'Not now, play the next sample call'}>{refined ? <ArrowRight size={22} weight="bold" /> : <PhoneDisconnect size={22} weight="fill" />}</button>
+                      <small aria-hidden="true">{refined ? 'Next sample' : 'Not now'}</small>
                     </span>
                     <span className={styles.callAction}>
-                      <button type="button" className={styles.answerButton} onClick={answer} aria-label={live ? 'Pause call' : 'Answer and play the real AI call'}>
-                        {live ? <span className={styles.pauseBars}><i /><i /></span> : <Phone size={24} weight="fill" />}
+                      <button type="button" className={styles.answerButton} onClick={answer} aria-label={live ? 'Pause call' : refined ? (player.status === 'paused' ? 'Resume call' : 'Play sample call') : 'Answer and play the real AI call'}>
+                        {live ? <span className={styles.pauseBars}><i /><i /></span> : refined ? <Play size={24} weight="fill" aria-hidden="true" /> : <Phone size={24} weight="fill" />}
                       </button>
-                      <small aria-hidden="true">{live ? 'Pause' : 'Answer'}</small>
+                      <small aria-hidden="true">{live ? 'Pause' : refined ? (player.status === 'paused' ? 'Resume' : 'Play call') : 'Answer'}</small>
                     </span>
                   </motion.div>}
               </AnimatePresence>
@@ -361,6 +361,10 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
             <audio {...player.audioProps} />
           </div>
           <p className={styles.phoneHint}>{live ? 'Real recording of our AI voice agent' : ended ? 'What happened next:' : <><SpeakerHigh size={15} weight="fill" aria-hidden="true" />Turn your sound on</>}</p>
+          {refined && !ended && <div className={styles.refinedSummary} aria-label="Sample workflow follow-up">
+            <span><WhatsappLogo size={15} aria-hidden="true" />WhatsApp follow-up</span>
+            <span><Tag size={15} aria-hidden="true" />{item.tag}</span>
+          </div>}
           {ended && <div className={styles.outcomeChips}>
             <span><WhatsappLogo size={15} weight="fill" aria-hidden="true" />WhatsApp follow-up sent</span>
             <span><Tag size={15} weight="fill" aria-hidden="true" />Shopify tag: {item.tag}</span>
@@ -382,16 +386,16 @@ export function CallStage({ defaultScenario = 'cod', playRef }: { defaultScenari
       </div>;
 }
 
-export function Hero() {
+export function Hero({ refined = false }: { refined?: boolean }) {
   const onTrial = useTrial();
   const playRef = useRef<(() => void) | null>(null);
-  return <section className={styles.hero} id="top">
+  return <section className={`${styles.hero} ${refined ? styles.heroRefined : ''}`} id="top">
     <div className={styles.heroGrid} aria-hidden="true" />
     <div className={styles.heroInner}>
       <div className={styles.heroCopy}>
         <p className={styles.heroBadge}><span className={styles.pulseDot} />Built by a D2C founder, for D2C brands</p>
         <h1>Stop shipping orders <span>that come back.</span></h1>
-        <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>
+        {refined ? <><p className={styles.heroLead}>Confirm COD orders, correct addresses and follow up on WhatsApp—with an AI voice agent.</p><p className={styles.heroResult}>Average RTO <strong>32% → 17%</strong><a href="#case-study">See the case study <ArrowRight size={13} aria-hidden="true" /></a></p></> : <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>}
         <div className={styles.heroActions}>
           <TrialButton onClick={onTrial} source="hero" />
           <button type="button" className={styles.ghostButton} onClick={() => playRef.current?.()}><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</button>
@@ -399,13 +403,13 @@ export function Hero() {
         <ul className={styles.heroAssurances}>
           <li><Check size={15} weight="bold" aria-hidden="true" />Test it on your real orders</li>
           <li><Check size={15} weight="bold" aria-hidden="true" />Calls in 6 languages</li>
-          <li><Check size={15} weight="bold" aria-hidden="true" />Zero setup fee</li>
-          <li><Check size={15} weight="bold" aria-hidden="true" />No annual lock-in</li>
+          {!refined && <li><Check size={15} weight="bold" aria-hidden="true" />Zero setup fee</li>}
+          {!refined && <li><Check size={15} weight="bold" aria-hidden="true" />No annual lock-in</li>}
         </ul>
       </div>
-      <CallStage playRef={playRef} />
+      <CallStage playRef={playRef} refined={refined} />
     </div>
-    <a href="#proof" className={styles.scrollCue} aria-label="Scroll to results"><span /></a>
+    {!refined && <a href="#proof" className={styles.scrollCue} aria-label="Scroll to results"><span /></a>}
   </section>;
 }
 
@@ -1277,9 +1281,9 @@ export function PageHero({ eyebrow, title, description, crumbs, showCtas = true 
 
 /* ───────────────────────── Homepage ───────────────────────── */
 
-export function TrialHomepage() {
+export function TrialHomepage({ refinedHero = false }: { refinedHero?: boolean }) {
   return <TrialSiteFrame isHome>
-    <Hero />
+    <Hero refined={refinedHero} />
     <IntegrationStrip />
     <ProofBand />
     <CaseStudySection />

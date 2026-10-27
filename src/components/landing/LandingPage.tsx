@@ -68,7 +68,7 @@ function ColdPage() {
 }
 
 function FullPage() {
-  return <TrialHomepage />;
+  return <TrialHomepage refinedHero />;
 }
 
 export function LandingPage({ variant = "full" }: { variant?: LandingVariant | "classic" }) {
