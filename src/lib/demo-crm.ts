@@ -23,6 +23,7 @@ export interface WebsitePartialLead {
   source: string;
   name: string;
   phone: string;
+  storeUrl?: string;
   submittedAt: string;
   engagement?: LeadEngagement;
 }
@@ -88,7 +89,7 @@ export function buildDashboardLeadRequest(payload: WebsiteDemoLead, companyId: s
 }
 
 /**
- * Step 1 of the demo form: name + WhatsApp only. The dashboard creates the lead
+ * Step 1 of the demo form: name, WhatsApp and store URL. The dashboard creates the lead
  * now (deduped by phone), and the step-2 "book-demo" submit later fills the same row.
  */
 export function buildDashboardPartialLeadRequest(payload: WebsitePartialLead, companyId: string) {
@@ -103,6 +104,7 @@ export function buildDashboardPartialLeadRequest(payload: WebsitePartialLead, co
       received_at: payload.submittedAt,
       contact: {
         whatsapp: payload.phone,
+        ...(payload.storeUrl ? { store_url: payload.storeUrl } : {}),
         form_status: FORM_STATUS_PARTIAL,
         ...engagementContact(engagement),
       },

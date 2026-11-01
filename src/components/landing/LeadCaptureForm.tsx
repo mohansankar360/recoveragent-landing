@@ -16,12 +16,15 @@ import {
 import { trackEvent } from "@/lib/analytics";
 import {
   MONTHLY_ORDERS_OPTIONS,
+  NO_WEBSITE_PLATFORM,
+  NO_WEBSITE_STORE_URL,
   STORE_PLATFORM_OPTIONS,
   UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { saveDemoBookingSession } from '@/lib/demo-booking-session';
-import { getDisqualificationMessage, getStoreUrlValidationError, normalizeStoreUrl, qualifiesForDemoCalendar } from '@/lib/demo-booking';
-import { generateMetaEventId } from "@/lib/meta-pixel";
+import { getDisqualificationMessage, getStoreUrlValidationError, normalizeStoreUrl, parseIndianMobileInput, qualifiesForDemoCalendar } from '@/lib/demo-booking';
+import { suggestEmailCorrection } from "@/lib/email-suggestion";
+import { generateMetaEventId, getMetaBrowserIds } from "@/lib/meta-pixel";
 import { identifyClarityLead } from "@/lib/clarity";
 import { getEngagementSnapshot } from "@/lib/visitor-engagement";
 import { appleFade, appleSpring } from "@/lib/motion";
@@ -41,10 +44,12 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TRIAL_LOW_VOLUME_MESSAGE =
   "The 14-day free trial is for stores doing 500+ orders a month. We can still help you reduce RTO with our WhatsApp service — our team will call you soon.";
 
+// hasWebsite is false once the visitor ticks "No website yet": the URL and
+// platform are then not asked for.
 function validateField(
   field: keyof LeadFormData,
   value: string,
-  collectStoreUrl: boolean
+  hasWebsite: boolean
 ): string | undefined {
   const trimmed = value.trim();
 
@@ -66,10 +71,10 @@ function validateField(
       if (!trimmed) return "Select your monthly order volume";
       return undefined;
     case "storePlatform":
-      if (!trimmed) return "Select your store platform";
+      if (hasWebsite && !trimmed) return "Select your store platform";
       return undefined;
     case "storeUrl":
-      return collectStoreUrl ? getStoreUrlValidationError(value) : undefined;
+      return hasWebsite ? getStoreUrlValidationError(value) : undefined;
     default:
       return undefined;
   }
@@ -77,16 +82,16 @@ function validateField(
 
 // Step 1 is saved to the CRM on its own, so a visitor who drops off on step 2
 // can still be followed up. Step 2 then completes the same contact.
-const STEP_ONE_FIELDS: (keyof LeadFormData)[] = ["name", "whatsapp"];
+const STEP_ONE_FIELDS: (keyof LeadFormData)[] = ["name", "whatsapp", "storeUrl"];
 
 function validateAll(
   form: LeadFormData,
-  collectStoreUrl: boolean,
+  hasWebsite: boolean,
   fields = Object.keys(form) as (keyof LeadFormData)[]
 ): Partial<LeadFormData> {
   const next: Partial<LeadFormData> = {};
   fields.forEach((field) => {
-    const error = validateField(field, form[field], collectStoreUrl);
+    const error = validateField(field, form[field], hasWebsite);
     if (error) next[field] = error;
   });
   return next;
@@ -113,7 +118,9 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [onboardingRequested, setOnboardingRequested] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
-  // Name + number last sent to the CRM, so Back → Next without edits doesn't resend.
+  const [noWebsite, setNoWebsite] = useState(false);
+  const hasWebsite = !noWebsite;
+  // Step 1 values last sent to the CRM, so Back → Next without edits doesn't resend.
   const savedStepOne = useRef<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const pendingFocus = useRef<string | null>(null);
@@ -129,8 +136,8 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
   const focusFirstError = (nextErrors: Partial<LeadFormData>) => {
     const ids: Record<keyof LeadFormData, string> = {
-      name: `${idPrefix}-name`, whatsapp: `${idPrefix}-whatsapp`, monthlyOrders: `${idPrefix}-orders`,
-      storePlatform: `${idPrefix}-platform`, storeUrl: `${idPrefix}-store-url`, email: `${idPrefix}-email`,
+      name: `${idPrefix}-name`, whatsapp: `${idPrefix}-whatsapp`, storeUrl: `${idPrefix}-store-url`,
+      monthlyOrders: `${idPrefix}-orders`, storePlatform: `${idPrefix}-platform`, email: `${idPrefix}-email`,
     };
     const first = (Object.keys(ids) as (keyof LeadFormData)[]).find((field) => nextErrors[field]);
     if (first) pendingFocus.current = ids[first];
@@ -145,23 +152,32 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     setForm((prev) => ({ ...prev, [field]: value }));
 
     if (errors[field] || touched[field]) {
-      const error = validateField(field, value, true);
+      const error = validateField(field, value, hasWebsite);
       setErrors((prev) => ({ ...prev, [field]: error }));
     }
   };
 
   const handleBlur = (field: keyof LeadFormData) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    const error = validateField(field, form[field], true);
+    const error = validateField(field, form[field], hasWebsite);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
+
+  const toggleNoWebsite = (checked: boolean) => {
+    setNoWebsite(checked);
+    setErrors((prev) => ({ ...prev, storeUrl: undefined, storePlatform: undefined }));
+  };
+
+  const storeUrlForCrm = () => (noWebsite ? NO_WEBSITE_STORE_URL : normalizeStoreUrl(form.storeUrl));
+  const emailSuggestion = errors.email ? null : suggestEmailCorrection(form.email);
+  const routesToOnboarding = noWebsite || form.monthlyOrders === "0-500";
 
   const markTouched = (fields: (keyof LeadFormData)[]) =>
     setTouched((prev) => fields.reduce((acc, field) => ({ ...acc, [field]: true }), prev));
 
   const handleNext = (e: FormEvent) => {
     e.preventDefault();
-    const nextErrors = validateAll(form, true, STEP_ONE_FIELDS);
+    const nextErrors = validateAll(form, hasWebsite, STEP_ONE_FIELDS);
     setErrors(nextErrors);
     markTouched(STEP_ONE_FIELDS);
     if (Object.keys(nextErrors).length > 0) {
@@ -171,7 +187,8 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
     const name = form.name.trim();
     const whatsapp = form.whatsapp.replace(/\D/g, "").slice(0, 10);
-    const key = `${name}|${whatsapp}`;
+    const storeUrl = storeUrlForCrm();
+    const key = `${name}|${whatsapp}|${storeUrl}`;
     if (savedStepOne.current !== key) {
       savedStepOne.current = key;
       trackEvent("lead_form_step1_completed");
@@ -179,7 +196,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       fetch("/api/demo-lead/partial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, whatsapp, engagement: getEngagementSnapshot() }),
+        body: JSON.stringify({ name, whatsapp, storeUrl, engagement: getEngagementSnapshot() }),
         keepalive: true,
       })
         .then((response) => {
@@ -198,7 +215,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     e.preventDefault();
     if (isSubmitting || calendarPrefill) return;
 
-    const nextErrors = validateAll(form, true);
+    const nextErrors = validateAll(form, hasWebsite);
     setErrors(nextErrors);
     markTouched(Object.keys(form) as (keyof LeadFormData)[]);
 
@@ -208,7 +225,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       return;
     }
 
-    if (form.storePlatform === "other") {
+    if (hasWebsite && form.storePlatform === "other") {
       setIsUnsupportedPlatform(true);
       return;
     }
@@ -222,20 +239,20 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       email: form.email.trim(),
       whatsapp: form.whatsapp.replace(/\D/g, "").slice(0, 10),
       monthlyOrders: form.monthlyOrders,
-      storePlatform: form.storePlatform,
-      storeUrl: normalizeStoreUrl(form.storeUrl),
+      storePlatform: noWebsite ? NO_WEBSITE_PLATFORM : form.storePlatform,
+      storeUrl: storeUrlForCrm(),
       preferredLanguage: 'english-or-hindi',
     };
     setSubmitError(null);
     try {
-      const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId, engagement: getEngagementSnapshot() }) });
+      const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId, ...getMetaBrowserIds(), engagement: getEngagementSnapshot() }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Could not save your details. Please try again.');
       identifyClarityLead(result.leadId ?? metaEventId, payload.name);
       if (!qualifiesForDemoCalendar(payload)) {
         trackEvent("lead_form_submitted", {
           monthly_orders: form.monthlyOrders,
-          store_platform: form.storePlatform,
+          store_platform: payload.storePlatform,
           qualifies: false,
           event_id: metaEventId,
         });
@@ -287,7 +304,14 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
             aria-live="polite"
           >
             <p className="lead-form-success-title">Your onboarding request is received.</p>
-            <p>{isTrial ? TRIAL_LOW_VOLUME_MESSAGE : getDisqualificationMessage(form)}</p>
+            <p>
+              {isTrial && !noWebsite
+                ? TRIAL_LOW_VOLUME_MESSAGE
+                : getDisqualificationMessage({
+                    monthlyOrders: form.monthlyOrders,
+                    storePlatform: noWebsite ? NO_WEBSITE_PLATFORM : form.storePlatform,
+                  })}
+            </p>
           </motion.div>
         ) : isUnsupportedPlatform ? (
           <motion.div
@@ -324,10 +348,12 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
               <h2>{isTrial ? "Start your 14-day free trial" : "Book a demo"}</h2>
               <p>
                 {step === 1
-                  ? "Start with your name and WhatsApp number."
-                  : isTrial
-                    ? "A few store details, then pick a time for your setup call."
-                    : "A few store details, then choose a time for your 30-minute demo."}
+                  ? "Start with your name, WhatsApp number and store."
+                  : noWebsite
+                    ? "A couple of details so our team can call you."
+                    : isTrial
+                      ? "A few store details, then pick a time for your setup call."
+                      : "A few store details, then choose a time for your 30-minute demo."}
               </p>
             </div>
 
@@ -354,6 +380,31 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                 onBlur={() => handleBlur("whatsapp")}
               />
 
+              <div>
+                {hasWebsite && (
+                  <IconField
+                    id={`${idPrefix}-store-url`}
+                    label="Store URL"
+                    icon={Globe}
+                    value={form.storeUrl}
+                    error={errors.storeUrl}
+                    onChange={(v) => handleChange("storeUrl", v)}
+                    onBlur={() => handleBlur("storeUrl")}
+                    placeholder="yourstore.com"
+                    autoComplete="url"
+                    inputMode="url"
+                  />
+                )}
+                <label className="lead-no-website">
+                  <input
+                    type="checkbox"
+                    checked={noWebsite}
+                    onChange={(e) => toggleNoWebsite(e.target.checked)}
+                  />
+                  No website yet. I sell on Instagram or WhatsApp.
+                </label>
+              </div>
+
               <button type="submit" className="btn btn-green lead-form-submit">
                 Next →
               </button>
@@ -368,7 +419,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
             <form onSubmit={handleSubmit} noValidate className="lead-form-fields">
               <div className="lead-form-recap">
                 <span>
-                  {form.name.trim()} · +91 {form.whatsapp}
+                  {form.name.trim()} · +91 {form.whatsapp} · {noWebsite ? "No website" : form.storeUrl.trim()}
                 </span>
                 <button type="button" className="lead-form-back" onClick={() => { pendingFocus.current = `${idPrefix}-name`; setStep(1); }}>
                   <ArrowLeft size={14} weight="bold" aria-hidden />
@@ -391,32 +442,22 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                 }))}
               />
 
-              <IconSelectField
-                id={`${idPrefix}-platform`}
-                label="Store platform"
-                icon={Storefront}
-                value={form.storePlatform}
-                error={errors.storePlatform}
-                onChange={(v) => handleChange("storePlatform", v)}
-                onBlur={() => handleBlur("storePlatform")}
-                placeholder="Platform"
-                options={STORE_PLATFORM_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-              />
-                <IconField
-                  id={`${idPrefix}-store-url`}
-                  label="Store URL"
-                  icon={Globe}
-                  value={form.storeUrl}
-                  error={errors.storeUrl}
-                  onChange={(v) => handleChange("storeUrl", v)}
-                  onBlur={() => handleBlur("storeUrl")}
-                  placeholder="yourstore.com"
-                  autoComplete="url"
-                  inputMode="url"
+              {hasWebsite && (
+                <IconSelectField
+                  id={`${idPrefix}-platform`}
+                  label="Store platform"
+                  icon={Storefront}
+                  value={form.storePlatform}
+                  error={errors.storePlatform}
+                  onChange={(v) => handleChange("storePlatform", v)}
+                  onBlur={() => handleBlur("storePlatform")}
+                  placeholder="Platform"
+                  options={STORE_PLATFORM_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
                 />
+              )}
               <IconField
                 id={`${idPrefix}-email`}
                 label="Email"
@@ -428,15 +469,24 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                 type="email"
                 autoComplete="email"
                 inputMode="email"
+                hint={emailSuggestion && (
+                  <>
+                    Did you mean{" "}
+                    <button type="button" className="lead-field-hint-fix" onClick={() => handleChange("email", emailSuggestion)}>
+                      {emailSuggestion}
+                    </button>
+                    ?
+                  </>
+                )}
               />
 
               {submitError && <p role="alert" className="lead-field-msg">{submitError}</p>}
               <button
                 type="submit"
                 className="btn btn-green lead-form-submit"
-                disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}
+                disabled={isSubmitting || !!calendarPrefill || (hasWebsite && form.storePlatform === 'other')}
               >
-                {isSubmitting ? "Saving…" : form.monthlyOrders === '0-500' ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue to choose a time →'}
+                {isSubmitting ? "Saving…" : routesToOnboarding ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue to choose a time →'}
               </button>
 
               <p className="lead-form-privacy">
@@ -470,13 +520,7 @@ function PhoneField({
 }) {
   const reduceMotion = useReducedMotion();
 
-  const handleInput = (raw: string) => {
-    let digits = raw.replace(/\D/g, "");
-    if (digits.startsWith("91") && digits.length > 10) {
-      digits = digits.slice(2);
-    }
-    onChange(digits.slice(0, 10));
-  };
+  const handleInput = (raw: string) => onChange(parseIndianMobileInput(raw));
 
   return (
     <div className="lead-field">
@@ -496,7 +540,6 @@ function PhoneField({
             onChange={(e) => handleInput(e.target.value)}
             onBlur={onBlur}
             placeholder="98765 43210"
-            maxLength={10}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? `${id}-error` : undefined}
           />
@@ -519,6 +562,7 @@ function IconField({
   type = "text",
   autoComplete,
   inputMode,
+  hint,
 }: {
   id: string;
   label: string;
@@ -531,6 +575,7 @@ function IconField({
   type?: string;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  hint?: React.ReactNode;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -551,10 +596,15 @@ function IconField({
           autoComplete={autoComplete}
           inputMode={inputMode}
           aria-invalid={Boolean(error)}
-          aria-describedby={error ? `${id}-error` : undefined}
+          aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         />
       </div>
       <FieldError id={id} error={error} reduceMotion={reduceMotion} />
+      {!error && hint && (
+        <p id={`${id}-hint`} className="lead-field-hint" aria-live="polite">
+          {hint}
+        </p>
+      )}
     </div>
   );
 }

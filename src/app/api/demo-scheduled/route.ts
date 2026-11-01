@@ -1,4 +1,4 @@
-import { sendMetaServerEvent } from "@/lib/meta-conversions-api";
+import { readMetaBrowserIds, sendMetaServerEvent } from "@/lib/meta-conversions-api";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     phone,
     email,
     firstName: name?.split(/\s+/)[0],
+    ...readMetaBrowserIds(request, body),
     customData: {
       content_name: "demo_booking",
       ...(startTime ? { start_time: startTime } : {}),

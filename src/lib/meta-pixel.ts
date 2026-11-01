@@ -55,6 +55,51 @@ export function generateMetaEventId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
+const FBC_STORAGE_KEY = "ra_fbc";
+// Meta keeps the click id for 90 days; match that for the fallback copy.
+const FBC_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+
+function readCookie(name: string): string | undefined {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+/**
+ * Remembers an ad click (?fbclid=) in fbc format. The pixel sets the _fbc
+ * cookie itself, but this copy survives when the pixel loads late or is blocked.
+ */
+export function captureMetaClickId(): void {
+  if (typeof window === "undefined") return;
+  const fbclid = new URLSearchParams(window.location.search).get("fbclid");
+  if (!fbclid) return;
+  try {
+    localStorage.setItem(
+      FBC_STORAGE_KEY,
+      JSON.stringify({ fbc: `fb.1.${Date.now()}.${fbclid}`, at: Date.now() })
+    );
+  } catch {
+    // Storage blocked: the _fbc cookie is still used when present.
+  }
+}
+
+/** Browser ids that let Meta match server events to the ad click. */
+export function getMetaBrowserIds(): { fbc?: string; fbp?: string } {
+  if (typeof window === "undefined") return {};
+  let fbc = readCookie("_fbc");
+  if (!fbc) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(FBC_STORAGE_KEY) ?? "null") as
+        | { fbc?: string; at?: number }
+        | null;
+      if (stored?.fbc && stored.at && Date.now() - stored.at < FBC_MAX_AGE_MS) fbc = stored.fbc;
+    } catch {
+      // Ignore unreadable storage.
+    }
+  }
+  const fbp = readCookie("_fbp");
+  return { ...(fbc ? { fbc } : {}), ...(fbp ? { fbp } : {}) };
+}
+
 function getFbq(): MetaFbq | undefined {
   if (typeof window === "undefined") return undefined;
   return window.fbq;
@@ -73,7 +118,8 @@ function mapAnalyticsEventToMeta(
       kind: "custom",
       name: "LowVolumeLead",
       params: {
-        content_name: event === "demo_form_submitted" ? "demo_booking" : "lead_capture",
+        // Both forms post to /api/demo-lead, which reports content_name "demo_booking".
+        content_name: "demo_booking",
         ...(properties.monthly_orders ? { monthly_orders: properties.monthly_orders } : {}),
       },
     };
@@ -107,7 +153,7 @@ function mapAnalyticsEventToMeta(
         kind: "standard",
         name: "Lead",
         params: {
-          content_name: properties?.product === "whatsapp" ? "whatsapp_onboarding" : "lead_capture",
+          content_name: properties?.product === "whatsapp" ? "whatsapp_onboarding" : "demo_booking",
           ...(properties?.product === "whatsapp" ? { value: 999, currency: "INR" } : {}),
           ...(properties?.monthly_orders
             ? { monthly_orders: properties.monthly_orders }

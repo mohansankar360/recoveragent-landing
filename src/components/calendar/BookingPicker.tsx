@@ -5,7 +5,7 @@ import { normalizeWhatsAppNumber, qualifiesForDemoCalendar, type DemoFormData } 
 import { clearDemoBookingSession, readDemoBookingSession } from "@/lib/demo-booking-session";
 import { bookingDays, BOOKING_TIMES, formatBookingDate, slotStart } from "@/lib/calendar-slots";
 import { trackEvent } from "@/lib/analytics";
-import { generateMetaEventId } from "@/lib/meta-pixel";
+import { generateMetaEventId, getMetaBrowserIds } from "@/lib/meta-pixel";
 import styles from "./CalendarPageClient.module.css";
 type Availability = { days: string[]; slots: string[] };
 type Booking = { uid: string; status: string; start: string };
@@ -52,7 +52,7 @@ export function BookingPicker({ prefill, onEdit }: { prefill?: DemoFormData | nu
       if (result.status === "accepted") {
         const eventId = generateMetaEventId();
         trackEvent("demo_scheduled", { event_id: eventId, start_time: result.start });
-        void fetch("/api/demo-scheduled", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ metaEventId: eventId, name: details.name, email: details.email, phone: normalizeWhatsAppNumber(details.whatsapp), startTime: result.start }) }).catch(() => {});
+        void fetch("/api/demo-scheduled", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ metaEventId: eventId, ...getMetaBrowserIds(), name: details.name, email: details.email, phone: normalizeWhatsAppNumber(details.whatsapp), startTime: result.start }) }).catch(() => {});
       }
     } catch (err) { setError(err instanceof Error ? err.message : "We couldn’t confirm your booking. Please check your email before trying again."); }
     finally { submitting.current = false; setBusy(false); }
@@ -60,10 +60,10 @@ export function BookingPicker({ prefill, onEdit }: { prefill?: DemoFormData | nu
   return <div className={`${styles.card} ${onEdit ? styles.inline : ""}`} aria-busy={loading || busy}>
     {booking ? <div className={styles.success} role="status">
       <span className={styles.check}>✓</span><p className={styles.eyebrow}>{booking.status === "accepted" ? "YOU’RE ALL SET" : "REQUEST RECEIVED"}</p>
-      <h2>{booking.status === "accepted" ? "Your discovery call is booked." : "Your call is awaiting confirmation."}</h2>
+      <h2>{booking.status === "accepted" ? "Your demo is booked." : "Your demo is awaiting confirmation."}</h2>
       <p>{formatBookingDate(booking.start)} IST</p><p>Check <strong>{details?.email}</strong> for your calendar invitation and meeting details.</p>
     </div> : <>
-      <p className={styles.eyebrow}>RECOVER AGENT · DISCOVERY CALL</p><h2>Choose your demo time.</h2>
+      <p className={styles.eyebrow}>RECOVER AGENT · LIVE DEMO</p><h2>Choose your demo time.</h2>
       <p className={styles.muted}>30 minutes · Google Meet<br />All times are in India Standard Time (IST).</p>
       {details === undefined ? <p role="status">Loading your details…</p> : !details || !qualifiesForDemoCalendar(details) ? <div className={styles.notice}><p>Start with your store details so we can prepare for your call.</p><Link href="/book-demo" className={styles.confirm}>Enter demo details →</Link></div> : <>
         <fieldset disabled={busy || loading} className={styles.fieldset}><legend>1. Choose a day</legend><div className={styles.days}>
@@ -75,7 +75,7 @@ export function BookingPicker({ prefill, onEdit }: { prefill?: DemoFormData | nu
         <div className={styles.summary}><span>Booking for</span><strong>{details.name}</strong><p>{details.email}</p>{selected && <p className={styles.selection}>{formatBookingDate(selected)} IST</p>}
           {onEdit ? <button type="button" className={styles.edit} disabled={busy} onClick={onEdit}>← Edit your details</button> : <Link href="/book-demo">Edit your details</Link>}
         </div>
-        <button type="button" className={styles.confirm} disabled={!selected || busy || loading} onClick={() => void confirm()}>{busy ? "Confirming your booking…" : "Confirm discovery call →"}</button>
+        <button type="button" className={styles.confirm} disabled={!selected || busy || loading} onClick={() => void confirm()}>{busy ? "Confirming your booking…" : "Confirm demo time →"}</button>
         <p className={styles.footnote}>Your details will be shared with Cal.com to book your call. You’ll receive a calendar invitation by email.</p>
       </>}
       {error && <div className={styles.error} role="alert"><p>{error}</p><button type="button" disabled={busy || loading} onClick={() => void refresh()}>Reload available times</button></div>}

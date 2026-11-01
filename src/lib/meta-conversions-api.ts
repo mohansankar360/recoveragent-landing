@@ -9,8 +9,34 @@ type MetaServerEventParams = {
   phone?: string;
   email?: string;
   firstName?: string;
+  fbc?: string;
+  fbp?: string;
   customData?: Record<string, string | number>;
 };
+
+const META_BROWSER_ID_PATTERN = /^fb\.\d\.\d+\.[\w.-]{1,400}$/;
+
+function cleanBrowserId(value: unknown): string | undefined {
+  return typeof value === "string" && META_BROWSER_ID_PATTERN.test(value.trim())
+    ? value.trim()
+    : undefined;
+}
+
+function readCookie(request: Request, name: string): string | undefined {
+  const match = request.headers.get("cookie")?.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+/**
+ * fbc/fbp for the server event: the pixel's first-party cookies first, then
+ * the copy the page sent in the body (covers a late or blocked pixel).
+ */
+export function readMetaBrowserIds(request: Request, body: unknown): { fbc?: string; fbp?: string } {
+  const sent = body && typeof body === "object" ? (body as { fbc?: unknown; fbp?: unknown }) : {};
+  const fbc = cleanBrowserId(readCookie(request, "_fbc")) ?? cleanBrowserId(sent.fbc);
+  const fbp = cleanBrowserId(readCookie(request, "_fbp")) ?? cleanBrowserId(sent.fbp);
+  return { ...(fbc ? { fbc } : {}), ...(fbp ? { fbp } : {}) };
+}
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
@@ -61,6 +87,10 @@ export async function sendMetaServerEvent(
   if (params.clientUserAgent) {
     userData.client_user_agent = params.clientUserAgent;
   }
+
+  // Not hashed: Meta expects fbc/fbp exactly as the pixel wrote them.
+  if (params.fbc) userData.fbc = params.fbc;
+  if (params.fbp) userData.fbp = params.fbp;
 
   const payload = {
     data: [

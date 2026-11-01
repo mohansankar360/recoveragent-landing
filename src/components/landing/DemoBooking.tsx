@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { trackEvent } from "@/lib/analytics";
-import { generateMetaEventId } from "@/lib/meta-pixel";
+import { generateMetaEventId, getMetaBrowserIds } from "@/lib/meta-pixel";
 import { identifyClarityLead } from "@/lib/clarity";
 import { getEngagementSnapshot } from "@/lib/visitor-engagement";
 import {
@@ -13,6 +13,7 @@ import {
   getStoreUrlInlineError,
   getStoreUrlValidationError,
   normalizeStoreUrl,
+  parseIndianMobileInput,
   qualifiesForDemoCalendar,
   STORE_PLATFORM_OPTIONS,
   UNSUPPORTED_PLATFORM_MESSAGE,
@@ -212,6 +213,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
         body: JSON.stringify({
           ...payload,
           metaEventId,
+          ...getMetaBrowserIds(),
           engagement: getEngagementSnapshot(),
         }),
       });
@@ -435,13 +437,7 @@ function PhoneField({
 }) {
   const reduceMotion = useReducedMotion();
 
-  const handleInput = (raw: string) => {
-    let digits = raw.replace(/\D/g, "");
-    if (digits.startsWith("91") && digits.length > 10) {
-      digits = digits.slice(2);
-    }
-    onChange(digits.slice(0, 10));
-  };
+  const handleInput = (raw: string) => onChange(parseIndianMobileInput(raw));
 
   return (
     <div className="numfield demo-field">
@@ -458,7 +454,6 @@ function PhoneField({
           value={value}
           onChange={(e) => handleInput(e.target.value)}
           onBlur={onBlur}
-          maxLength={10}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
         />

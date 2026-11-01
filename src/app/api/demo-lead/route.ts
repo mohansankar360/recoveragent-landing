@@ -1,6 +1,7 @@
 import { buildDemoLeadPayload, isValidDemoFormData, parseLeadEngagement } from "@/lib/demo-lead";
-import { sendMetaServerEvent } from "@/lib/meta-conversions-api";
-import { buildDashboardLeadRequest, isDashboardLeadEndpoint, readDashboardLeadReceipt } from "@/lib/demo-crm";
+import { readMetaBrowserIds, sendMetaServerEvent } from "@/lib/meta-conversions-api";
+import { buildDashboardLeadRequest } from "@/lib/demo-crm";
+import { forwardLeadToCrm } from "@/lib/crm-forward";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -27,67 +28,15 @@ export async function POST(request: Request) {
     body,
     parseLeadEngagement((body as { engagement?: unknown }).engagement)
   );
-  const webhookUrl = process.env.CRM_WEBHOOK_URL;
-
-  if (!webhookUrl) {
-    console.error("[demo-lead] CRM_WEBHOOK_URL is not configured");
-    return Response.json(
-      { ok: false, error: "Lead capture is not configured yet" },
-      { status: 503 }
-    );
+  const forwarded = await forwardLeadToCrm(
+    "demo-lead",
+    (companyId) => buildDashboardLeadRequest(payload, companyId),
+    payload
+  );
+  if (!forwarded.ok) {
+    return Response.json({ ok: false, error: forwarded.error }, { status: forwarded.status });
   }
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  const secret = process.env.CRM_WEBHOOK_SECRET?.trim();
-  const dashboardSync = isDashboardLeadEndpoint(webhookUrl);
-  const companyId = process.env.CRM_COMPANY_ID?.trim();
-  if (dashboardSync && (!companyId || !secret)) {
-    console.error("[demo-lead] Dashboard sync requires CRM_COMPANY_ID and CRM_WEBHOOK_SECRET");
-    return Response.json({ ok: false, error: "Lead capture is not configured yet" }, { status: 503 });
-  }
-  const crmPayload = dashboardSync ? buildDashboardLeadRequest(payload, companyId!) : payload;
-  if (secret) {
-    if (dashboardSync) {
-      headers["x-api-key"] = secret;
-      const gatewayKey = process.env.CRM_GATEWAY_KEY?.trim();
-      if (gatewayKey) headers.Authorization = `Bearer ${gatewayKey}`;
-    } else headers.Authorization = `Bearer ${secret}`;
-  }
-
-  let leadReceipt: { id: string; duplicate: boolean } | null = null;
-  try {
-    const crmResponse = await fetch(webhookUrl, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(crmPayload),
-      signal: AbortSignal.timeout(10_000),
-    });
-
-    if (!crmResponse.ok) {
-
-      console.error("[demo-lead] CRM webhook failed", crmResponse.status);
-      return Response.json(
-        { ok: false, error: "Could not save to CRM" },
-        { status: 502 }
-      );
-    }
-    if (dashboardSync) {
-      leadReceipt = readDashboardLeadReceipt(await crmResponse.json().catch(() => null));
-      if (!leadReceipt) {
-        console.error("[demo-lead] Dashboard did not confirm lead creation");
-        return Response.json({ ok: false, error: "Could not save your details. Please try again." }, { status: 502 });
-      }
-    }
-  } catch (error) {
-    console.error("[demo-lead] CRM webhook error", error);
-    return Response.json(
-      { ok: false, error: "Could not reach CRM" },
-      { status: 502 }
-    );
-  }
+  const leadReceipt = forwarded.receipt;
 
   // Only stores that qualify for the calendar count as a Lead, so ads optimised
   // for Lead don't learn to find stores below 500 orders a month.
@@ -102,6 +51,7 @@ export async function POST(request: Request) {
     phone: payload.phone,
     email: payload.email,
     firstName: payload.name.split(/\s+/)[0],
+    ...readMetaBrowserIds(request, body),
     customData: {
       content_name: "demo_booking",
       monthly_orders: payload.monthlyOrders,

@@ -58,30 +58,36 @@ export interface PartialLeadPayload {
   source: "recover-agent-landing";
   name: string;
   phone: string;
+  storeUrl?: string;
   submittedAt: string;
   engagement?: LeadEngagement;
 }
 
-/** Step 1 of the demo form: only name and WhatsApp are known yet. */
-export function isValidPartialLead(data: unknown): data is Pick<DemoFormData, "name" | "whatsapp"> {
+type PartialLeadData = Pick<DemoFormData, "name" | "whatsapp"> & { storeUrl?: string };
+
+/** Step 1 of the demo form: name, WhatsApp and (from newer pages) the store URL. */
+export function isValidPartialLead(data: unknown): data is PartialLeadData {
   if (!data || typeof data !== "object") return false;
-  const form = data as DemoFormData;
+  const form = data as PartialLeadData;
   return (
     typeof form.name === "string" &&
     form.name.trim().length > 0 &&
     typeof form.whatsapp === "string" &&
-    /^[6-9]\d{9}$/.test(form.whatsapp.replace(/\D/g, ""))
+    /^[6-9]\d{9}$/.test(form.whatsapp.replace(/\D/g, "")) &&
+    (form.storeUrl === undefined ||
+      (typeof form.storeUrl === "string" && form.storeUrl.length <= 300 && isValidStoreUrl(form.storeUrl)))
   );
 }
 
 export function buildPartialLeadPayload(
-  data: Pick<DemoFormData, "name" | "whatsapp">,
+  data: PartialLeadData,
   engagement?: LeadEngagement
 ): PartialLeadPayload {
   return {
     source: "recover-agent-landing",
     name: data.name.trim().slice(0, 120),
     phone: normalizeWhatsAppNumber(data.whatsapp),
+    ...(data.storeUrl ? { storeUrl: data.storeUrl.trim() } : {}),
     submittedAt: new Date().toISOString(),
     ...(engagement ? { engagement } : {}),
   };

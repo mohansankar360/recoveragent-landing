@@ -2,6 +2,7 @@ import type { DemoFormData } from "./demo-booking";
 import {
   isValidMonthlyOrders,
   isValidStorePlatform,
+  parseIndianMobileInput,
 } from "./demo-booking";
 
 export const LEAD_PREFILL_SESSION_KEY = "recoveragent_lead_prefill";
@@ -33,12 +34,8 @@ function sanitizeLeadPrefill(raw: unknown): LeadPrefillData | null {
   if (isNonEmptyString(data.email)) prefill.email = data.email.trim();
 
   if (isNonEmptyString(data.whatsapp)) {
-    const digits = data.whatsapp.replace(/\D/g, "");
-    const normalized =
-      digits.startsWith("91") && digits.length > 10 ? digits.slice(2) : digits;
-    if (/^[6-9]\d{9}$/.test(normalized.slice(0, 10))) {
-      prefill.whatsapp = normalized.slice(0, 10);
-    }
+    const normalized = parseIndianMobileInput(data.whatsapp);
+    if (/^[6-9]\d{9}$/.test(normalized)) prefill.whatsapp = normalized;
   }
 
   if (isNonEmptyString(data.storeUrl)) prefill.storeUrl = data.storeUrl.trim();

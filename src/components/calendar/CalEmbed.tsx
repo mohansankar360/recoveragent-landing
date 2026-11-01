@@ -10,7 +10,7 @@ import {
   type DemoFormData,
 } from "@/lib/demo-booking";
 import { clearDemoBookingSession } from "@/lib/demo-booking-session";
-import { generateMetaEventId } from "@/lib/meta-pixel";
+import { generateMetaEventId, getMetaBrowserIds } from "@/lib/meta-pixel";
 
 type CalEmbedProps = {
   prefill?: DemoFormData | null;
@@ -47,6 +47,7 @@ export function CalEmbed({ prefill }: CalEmbedProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             metaEventId: eventId,
+            ...getMetaBrowserIds(),
             phone: prefill ? normalizeWhatsAppNumber(prefill.whatsapp) : undefined,
             email: prefill?.email.trim(),
             name: prefill?.name.trim(),

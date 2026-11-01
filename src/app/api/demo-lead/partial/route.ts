@@ -3,7 +3,7 @@ import { buildDashboardPartialLeadRequest } from "@/lib/demo-crm";
 import { forwardLeadToCrm } from "@/lib/crm-forward";
 
 /**
- * Step 1 of the demo form (name + WhatsApp). Saved before the visitor sees
+ * Step 1 of the demo form (name, WhatsApp, store URL). Saved before the visitor sees
  * step 2 so a drop-off can still be followed up. The full submit to
  * /api/demo-lead later updates the same CRM contact, matched by phone.
  * No Meta Lead event fires here; that stays on the completed form.

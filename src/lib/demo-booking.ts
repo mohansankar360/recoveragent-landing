@@ -36,13 +36,20 @@ export const STORE_PLATFORM_OPTIONS = [
 export const UNSUPPORTED_PLATFORM_MESSAGE =
   "Sorry, Recover Agent is built only for Shopify and WooCommerce stores.";
 
+// Sellers who only sell on Instagram/WhatsApp tick "No website yet". They are
+// saved to the CRM for the WhatsApp service team but never get the calendar.
+export const NO_WEBSITE_PLATFORM = "no-website";
+export const NO_WEBSITE_STORE_URL = "No website yet";
+const NO_WEBSITE_PLATFORM_LABEL = "No website (Instagram/WhatsApp)";
+
 const MONTHLY_ORDERS_VALUE_SET = new Set(
   MONTHLY_ORDERS_OPTIONS.map((option) => option.value)
 );
 
-const STORE_PLATFORM_VALUE_SET = new Set(
-  STORE_PLATFORM_OPTIONS.map((option) => option.value)
-);
+const STORE_PLATFORM_VALUE_SET = new Set<string>([
+  ...STORE_PLATFORM_OPTIONS.map((option) => option.value),
+  NO_WEBSITE_PLATFORM,
+]);
 
 export function demoLanguageLabel(value: string): string {
   return DEMO_LANGUAGE_OPTIONS.find((option) => option.value === value)?.label ?? value;
@@ -53,6 +60,7 @@ export function monthlyOrdersLabel(value: string): string {
 }
 
 export function storePlatformLabel(value: string): string {
+  if (value === NO_WEBSITE_PLATFORM) return NO_WEBSITE_PLATFORM_LABEL;
   return STORE_PLATFORM_OPTIONS.find((option) => option.value === value)?.label ?? value;
 }
 
@@ -61,7 +69,7 @@ export function isValidMonthlyOrders(value: string): boolean {
 }
 
 export function isValidStorePlatform(value: string): boolean {
-  return STORE_PLATFORM_VALUE_SET.has(value as (typeof STORE_PLATFORM_OPTIONS)[number]["value"]);
+  return STORE_PLATFORM_VALUE_SET.has(value);
 }
 
 export function qualifiesForDemoCalendar(
@@ -84,6 +92,10 @@ export function getDisqualificationMessage(
     return UNSUPPORTED_PLATFORM_MESSAGE;
   }
 
+  if (data.storePlatform === NO_WEBSITE_PLATFORM) {
+    return "Live demos are for Shopify and WooCommerce stores. We can still help you reduce RTO with our WhatsApp API service — our team will call you soon.";
+  }
+
   if (lowVolume) {
     return "Live demos are for stores doing 500+ orders per month. We can still set you up with our WhatsApp API service — our team will call you soon to see how we can help you reduce your RTO.";
   }
@@ -100,12 +112,23 @@ export function normalizeWhatsAppNumber(phone: string): string {
   return `+91${digits}`;
 }
 
-const STORE_URL_PLACEHOLDER = "to be shared on call";
+/**
+ * Reduces what a visitor types or pastes into the +91 field ("+91 98765 43210",
+ * "919876543210", "09876543210") to the 10-digit national number. Runs on every
+ * keystroke, so the input must not cap its length at 10 characters.
+ */
+export function parseIndianMobileInput(raw: string): string {
+  let digits = raw.replace(/\D/g, "").replace(/^0+/, "");
+  if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+  return digits.slice(0, 10);
+}
+
+const STORE_URL_PLACEHOLDERS = new Set(["to be shared on call", NO_WEBSITE_STORE_URL.toLowerCase()]);
 
 /** Prepends https:// when the user enters a bare domain. */
 export function normalizeStoreUrl(value: string): string {
   const trimmed = value.trim();
-  if (!trimmed) return trimmed;
+  if (!trimmed || STORE_URL_PLACEHOLDERS.has(trimmed.toLowerCase())) return trimmed;
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
@@ -119,7 +142,7 @@ export function getStoreUrlValidationError(value: string): string | undefined {
   const trimmed = value.trim();
   if (!trimmed) return "Store URL is required";
 
-  if (trimmed.toLowerCase() === STORE_URL_PLACEHOLDER) return undefined;
+  if (STORE_URL_PLACEHOLDERS.has(trimmed.toLowerCase())) return undefined;
 
   if (/\s/.test(trimmed)) {
     return "Store URL cannot contain spaces";
