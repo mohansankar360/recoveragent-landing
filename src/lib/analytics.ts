@@ -23,6 +23,7 @@ export type AnalyticsEvent =
   | "demo_form_started"
   | "demo_form_submitted"
   | "demo_scheduled"
+  | "demo_time_requested"
   | "sticky_cta_clicked"
   | "exit_intent_shown"
   | "exit_intent_cta_clicked";

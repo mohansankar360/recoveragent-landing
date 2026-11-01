@@ -121,6 +121,24 @@ export function buildDashboardPartialLeadRequest(payload: WebsitePartialLead, co
   };
 }
 
+/**
+ * "None of these times work?" on the booking picker. The dashboard treats this form as a
+ * time request: it saves the time on the matching lead and adds a "Confirm requested demo
+ * time" task, without the stage reset a repeat "book-demo" submit would cause.
+ */
+export function buildDashboardTimeRequest(payload: WebsiteDemoLead, requestedTime: string, companyId: string) {
+  const request = buildDashboardLeadRequest(payload, companyId);
+  return {
+    ...request,
+    lead: {
+      ...request.lead,
+      contact: { ...request.lead.contact, requested_demo_time: requestedTime, booking_status: "Time requested" },
+      attribution: { ...request.lead.attribution, form: "book-demo-time-request" },
+      landing_form: { ...payload, requestedTime },
+    },
+  };
+}
+
 export function isDashboardLeadEndpoint(value: string): boolean {
   try {
     return new URL(value).pathname.replace(/\/$/, "") === "/functions/v1/lead-followup-api";
