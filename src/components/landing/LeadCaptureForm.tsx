@@ -19,7 +19,7 @@ import {
   STORE_PLATFORM_OPTIONS,
   UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
-import { saveDemoBookingSession } from '@/lib/demo-booking-session';
+import { clearSavedLeadDetails, readSavedLeadDetails, saveDemoBookingSession, saveLeadDetails } from '@/lib/demo-booking-session';
 import { getDisqualificationMessage, getStoreUrlValidationError, normalizeStoreUrl, parseIndianMobileInput, qualifiesForDemoCalendar } from '@/lib/demo-booking';
 import { suggestEmailCorrection } from "@/lib/email-suggestion";
 import { generateMetaEventId, getMetaBrowserIds } from "@/lib/meta-pixel";
@@ -35,6 +35,15 @@ interface LeadFormData {
   storePlatform: string;
   storeUrl: string;
 }
+
+const EMPTY_FORM: LeadFormData = {
+  name: "",
+  whatsapp: "",
+  email: "",
+  monthlyOrders: "",
+  storePlatform: "",
+  storeUrl: "",
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -93,14 +102,7 @@ function validateAll(
 
 export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "demo" | "trial"; idPrefix?: string }) {
   const isTrial = mode === "trial";
-  const [form, setForm] = useState<LeadFormData>({
-    name: "",
-    whatsapp: "",
-    email: "",
-    monthlyOrders: "",
-    storePlatform: "",
-    storeUrl: "",
-  });
+  const [form, setForm] = useState<LeadFormData>(EMPTY_FORM);
   const [errors, setErrors] = useState<Partial<LeadFormData>>({});
   const [touched, setTouched] = useState<
     Partial<Record<keyof LeadFormData, boolean>>
@@ -112,6 +114,8 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [onboardingRequested, setOnboardingRequested] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
+  // True when the fields were filled from details this browser saved on an earlier visit.
+  const [restored, setRestored] = useState(false);
   // Step 1 values last sent to the CRM, so Back → Next without edits doesn't resend.
   const savedStepOne = useRef<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -125,6 +129,24 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       pendingFocus.current = null;
     }
   }, [step, errors]);
+
+  // Read after mount: storage isn't available during server rendering.
+  useEffect(() => {
+    const saved = readSavedLeadDetails();
+    if (!saved) return;
+    setForm((prev) => ({ ...prev, ...saved }));
+    setRestored(true);
+  }, []);
+
+  const clearSavedDetails = () => {
+    clearSavedLeadDetails();
+    setForm(EMPTY_FORM);
+    setErrors({});
+    setTouched({});
+    setRestored(false);
+    savedStepOne.current = null;
+    pendingFocus.current = `${idPrefix}-name`;
+  };
 
   const focusFirstError = (nextErrors: Partial<LeadFormData>) => {
     const ids: Record<keyof LeadFormData, string> = {
@@ -174,6 +196,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     const name = form.name.trim();
     const whatsapp = form.whatsapp.replace(/\D/g, "").slice(0, 10);
     const storeUrl = normalizeStoreUrl(form.storeUrl);
+    saveLeadDetails({ name, whatsapp, storeUrl: form.storeUrl });
     const key = `${name}|${whatsapp}|${storeUrl}`;
     if (savedStepOne.current !== key) {
       savedStepOne.current = key;
@@ -234,6 +257,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId, ...getMetaBrowserIds(), engagement: getEngagementSnapshot() }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Could not save your details. Please try again.');
+      saveLeadDetails(form);
       identifyClarityLead(result.leadId ?? metaEventId, payload.name);
       if (!qualifiesForDemoCalendar(payload)) {
         trackEvent("lead_form_submitted", {
@@ -343,6 +367,14 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
             {step === 1 ? (
             <form onSubmit={handleNext} noValidate className="lead-form-fields">
+              {restored && (
+                <div className="lead-form-recap">
+                  <span>Welcome back. We’ve filled in your details.</span>
+                  <button type="button" className="lead-form-back" onClick={clearSavedDetails}>
+                    Not you? Clear
+                  </button>
+                </div>
+              )}
               <IconField
                 id={`${idPrefix}-name`}
                 label="Full name"
