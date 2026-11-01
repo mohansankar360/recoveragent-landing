@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeWhatsAppNumber, qualifiesForDemoCalendar, type DemoFormData } from "@/lib/demo-booking";
 import { clearDemoBookingSession, readDemoBookingSession } from "@/lib/demo-booking-session";
-import { bookingDays, BOOKING_TIMES, formatBookingDate, slotStart } from "@/lib/calendar-slots";
+import { formatBookingDate, formatBookingTime, istDate } from "@/lib/calendar-slots";
 import { trackEvent } from "@/lib/analytics";
 import { generateMetaEventId, getMetaBrowserIds } from "@/lib/meta-pixel";
 import styles from "./CalendarPageClient.module.css";
@@ -67,11 +67,11 @@ export function BookingPicker({ prefill, onEdit }: { prefill?: DemoFormData | nu
       <p className={styles.muted}>30 minutes · Google Meet<br />All times are in India Standard Time (IST).</p>
       {details === undefined ? <p role="status">Loading your details…</p> : !details || !qualifiesForDemoCalendar(details) ? <div className={styles.notice}><p>Start with your store details so we can prepare for your call.</p><Link href="/book-demo" className={styles.confirm}>Enter demo details →</Link></div> : <>
         <fieldset disabled={busy || loading} className={styles.fieldset}><legend>1. Choose a day</legend><div className={styles.days}>
-          {availability.days.map(date => { const value = new Date(`${date}T12:00:00+05:30`); const days = bookingDays(); return <button key={date} type="button" aria-pressed={day === date} onClick={() => { setDay(date); setSelected(""); }}><small>{date === days[0] ? "Today" : date === days[1] ? "Tomorrow" : value.toLocaleDateString("en-IN", { weekday: "short", timeZone: "Asia/Kolkata" })}</small><strong>{value.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}</strong></button>; })}
+          {availability.days.map(date => { const value = new Date(`${date}T12:00:00+05:30`); const today = istDate(new Date()); const tomorrow = istDate(new Date(Date.now() + 86400000)); return <button key={date} type="button" aria-pressed={day === date} onClick={() => { setDay(date); setSelected(""); }}><small>{date === today ? "Today" : date === tomorrow ? "Tomorrow" : value.toLocaleDateString("en-IN", { weekday: "short", timeZone: "Asia/Kolkata" })}</small><strong>{value.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}</strong></button>; })}
         </div></fieldset>
         <fieldset disabled={busy || loading} className={styles.fieldset}><legend>2. Pick a time</legend><div className={styles.times}>
-          {BOOKING_TIMES.filter(time => day && availability.slots.includes(slotStart(day, time))).map(time => { const start = slotStart(day, time); return <button key={time} type="button" aria-pressed={selected === start} onClick={() => setSelected(start)}>{time === "12:30" ? "12:30 PM" : "4:00 PM"}<small>Available</small></button>; })}
-        </div>{loading && <p className={styles.muted} role="status">Checking available times…</p>}{!loading && !availability.days.length && !error && <p className={styles.muted}>No times are available in the next three days. Please contact us to arrange your call.</p>}</fieldset>
+          {availability.slots.filter(start => day && istDate(new Date(start)) === day).map(start => <button key={start} type="button" aria-pressed={selected === start} onClick={() => setSelected(start)}>{formatBookingTime(start)}</button>)}
+        </div>{loading && <p className={styles.muted} role="status">Checking available times…</p>}{!loading && !availability.days.length && !error && <p className={styles.muted}>No times are available in the next few days. Please contact us to arrange your call.</p>}</fieldset>
         <div className={styles.summary}><span>Booking for</span><strong>{details.name}</strong><p>{details.email}</p>{selected && <p className={styles.selection}>{formatBookingDate(selected)} IST</p>}
           {onEdit ? <button type="button" className={styles.edit} disabled={busy} onClick={onEdit}>← Edit your details</button> : <Link href="/book-demo">Edit your details</Link>}
         </div>

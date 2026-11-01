@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       typeof body.details[field] === "string" && body.details[field].length <= 500) ||
       body.confirmed !== true || !isValidDemoFormData(body.details) ||
       !qualifiesForDemoCalendar(body.details) || typeof body.start !== "string" || !allowedSlot(body.start)) {
-    return Response.json({ error: "Please check your details and choose a future time within the next three days." }, { status: 400 });
+    return Response.json({ error: "Please check your details and choose one of the available times shown." }, { status: 400 });
   }
   try {
     const availability = await availableBookingSlots();
@@ -44,7 +44,6 @@ export async function POST(request: Request) {
       },
       bookingFieldsResponses: {
         [CAL_BOOKING_FIELDS.websiteUrl]: details.storeUrl.trim(),
-        [CAL_BOOKING_FIELDS.preferredLanguage]: "English only",
         [CAL_BOOKING_FIELDS.storePlatform]: details.storePlatform === "shopify" ? "Shopify" : "Woocommerce",
         notes: `Monthly orders: ${monthlyOrdersLabel(details.monthlyOrders)}`,
       },

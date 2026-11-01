@@ -1,4 +1,4 @@
-export const CAL_EVENT_LINK = "recoveragent/recover-agent-discovery-call";
+export const CAL_EVENT_LINK = "recoveragent/product-demo-recover-agent";
 
 export const DEMO_URL = `https://cal.com/${CAL_EVENT_LINK}`;
 

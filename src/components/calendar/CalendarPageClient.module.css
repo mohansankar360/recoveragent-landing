@@ -22,9 +22,8 @@
 .days strong { font-size: 17px; font-weight: 600; }
 .days button[aria-pressed=true], .times button[aria-pressed=true] { border-color: #088360; background: #edf8f1; color: #076d4f; box-shadow: inset 0 0 0 1px #088360; }
 .days button:hover, .times button:not(:disabled):hover { border-color: #088360; }
-.times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.times button { min-height: 68px; font-size: 16px; font-weight: 600; }
-.times small { display: block; font-size: 10px; font-weight: 400; margin-top: 6px; }
+.times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.times button { min-height: 48px; padding: 10px 4px; font-size: 14px; font-weight: 600; }
 .times button:disabled { color: #a1aaa3; background: #f7f8f6; cursor: not-allowed; }
 .summary { padding: 18px 20px; background: #f7f8f4; border-radius: 10px; margin: 24px 0 20px; overflow-wrap: anywhere; }
 .summary > span { display: block; font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
