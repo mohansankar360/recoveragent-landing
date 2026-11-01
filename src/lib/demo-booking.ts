@@ -36,20 +36,13 @@ export const STORE_PLATFORM_OPTIONS = [
 export const UNSUPPORTED_PLATFORM_MESSAGE =
   "Sorry, Recover Agent is built only for Shopify and WooCommerce stores.";
 
-// Sellers who only sell on Instagram/WhatsApp tick "No website yet". They are
-// saved to the CRM for the WhatsApp service team but never get the calendar.
-export const NO_WEBSITE_PLATFORM = "no-website";
-export const NO_WEBSITE_STORE_URL = "No website yet";
-const NO_WEBSITE_PLATFORM_LABEL = "No website (Instagram/WhatsApp)";
-
 const MONTHLY_ORDERS_VALUE_SET = new Set(
   MONTHLY_ORDERS_OPTIONS.map((option) => option.value)
 );
 
-const STORE_PLATFORM_VALUE_SET = new Set<string>([
-  ...STORE_PLATFORM_OPTIONS.map((option) => option.value),
-  NO_WEBSITE_PLATFORM,
-]);
+const STORE_PLATFORM_VALUE_SET = new Set<string>(
+  STORE_PLATFORM_OPTIONS.map((option) => option.value)
+);
 
 export function demoLanguageLabel(value: string): string {
   return DEMO_LANGUAGE_OPTIONS.find((option) => option.value === value)?.label ?? value;
@@ -60,7 +53,6 @@ export function monthlyOrdersLabel(value: string): string {
 }
 
 export function storePlatformLabel(value: string): string {
-  if (value === NO_WEBSITE_PLATFORM) return NO_WEBSITE_PLATFORM_LABEL;
   return STORE_PLATFORM_OPTIONS.find((option) => option.value === value)?.label ?? value;
 }
 
@@ -92,10 +84,6 @@ export function getDisqualificationMessage(
     return UNSUPPORTED_PLATFORM_MESSAGE;
   }
 
-  if (data.storePlatform === NO_WEBSITE_PLATFORM) {
-    return "Live demos are for Shopify and WooCommerce stores. We can still help you reduce RTO with our WhatsApp API service — our team will call you soon.";
-  }
-
   if (lowVolume) {
     return "Live demos are for stores doing 500+ orders per month. We can still set you up with our WhatsApp API service — our team will call you soon to see how we can help you reduce your RTO.";
   }
@@ -123,7 +111,7 @@ export function parseIndianMobileInput(raw: string): string {
   return digits.slice(0, 10);
 }
 
-const STORE_URL_PLACEHOLDERS = new Set(["to be shared on call", NO_WEBSITE_STORE_URL.toLowerCase()]);
+const STORE_URL_PLACEHOLDERS = new Set(["to be shared on call"]);
 
 /** Prepends https:// when the user enters a bare domain. */
 export function normalizeStoreUrl(value: string): string {

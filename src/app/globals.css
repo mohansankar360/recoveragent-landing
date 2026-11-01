@@ -3957,24 +3957,6 @@ footer.site-footer .wrap {
   cursor: pointer;
 }
 
-.lead-no-website {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 9px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  cursor: pointer;
-}
-
-.lead-no-website input {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  accent-color: var(--recover-lo);
-}
-
 .lead-form-submit {
   justify-content: center;
   text-align: center;
