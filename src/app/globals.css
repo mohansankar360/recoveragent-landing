@@ -7146,3 +7146,11 @@ footer.site-footer .wrap {
 @media (max-width: 600px) {
   .calc-section .calc-baseline .out-label { display: block; min-height: 2.8em; line-height: 1.4; }
 }
+
+.lead-goals { border: 0; padding: 0; margin: 0; min-width: 0; }
+.lead-goals legend { font-size: 12px; font-weight: 600; color: #52647d; margin-bottom: 8px; }
+.lead-goals legend span { font-weight: 400; }
+.lead-goals-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.lead-goals-options label { display: flex; align-items: center; gap: 7px; padding: 10px 12px; border: 1px solid #d7e0ed; border-radius: 7px; font-size: 13px; color: #142344; cursor: pointer; }
+.lead-goals-options label.is-selected { border-color: #1b5bc4; background: #eef4ff; color: #164eaa; }
+.lead-goals-options input { accent-color: #1b5bc4; margin: 0; }

@@ -16,7 +16,6 @@ import {
   parseIndianMobileInput,
   qualifiesForDemoCalendar,
   STORE_PLATFORM_OPTIONS,
-  UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { saveDemoBookingSession } from "@/lib/demo-booking-session";
 import {
@@ -184,12 +183,6 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
 
     setSubmitError(null);
 
-    if (form.storePlatform === "other") {
-      setDisqualificationMessage(UNSUPPORTED_PLATFORM_MESSAGE);
-      setSubmitOutcome("disqualified");
-      return;
-    }
-
     setIsSubmitting(true);
 
     const payload = compact
@@ -297,7 +290,7 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                   role="status"
                   aria-live="polite"
                 >
-                  <p className="demo-success-title">{form.storePlatform === "other" ? "This platform is not supported." : "Your onboarding request is received."}</p>
+                  <p className="demo-success-title">Your onboarding request is received.</p>
                   <p className="demo-success-copy">{disqualificationMessage}</p>
                 </motion.div>
               ) : (
@@ -406,9 +399,9 @@ export function DemoBooking({ compact = false, sectionId = "demo-booking", onEli
                   <button
                     type="submit"
                     className="btn btn-green demo-submit"
-                    disabled={Boolean(submitOutcome) || isSubmitting || form.storePlatform === 'other'}
+                    disabled={Boolean(submitOutcome) || isSubmitting}
                   >
-                    {isSubmitting ? "Saving your details…" : form.monthlyOrders === '0-500' ? "Request an onboarding call" : "Continue to choose a time"}
+                    {isSubmitting ? "Saving your details…" : (form.monthlyOrders === '0-500' || form.storePlatform === 'other') ? "Request an onboarding call" : "Next: pick a time →"}
                   </button>
                 </motion.form>
               )}

@@ -18,12 +18,6 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "Invalid form data" }, { status: 400 });
   }
 
-  // Unsupported-platform leads are intentionally not forwarded to the CRM.
-  // Keep this server-side guard even though the UI blocks these submissions.
-  if (body.storePlatform === "other") {
-    return Response.json({ ok: true, skipped: true });
-  }
-
   const payload = buildDemoLeadPayload(
     body,
     parseLeadEngagement((body as { engagement?: unknown }).engagement)
@@ -39,7 +33,7 @@ export async function POST(request: Request) {
   const leadReceipt = forwarded.receipt;
 
   // Only stores that qualify for the calendar count as a Lead, so ads optimised
-  // for Lead don't learn to find stores below 500 orders a month.
+  // for Lead don't learn to find stores that do not qualify for a demo.
   await sendMetaServerEvent({
     eventName: payload.qualifiesForCalendar ? "Lead" : "LowVolumeLead",
     eventId: metaEventId ?? crypto.randomUUID(),

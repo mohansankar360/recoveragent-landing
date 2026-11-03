@@ -10,6 +10,7 @@ export interface DemoFormData {
   storePlatform: string;
   monthlyOrders: string;
   preferredLanguage: string;
+  goals?: string[];
 }
 
 export const DEMO_LANGUAGE_OPTIONS = [
@@ -80,17 +81,14 @@ export function getDisqualificationMessage(
   const lowVolume = data.monthlyOrders === "0-500";
   const unsupportedPlatform = data.storePlatform === "other";
 
-  if (lowVolume && unsupportedPlatform) {
-    return UNSUPPORTED_PLATFORM_MESSAGE;
+  if (unsupportedPlatform) {
+    return "Our team will review your store details and contact you about onboarding options.";
   }
 
   if (lowVolume) {
     return "Live demos are for stores doing 500+ orders per month. We can still set you up with our WhatsApp API service — our team will call you soon to see how we can help you reduce your RTO.";
   }
 
-  if (unsupportedPlatform) {
-    return UNSUPPORTED_PLATFORM_MESSAGE;
-  }
 
   return null;
 }

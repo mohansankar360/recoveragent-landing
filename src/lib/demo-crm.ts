@@ -17,6 +17,7 @@ export interface WebsiteDemoLead {
   calBookingUrl: string;
   submittedAt: string;
   engagement?: LeadEngagement;
+  goals?: string[];
 }
 
 export interface WebsitePartialLead {
@@ -67,6 +68,7 @@ export function buildDashboardLeadRequest(payload: WebsiteDemoLead, companyId: s
         store_url: payload.storeUrl,
         store_platform: payload.storePlatform,
         monthly_orders: payload.monthlyOrders,
+        ...(payload.goals?.length ? { recovery_goals: payload.goals.map((goal) => goal === "cod_rto" ? "COD confirmations & RTO" : "Abandoned checkouts").join(", ") } : {}),
         preferred_language: payload.preferredLanguage,
         product: payload.qualifiesForCalendar ? "Product demo" : "WhatsApp API onboarding",
         calendar_eligible: payload.qualifiesForCalendar ? "Yes" : "No",

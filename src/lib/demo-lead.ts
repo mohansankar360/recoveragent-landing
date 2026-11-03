@@ -27,6 +27,7 @@ export interface DemoLeadPayload {
   calBookingUrl: string;
   submittedAt: string;
   engagement?: LeadEngagement;
+  goals?: string[];
 }
 
 export function buildDemoLeadPayload(
@@ -35,6 +36,7 @@ export function buildDemoLeadPayload(
 ): DemoLeadPayload {
   return {
     source: "recover-agent-landing",
+    goals: Array.isArray(data.goals) ? data.goals.filter((goal) => goal === "cod_rto" || goal === "abandoned_checkouts") : [],
     name: data.name.trim(),
     phone: normalizeWhatsAppNumber(data.whatsapp),
     email: data.email.trim(),

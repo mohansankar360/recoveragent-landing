@@ -17,7 +17,6 @@ import { trackEvent } from "@/lib/analytics";
 import {
   MONTHLY_ORDERS_OPTIONS,
   STORE_PLATFORM_OPTIONS,
-  UNSUPPORTED_PLATFORM_MESSAGE,
 } from "@/lib/demo-booking";
 import { clearSavedLeadDetails, readSavedLeadDetails, saveDemoBookingSession, saveLeadDetails } from '@/lib/demo-booking-session';
 import { getDisqualificationMessage, getStoreUrlValidationError, normalizeStoreUrl, parseIndianMobileInput, qualifiesForDemoCalendar } from '@/lib/demo-booking';
@@ -103,13 +102,13 @@ function validateAll(
 export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "demo" | "trial"; idPrefix?: string }) {
   const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>(EMPTY_FORM);
+  const [goals, setGoals] = useState<string[]>([]);
   const [errors, setErrors] = useState<Partial<LeadFormData>>({});
   const [touched, setTouched] = useState<
     Partial<Record<keyof LeadFormData, boolean>>
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [calendarPrefill, setCalendarPrefill] = useState<DemoFormData | null>(null);
-  const [isUnsupportedPlatform, setIsUnsupportedPlatform] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [onboardingRequested, setOnboardingRequested] = useState(false);
@@ -141,6 +140,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   const clearSavedDetails = () => {
     clearSavedLeadDetails();
     setForm(EMPTY_FORM);
+    setGoals([]);
     setErrors({});
     setTouched({});
     setRestored(false);
@@ -178,7 +178,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   };
 
   const emailSuggestion = errors.email ? null : suggestEmailCorrection(form.email);
-  const routesToOnboarding = form.monthlyOrders === "0-500";
+  const routesToOnboarding = form.monthlyOrders === "0-500" || form.storePlatform === "other";
 
   const markTouched = (fields: (keyof LeadFormData)[]) =>
     setTouched((prev) => fields.reduce((acc, field) => ({ ...acc, [field]: true }), prev));
@@ -234,11 +234,6 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       return;
     }
 
-    if (form.storePlatform === "other") {
-      setIsUnsupportedPlatform(true);
-      return;
-    }
-
     setIsSubmitting(true);
 
     const metaEventId = generateMetaEventId();
@@ -251,6 +246,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       storePlatform: form.storePlatform,
       storeUrl: normalizeStoreUrl(form.storeUrl),
       preferredLanguage: 'english-or-hindi',
+      goals,
     };
     setSubmitError(null);
     try {
@@ -315,29 +311,13 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
           >
             <p className="lead-form-success-title">Your onboarding request is received.</p>
             <p>
-              {isTrial
+              {isTrial && form.storePlatform !== "other"
                 ? TRIAL_LOW_VOLUME_MESSAGE
                 : getDisqualificationMessage({
                     monthlyOrders: form.monthlyOrders,
                     storePlatform: form.storePlatform,
                   })}
             </p>
-          </motion.div>
-        ) : isUnsupportedPlatform ? (
-          <motion.div
-            key="unsupported-platform"
-            ref={revealOutcome}
-            tabIndex={-1}
-            className="lead-form-success"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={appleFade}
-            role="status"
-            aria-live="polite"
-          >
-            <p className="lead-form-success-title">This platform is not supported.</p>
-            <p className="lead-form-success-copy">{UNSUPPORTED_PLATFORM_MESSAGE}</p>
           </motion.div>
         ) : calendarPrefill ? (
           <motion.div key="calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={appleFade}>
@@ -431,6 +411,21 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                 </button>
               </div>
 
+              <fieldset className="lead-goals">
+                <legend>What do you want to fix? <span>· Pick one or both (optional)</span></legend>
+                <div className="lead-goals-options">
+                  {[
+                    { value: "cod_rto", label: "COD confirmations & RTO" },
+                    { value: "abandoned_checkouts", label: "Abandoned checkouts" },
+                  ].map((option) => (
+                    <label key={option.value} className={goals.includes(option.value) ? "is-selected" : undefined}>
+                      <input type="checkbox" checked={goals.includes(option.value)} onChange={() => setGoals((current) => current.includes(option.value) ? current.filter((goal) => goal !== option.value) : [...current, option.value])} />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
               <IconSelectField
                 id={`${idPrefix}-orders`}
                 label="Monthly orders"
@@ -486,9 +481,9 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
               <button
                 type="submit"
                 className="btn btn-green lead-form-submit"
-                disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}
+                disabled={isSubmitting || !!calendarPrefill}
               >
-                {isSubmitting ? "Saving…" : routesToOnboarding ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue to choose a time →'}
+                {isSubmitting ? "Saving…" : routesToOnboarding ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Next: pick a time →'}
               </button>
 
               <p className="lead-form-privacy">
