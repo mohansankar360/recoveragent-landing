@@ -117,9 +117,13 @@ const partnerLogos: Array<{ name: string; src?: string; width: number; height?: 
 ];
 
 
-// Any section can open the trial sign-up dialog owned by TrialSiteFrame.
+const SIGNUP_URL = 'https://dashboard.recoveragent.ai/signup';
+
+// Any section can send a visitor to sign-up, or open the demo dialog owned by TrialSiteFrame.
 const TrialContext = createContext<() => void>(() => {});
 export const useTrial = () => useContext(TrialContext);
+const BookDemoContext = createContext<() => void>(() => {});
+const useBookDemo = () => useContext(BookDemoContext);
 
 function smoothScrollTo(id: string, block: ScrollLogicalPosition = 'start') {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -130,8 +134,8 @@ export function TrialButton({ onClick, children, variant = 'primary', source }: 
   return <button
     type="button"
     className={`${styles.trialButton} ${variant === 'light' ? styles.trialButtonLight : ''} ${variant === 'compact' ? styles.trialButtonCompact : ''}`}
-    onClick={() => { trackEvent('cta_clicked', { cta: children ? 'start_trial' : 'book_demo', source }); onClick(); }}
-  >{children ?? <span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span>}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
+    onClick={() => { trackEvent('cta_clicked', { cta: children ? 'start_trial' : 'create_account', source }); onClick(); }}
+  >{children ?? <span className={styles.ctaCopy}><span>Create account</span><span className={styles.ctaSubtext}>14-day free trial</span></span>}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -148,6 +152,7 @@ const navLinks = [
 
 function Header({ isHome }: { isHome: boolean }) {
   const onTrial = useTrial();
+  const onBookDemo = useBookDemo();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -177,7 +182,8 @@ function Header({ isHome }: { isHome: boolean }) {
     <AnimatePresence>
       {open && <motion.nav id="trial-mobile-nav" className={styles.mobileNav} aria-label="Mobile navigation" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
         {links.map(([href, label]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
-        <button type="button" onClick={() => { setOpen(false); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} /></button>
+        <button type="button" onClick={() => { setOpen(false); trackEvent('cta_clicked', { cta: 'book_demo', source: 'mobile_nav' }); onBookDemo(); }} className={styles.mobileNavDemo}>Book a demo</button>
+        <button type="button" onClick={() => { setOpen(false); trackEvent('cta_clicked', { cta: 'create_account', source: 'mobile_nav' }); onTrial(); }}><span className={styles.ctaCopy}><span>Create account</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} /></button>
       </motion.nav>}
     </AnimatePresence>
   </header>;
@@ -388,6 +394,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
 
 export function Hero({ refined = false }: { refined?: boolean }) {
   const onTrial = useTrial();
+  const onBookDemo = useBookDemo();
   const playRef = useRef<(() => void) | null>(null);
   return <section className={`${styles.hero} ${refined ? styles.heroRefined : ''}`} id="top">
     <div className={styles.heroGrid} aria-hidden="true" />
@@ -400,6 +407,7 @@ export function Hero({ refined = false }: { refined?: boolean }) {
           <TrialButton onClick={onTrial} source="hero" />
           <button type="button" className={styles.ghostButton} onClick={() => playRef.current?.()}><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</button>
         </div>
+        <p className={styles.heroDemoPrompt}>Prefer to talk first? <button type="button" onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'hero' }); onBookDemo(); }}>Book a demo</button></p>
         <ul className={styles.heroAssurances}>
           <li><Check size={15} weight="bold" aria-hidden="true" />Test it on your real orders</li>
           <li><Check size={15} weight="bold" aria-hidden="true" />Calls in 6 languages</li>
@@ -1090,7 +1098,7 @@ export function PricingSection() {
             </li>;
           })}
         </ul>
-        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'pricing', tier: tier.id }); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
+        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'create_account', source: 'pricing', tier: tier.id }); onTrial(); }}><span className={styles.ctaCopy}><span>Create account</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
       </article>)}
     </div>
     <div className={styles.whatsappIncluded}>
@@ -1106,7 +1114,7 @@ export function PricingSection() {
 const trialFaqs = [
   { q: 'What do I get in the 14-day free trial?', a: 'AI calls on your real COD orders, WhatsApp follow-up and the full dashboard, set up with your team on a short call. You see confirmed, cancelled and unreachable orders from your own store, with zero setup fee.' },
   { q: 'What happens after 14 days?', a: 'We review your trial results with you. If the numbers work, you choose a plan and continue. There is no annual lock-in.' },
-  { q: 'Who can start a trial?', a: 'Shopify and WooCommerce stores doing 500 or more orders a month go straight to a setup call. Smaller stores can request an onboarding call to explore WhatsApp recovery.' },
+  { q: 'Who can start a trial?', a: 'Any store can create an account and see the dashboard. Book your onboarding call from there, and we connect your store and WhatsApp with you.' },
 ];
 
 // Answers confirmed against the product; they replace the generic shared versions on this page.
@@ -1222,8 +1230,9 @@ export function SiteFooter() {
 export function TrialSiteFrame({ children, isHome = false }: { children: React.ReactNode; isHome?: boolean }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
-  const openTrial = useCallback(() => setDialogOpen(true), []);
-  const closeTrial = useCallback(() => setDialogOpen(false), []);
+  const goToSignup = useCallback(() => { window.location.assign(SIGNUP_URL); }, []);
+  const openDemo = useCallback(() => setDialogOpen(true), []);
+  const closeDemo = useCallback(() => setDialogOpen(false), []);
 
   useEffect(() => {
     // Hide the sticky bar while the page top or the final sign-up form is on screen.
@@ -1239,20 +1248,20 @@ export function TrialSiteFrame({ children, isHome = false }: { children: React.R
     return () => { observer.disconnect(); window.removeEventListener('scroll', update); };
   }, []);
 
-  return <TrialContext.Provider value={openTrial}>
+  return <TrialContext.Provider value={goToSignup}><BookDemoContext.Provider value={openDemo}>
     <div className={styles.page}>
       <div inert={dialogOpen ? true : undefined}>
         <Header isHome={isHome} />
         <main>{children}</main>
         <SiteFooter />
         <div className={`${styles.mobileSticky} ${showSticky ? styles.mobileStickyVisible : ''}`} aria-hidden={!showSticky}>
-          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
+          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'create_account' }); goToSignup(); }} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>Create account</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
           <a href="tel:+919788274333" aria-label="Call +91 97882 74333" tabIndex={showSticky ? 0 : -1}><PhoneCall size={22} weight="bold" aria-hidden="true" /></a>
         </div>
       </div>
-      <TrialDialog open={dialogOpen} onClose={closeTrial} />
+      <TrialDialog open={dialogOpen} onClose={closeDemo} />
     </div>
-  </TrialContext.Provider>;
+  </BookDemoContext.Provider></TrialContext.Provider>;
 }
 
 /* ───────────────────────── Sub page header ───────────────────────── */
