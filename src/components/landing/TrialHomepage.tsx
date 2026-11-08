@@ -126,12 +126,20 @@ function smoothScrollTo(id: string, block: ScrollLogicalPosition = 'start') {
   document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block });
 }
 
+const SIGNUP_URL = 'https://dashboard.recoveragent.ai/signup';
+
+function SignUpButton({ source }: { source: string }) {
+  return <a className={styles.ghostButton} href={SIGNUP_URL} onClick={() => trackEvent('cta_clicked', { cta: 'sign_up', source })}>
+    <span className={styles.ctaCopy}><span>Sign up</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={17} weight="bold" aria-hidden="true" />
+  </a>;
+}
+
 export function TrialButton({ onClick, children, variant = 'primary', source }: { onClick: () => void; children?: React.ReactNode; variant?: 'primary' | 'light' | 'compact'; source: string }) {
   return <button
     type="button"
     className={`${styles.trialButton} ${variant === 'light' ? styles.trialButtonLight : ''} ${variant === 'compact' ? styles.trialButtonCompact : ''}`}
     onClick={() => { trackEvent('cta_clicked', { cta: children ? 'start_trial' : 'book_demo', source }); onClick(); }}
-  >{children ?? <span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span>}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
+  >{children ?? 'Book a demo'}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -177,7 +185,8 @@ function Header({ isHome }: { isHome: boolean }) {
     <AnimatePresence>
       {open && <motion.nav id="trial-mobile-nav" className={styles.mobileNav} aria-label="Mobile navigation" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
         {links.map(([href, label]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
-        <button type="button" onClick={() => { setOpen(false); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} /></button>
+        <a href={SIGNUP_URL} onClick={() => { setOpen(false); trackEvent('cta_clicked', { cta: 'sign_up', source: 'mobile_nav' }); }}>Sign up · 14-day free trial</a>
+        <button type="button" onClick={() => { setOpen(false); onTrial(); }}>Book a demo<ArrowRight size={16} /></button>
       </motion.nav>}
     </AnimatePresence>
   </header>;
@@ -398,7 +407,7 @@ export function Hero({ refined = false }: { refined?: boolean }) {
         {refined ? <><p className={styles.heroLead}>Confirm COD orders, correct addresses and follow up on WhatsApp—with an AI voice agent.</p><p className={styles.heroResult}>Average RTO <strong>32% → 17%</strong><a href="#case-study">See the case study <ArrowRight size={13} aria-hidden="true" /></a></p></> : <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>}
         <div className={styles.heroActions}>
           <TrialButton onClick={onTrial} source="hero" />
-          <button type="button" className={styles.ghostButton} onClick={() => playRef.current?.()}><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</button>
+          <SignUpButton source="hero" />
         </div>
         <ul className={styles.heroAssurances}>
           <li><Check size={15} weight="bold" aria-hidden="true" />Test it on your real orders</li>
@@ -1090,7 +1099,7 @@ export function PricingSection() {
             </li>;
           })}
         </ul>
-        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'pricing', tier: tier.id }); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
+        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'pricing', tier: tier.id }); onTrial(); }}>Book a demo<ArrowRight size={16} aria-hidden="true" /></button>
       </article>)}
     </div>
     <div className={styles.whatsappIncluded}>
@@ -1106,7 +1115,7 @@ export function PricingSection() {
 const trialFaqs = [
   { q: 'What do I get in the 14-day free trial?', a: 'AI calls on your real COD orders, WhatsApp follow-up and the full dashboard, set up with your team on a short call. You see confirmed, cancelled and unreachable orders from your own store, with zero setup fee.' },
   { q: 'What happens after 14 days?', a: 'We review your trial results with you. If the numbers work, you choose a plan and continue. There is no annual lock-in.' },
-  { q: 'Who can start a trial?', a: 'Shopify and WooCommerce stores doing 500 or more orders a month go straight to a setup call. Smaller stores can request an onboarding call to explore WhatsApp recovery.' },
+  { q: 'Who can start a trial?', a: 'Any store can sign up and see the dashboard. Book your onboarding call from there, and we connect your store and WhatsApp with you.' },
 ];
 
 // Answers confirmed against the product; they replace the generic shared versions on this page.
@@ -1246,7 +1255,7 @@ export function TrialSiteFrame({ children, isHome = false }: { children: React.R
         <main>{children}</main>
         <SiteFooter />
         <div className={`${styles.mobileSticky} ${showSticky ? styles.mobileStickyVisible : ''}`} aria-hidden={!showSticky}>
-          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
+          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}>Book a demo<ArrowRight size={16} aria-hidden="true" /></button>
           <a href="tel:+919788274333" aria-label="Call +91 97882 74333" tabIndex={showSticky ? 0 : -1}><PhoneCall size={22} weight="bold" aria-hidden="true" /></a>
         </div>
       </div>
@@ -1273,7 +1282,7 @@ export function PageHero({ eyebrow, title, description, crumbs, showCtas = true 
       {description && <p className={styles.pageHeroLead}>{description}</p>}
       {showCtas && <div className={styles.heroActions}>
         <TrialButton onClick={onTrial} source="page_hero" />
-        <Link className={styles.ghostButton} href="/hear-a-call"><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</Link>
+        <SignUpButton source="page_hero" />
       </div>}
     </div>
   </section>;
