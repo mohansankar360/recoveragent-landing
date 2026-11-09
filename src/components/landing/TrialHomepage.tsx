@@ -395,7 +395,7 @@ export function Hero({ refined = false }: { refined?: boolean }) {
       <div className={styles.heroCopy}>
         <p className={styles.heroBadge}><span className={styles.pulseDot} />Built by a D2C founder, for D2C brands</p>
         <h1>Stop shipping orders <span>that come back.</span></h1>
-        {refined ? <><p className={styles.heroLead}>Confirm COD orders, correct addresses and follow up on WhatsApp—with an AI voice agent.</p><p className={styles.heroResult}>Average RTO <strong>32% → 17%</strong><a href="#case-study">See the case study <ArrowRight size={13} aria-hidden="true" /></a></p></> : <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>}
+        {refined ? <><p className={styles.heroLead}>Our AI voice agent calls to confirm COD orders and correct addresses, with follow-ups on WhatsApp.</p><p className={styles.heroResult}>Average RTO <strong>32% → 17%</strong><a href="#case-study">See the case study <ArrowRight size={13} aria-hidden="true" /></a></p></> : <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>}
         <div className={styles.heroActions}>
           <TrialButton onClick={onTrial} source="hero" />
           <button type="button" className={styles.ghostButton} onClick={() => playRef.current?.()}><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</button>
