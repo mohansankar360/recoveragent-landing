@@ -105,6 +105,9 @@
 .mobileNav a { padding: 12px 10px; color: var(--ink); font-weight: 600; text-decoration: none; border-radius: 10px; }
 .mobileNav a:hover { background: var(--paper); }
 .mobileNav button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; margin-top: 6px; color: #fff; font: 700 15px var(--font-geist), sans-serif; background: var(--blue); border: 0; border-radius: 12px; cursor: pointer; }
+.mobileNavCheckout a[href^="https://dashboard.recoveragent.ai/signup"] { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; margin-top: 6px; color: #fff; background: var(--blue); }
+.mobileNavCheckout a[href^="https://dashboard.recoveragent.ai/signup"]:hover { background: #2456e6; }
+.mobileNavCheckout button { color: var(--ink); background: #eef2fa; }
 
 /* ── Hero ── */
 .hero {
@@ -873,6 +876,8 @@
   .mobileStickyVisible { opacity: 1; pointer-events: auto; transform: none; }
   .mobileSticky button, .mobileSticky a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; color: #fff; font: 700 15px var(--font-geist), sans-serif; text-decoration: none; background: linear-gradient(135deg, #3d78ff, #2456e6); border: 0; border-radius: 14px; box-shadow: 0 16px 36px rgba(47, 107, 255, 0.4); cursor: pointer; }
   .mobileSticky a { background: #142344; border: 1px solid #586989; box-shadow: 0 16px 36px rgba(9, 22, 48, 0.3); }
+  .mobileStickyCheckout button { background: #142344; border: 1px solid #586989; box-shadow: 0 16px 36px rgba(9, 22, 48, 0.3); }
+  .mobileStickyCheckout a { background: linear-gradient(135deg, #3d78ff, #2456e6); border: 0; box-shadow: 0 16px 36px rgba(47, 107, 255, 0.4); }
 }
 @media (max-width: 380px) {
   .phone { width: 240px; height: 456px; }
