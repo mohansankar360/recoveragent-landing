@@ -126,12 +126,20 @@ function smoothScrollTo(id: string, block: ScrollLogicalPosition = 'start') {
   document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block });
 }
 
+const SIGNUP_URL = 'https://dashboard.recoveragent.ai/signup';
+
+function SignUpButton({ source, primary = false }: { source: string; primary?: boolean }) {
+  return <a className={primary ? styles.trialButton : styles.ghostButton} href={SIGNUP_URL} onClick={() => trackEvent('cta_clicked', { cta: 'sign_up', source })}>
+    <span className={styles.ctaCopy}><span>{source.startsWith('checkout_') ? 'Start free trial' : 'Sign up'}</span><span className={styles.ctaSubtext}>{source.startsWith('checkout_') ? '14 days free · No setup fee' : '14-day free trial'}</span></span><ArrowRight size={17} weight="bold" aria-hidden="true" />
+  </a>;
+}
+
 export function TrialButton({ onClick, children, variant = 'primary', source }: { onClick: () => void; children?: React.ReactNode; variant?: 'primary' | 'light' | 'compact'; source: string }) {
   return <button
     type="button"
     className={`${styles.trialButton} ${variant === 'light' ? styles.trialButtonLight : ''} ${variant === 'compact' ? styles.trialButtonCompact : ''}`}
     onClick={() => { trackEvent('cta_clicked', { cta: children ? 'start_trial' : 'book_demo', source }); onClick(); }}
-  >{children ?? <span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span>}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
+  >{source === 'hero' && <CalendarCheck size={17} aria-hidden="true" />}{children ?? 'Book a demo'}{source !== 'hero' && <ArrowRight size={17} weight="bold" aria-hidden="true" />}</button>;
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -146,7 +154,7 @@ const navLinks = [
   { label: 'FAQ', home: '#faq', page: '/faq' },
 ];
 
-function Header({ isHome }: { isHome: boolean }) {
+function Header({ isHome, checkoutFirst = false }: { isHome: boolean; checkoutFirst?: boolean }) {
   const onTrial = useTrial();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -162,7 +170,7 @@ function Header({ isHome }: { isHome: boolean }) {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
-  const links = navLinks.map((link) => [isHome ? link.home : link.page, link.label] as const);
+  const links = navLinks.filter((link) => !checkoutFirst || !['#case-study', '#game'].includes(link.home)).map((link) => [isHome ? link.home : link.page, checkoutFirst && link.home === '#game' ? 'Shopper questions' : checkoutFirst && link.home === '#calc' ? 'Checkout calculator' : link.label] as const);
   return <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
     <a href={isHome ? '#top' : '/'} className={styles.brand} aria-label="RecoverAgent home">
       <Image src="/recover-agent-logo-transparent.png" width={500} height={250} alt="RecoverAgent" priority />
@@ -170,14 +178,15 @@ function Header({ isHome }: { isHome: boolean }) {
     <nav className={styles.desktopNav} aria-label="Primary navigation">
       {links.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
     </nav>
-    <div className={styles.headerCta}><TrialButton onClick={onTrial} variant="compact" source="header" /></div>
+    <div className={styles.headerCta}>{checkoutFirst ? <SignUpButton source="checkout_header" primary /> : <TrialButton onClick={onTrial} variant="compact" source="header" />}</div>
     <button type="button" className={styles.menuButton} aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="trial-mobile-nav" onClick={() => setOpen((value) => !value)}>
       {open ? <X size={22} aria-hidden="true" /> : <List size={22} aria-hidden="true" />}
     </button>
     <AnimatePresence>
-      {open && <motion.nav id="trial-mobile-nav" className={styles.mobileNav} aria-label="Mobile navigation" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+      {open && <motion.nav id="trial-mobile-nav" className={`${styles.mobileNav} ${checkoutFirst ? styles.mobileNavCheckout : ''}`} aria-label="Mobile navigation" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
         {links.map(([href, label]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
-        <button type="button" onClick={() => { setOpen(false); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} /></button>
+        <a href={SIGNUP_URL} onClick={() => { setOpen(false); trackEvent('cta_clicked', { cta: 'sign_up', source: 'mobile_nav' }); }}>{checkoutFirst ? <span className={styles.ctaCopy}><span>Start free trial</span><span className={styles.ctaSubtext}>14 days free · No setup fee</span></span> : 'Sign up · 14-day free trial'}{checkoutFirst && <ArrowRight size={16} weight="bold" aria-hidden="true" />}</a>
+        <button type="button" onClick={() => { setOpen(false); onTrial(); }}>{checkoutFirst && <CalendarCheck size={17} aria-hidden="true" />}Book a demo<ArrowRight size={16} aria-hidden="true" /></button>
       </motion.nav>}
     </AnimatePresence>
   </header>;
@@ -311,6 +320,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
   return <div className={styles.heroStage} ref={stageRef} onPointerMove={onPointerMove} onPointerLeave={() => { pointerX.set(0); pointerY.set(0); }}>
         <motion.div className={styles.stageGlow} style={glowLayer} aria-hidden="true" />
 
+        {refined && <div className={styles.callInvitation}><span>LISTEN FOR YOURSELF</span><strong>Hear a real AI call</strong><p>Choose a scenario, then press play.</p></div>}
         <div className={styles.scenarioTabs} role="tablist" aria-label="Choose a call to hear">
           {scenarioKeys.map((key) => {
             const Icon = scenarios[key].icon;
@@ -326,7 +336,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
           <div className={`${styles.phone} ${player.status === 'ringing' ? styles.phoneRinging : ''}`}>
             <div className={styles.phoneNotch} aria-hidden="true" />
             <div className={styles.phoneScreen}>
-              <p className={styles.phoneStatus}>{live ? <><span className={styles.liveDot} />Live call · {item.language}</> : ended ? 'Call ended' : player.status === 'paused' ? (refined ? 'Recording paused' : 'On hold') : (refined ? 'Real AI call · ' + item.language : 'Incoming AI call…')}</p>
+              <p className={styles.phoneStatus}>{live ? <><span className={styles.liveDot} />Playing recording · {item.language}</> : ended ? 'Call ended' : player.status === 'paused' ? (refined ? 'Recording paused' : 'On hold') : (refined ? 'Real AI call · ' + item.language : 'Incoming AI call…')}</p>
               <div className={`${styles.callerAvatar} ${live ? styles.callerAvatarLive : ''}`}><PhoneCall size={30} weight="duotone" aria-hidden="true" /></div>
               <p className={styles.callerName}>RecoverAgent</p>
               <p className={styles.callerMeta}>{item.caller}</p>
@@ -348,10 +358,10 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
                       <small aria-hidden="true">{refined ? 'Next sample' : 'Not now'}</small>
                     </span>
                     <span className={styles.callAction}>
-                      <button type="button" className={styles.answerButton} onClick={answer} aria-label={live ? 'Pause call' : refined ? (player.status === 'paused' ? 'Resume call' : 'Play sample call') : 'Answer and play the real AI call'}>
+                      <button type="button" className={`${styles.answerButton} ${!live && !ended && player.status !== 'paused' ? styles.answerReady : ''}`} onClick={answer} aria-label={live ? 'Pause call' : refined ? (player.status === 'paused' ? 'Resume call' : 'Play sample call') : 'Answer and play the real AI call'}>
                         {live ? <span className={styles.pauseBars}><i /><i /></span> : refined ? <Play size={24} weight="fill" aria-hidden="true" /> : <Phone size={24} weight="fill" />}
                       </button>
-                      <small aria-hidden="true">{live ? 'Pause' : refined ? (player.status === 'paused' ? 'Resume' : 'Play call') : 'Answer'}</small>
+                      <small aria-hidden="true">{live ? 'Pause' : refined ? (player.status === 'paused' ? 'Resume' : 'Play sample') : 'Answer'}</small>
                     </span>
                   </motion.div>}
               </AnimatePresence>
@@ -360,7 +370,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
             </div>
             <audio {...player.audioProps} />
           </div>
-          <p className={styles.phoneHint}>{live ? 'Real recording of our AI voice agent' : ended ? 'What happened next:' : <><SpeakerHigh size={15} weight="fill" aria-hidden="true" />Turn your sound on</>}</p>
+          <p className={styles.phoneHint}>{live ? 'Real recording of our AI voice agent' : ended ? 'What happened next:' : <><SpeakerHigh size={15} weight="fill" aria-hidden="true" />Sound on to hear the conversation</>}</p>
           {refined && !ended && <div className={styles.refinedSummary} aria-label="Sample workflow follow-up">
             <span><WhatsappLogo size={15} aria-hidden="true" />WhatsApp follow-up</span>
             <span><Tag size={15} aria-hidden="true" />{item.tag}</span>
@@ -386,7 +396,42 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
       </div>;
 }
 
-export function Hero({ refined = false }: { refined?: boolean }) {
+function CallExperience({ defaultScenario = 'cod' }: { defaultScenario?: ScenarioKey }) {
+  const [scenario, setScenario] = useState<ScenarioKey>(defaultScenario);
+  const player = useCallPlayer(scenario);
+  const item = scenarios[scenario];
+  const preview = scenario === 'cod' ? CALL_CAPTIONS.cod[4] : scenario === 'checkout' ? CALL_CAPTIONS.checkout[10] : CALL_CAPTIONS.ndr[5];
+  const playing = player.status === 'live';
+  const caption = (playing || player.status === 'paused')
+    ? [...CALL_CAPTIONS[scenario]].reverse().find((line) => line.at <= player.progress)
+    : undefined;
+  const changeScenario = (next: ScenarioKey) => {
+    if (next === scenario) return;
+    player.hangUp();
+    setScenario(next);
+  };
+  return <section className={styles.listenExperience} aria-label="Listen to real AI calls">
+    <div className={styles.listenHeading}><span>HEAR IT IN ACTION</span><h2>Real calls. Real conversations.</h2><p>Choose a moment and hear how the AI responds.</p></div>
+    <div className={styles.listenTabs} role="group" aria-label="Choose a call sample">
+      {scenarioKeys.map((key) => <button key={key} type="button" aria-pressed={scenario === key} onClick={() => changeScenario(key)}>{scenarios[key].short}</button>)}
+    </div>
+    <div className={styles.listenCard}>
+      <div className={styles.listenCardTop}><span><i /> REAL RECORDING</span><span>{item.language}</span></div>
+      <div className={styles.listenStory}><span className={styles.listenStoryIcon}><PhoneCall size={23} weight="duotone" aria-hidden="true" /></span><div><strong>{item.label}</strong><p>{item.context}</p></div></div>
+      <div className={styles.listenConversation} aria-live="polite">
+        {player.status === 'ended' ? <><span>THE OUTCOME</span><strong>{item.outcome}</strong><p>Saved to your dashboard</p></> : caption ? <><span className={styles.listenSpeaker}>{caption.speaker === 'agent' ? 'AI AGENT' : 'BUYER'}{caption.speaker === 'agent' && <span className={`${styles.speakingWave} ${playing ? styles.speakingWaveActive : ''}`} aria-hidden="true"><i /><i /><i /><i /></span>}</span><strong>{caption.text}</strong></> : <div key={scenario} className={styles.listenPreview}><span>BUYER {scenario !== 'ndr' && '· TRANSLATED FROM HINDI'}</span><strong>“{preview.text}”</strong><p>Hear how the AI responds →</p></div>}
+      </div>
+      <div className={styles.listenControls}>
+        <button type="button" className={styles.listenPlay} onClick={() => playing ? player.pause() : player.play()} aria-label={playing ? 'Pause sample' : player.status === 'ended' ? 'Replay sample' : 'Play sample'}>{playing ? <span className={styles.pauseBars}><i /><i /></span> : <Play size={20} weight="fill" aria-hidden="true" />}</button>
+        <div className={styles.listenTimeline}><div className={styles.listenProgress} aria-hidden="true"><i style={{width: `${player.duration ? player.progress / player.duration * 100 : 0}%`}} /></div><div><span>{playing ? 'Playing' : player.status === 'paused' ? 'Paused' : player.status === 'ended' ? 'Call complete' : 'Play recording'}</span><span>{formatTime(player.progress)} / {player.duration ? formatTime(player.duration) : '—:—'}</span></div></div>
+      </div>
+      {player.error && <p className={styles.callError} role="alert">{player.error}</p>}
+      <audio {...player.audioProps} />
+    </div>
+  </section>;
+}
+
+export function Hero({ refined = false, checkoutHook = false }: { refined?: boolean; checkoutHook?: boolean }) {
   const onTrial = useTrial();
   const playRef = useRef<(() => void) | null>(null);
   return <section className={`${styles.hero} ${refined ? styles.heroRefined : ''}`} id="top">
@@ -394,11 +439,10 @@ export function Hero({ refined = false }: { refined?: boolean }) {
     <div className={styles.heroInner}>
       <div className={styles.heroCopy}>
         <p className={styles.heroBadge}><span className={styles.pulseDot} />Built by a D2C founder, for D2C brands</p>
-        <h1>Stop shipping orders <span>that come back.</span></h1>
-        {refined ? <><p className={styles.heroLead}>Our AI voice agent calls to confirm COD orders and correct addresses, with follow-ups on WhatsApp.</p><p className={styles.heroResult}>Average RTO <strong>32% → 17%</strong><a href="#case-study">See the case study <ArrowRight size={13} aria-hidden="true" /></a></p></> : <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>}
+        <h1>{checkoutHook ? <>Recover abandoned checkouts <span>before shoppers move on.</span></> : <>Stop shipping orders <span>that come back.</span></>}</h1>
+        {refined ? <><p className={styles.heroLead}>{checkoutHook ? 'Bring shoppers back with AI calls and WhatsApp follow-ups. Confirm COD orders and correct addresses too.' : 'Confirm COD orders, correct addresses and follow up on WhatsApp—with an AI voice agent.'}</p>{!checkoutHook && <p className={styles.heroResult}>Average RTO <strong>32% → 17%</strong><a href="#case-study">See the case study <ArrowRight size={13} aria-hidden="true" /></a></p>}</> : <p className={styles.heroLead}>Our AI voice agent calls every COD buyer before you dispatch. It confirms the order, fixes the address and follows up on WhatsApp. Brands on RecoverAgent cut average RTO from <strong>32% to 17%</strong>.</p>}
         <div className={styles.heroActions}>
-          <TrialButton onClick={onTrial} source="hero" />
-          <button type="button" className={styles.ghostButton} onClick={() => playRef.current?.()}><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</button>
+          {checkoutHook ? <><SignUpButton source="checkout_hero" primary /><button type="button" className={styles.ghostButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'checkout_hero_demo' }); onTrial(); }}>Book a demo <ArrowRight size={17} weight="bold" aria-hidden="true" /></button></> : <><TrialButton onClick={onTrial} source="hero" /><SignUpButton source="hero" /></>}
         </div>
         <ul className={styles.heroAssurances}>
           <li><Check size={15} weight="bold" aria-hidden="true" />Test it on your real orders</li>
@@ -407,7 +451,7 @@ export function Hero({ refined = false }: { refined?: boolean }) {
           {!refined && <li><Check size={15} weight="bold" aria-hidden="true" />No annual lock-in</li>}
         </ul>
       </div>
-      <CallStage playRef={playRef} refined={refined} />
+      {refined ? <CallExperience defaultScenario={checkoutHook ? 'checkout' : 'cod'} /> : <CallStage playRef={playRef} />}
     </div>
     {!refined && <a href="#proof" className={styles.scrollCue} aria-label="Scroll to results"><span /></a>}
   </section>;
@@ -806,8 +850,8 @@ const inboxThreads = [
   },
 ];
 
-export function WhatsAppSection() {
-  const [activeId, setActiveId] = useState(inboxThreads[0].id);
+export function WhatsAppSection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
+  const [activeId, setActiveId] = useState(checkoutFirst ? 'checkout' : inboxThreads[0].id);
   const thread = inboxThreads.find((item) => item.id === activeId) ?? inboxThreads[0];
   return <section className={styles.waSection} id="whatsapp" aria-labelledby="wa-title">
     <div className={styles.sectionHead}>
@@ -865,7 +909,7 @@ const languages = [
   { name: 'Malayalam', hello: 'നമസ്കാരം' },
 ];
 
-export function SafetySection() {
+export function SafetySection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
   const items = [
     { icon: ShieldCheck, title: 'Verified means a clear yes', text: 'An order is marked Verified only when the buyer clearly confirms it. Unclear answers stay unverified for your team to review.' },
     { icon: ClockCountdown, title: 'Quiet hours', text: 'Set the hours when buyers should not be called. Orders placed then wait in a queue and are called once the window ends.' },
@@ -880,7 +924,7 @@ export function SafetySection() {
       <h2 id="safety-title">Built so your ops team can trust it.</h2>
     </div>
     <div className={styles.safetyGrid}>
-      {items.map((item) => {
+      {items.filter((item) => !checkoutFirst || !['Verified means a clear yes', 'Duplicate orders caught', 'Up to 3 retries'].includes(item.title)).map((item) => {
         const Icon = item.icon;
         return <article key={item.title}>
           <span className={styles.safetyIcon}><Icon size={22} weight="duotone" aria-hidden="true" /></span>
@@ -1009,19 +1053,19 @@ export function LossSection() {
 
 /* ───────────────────────── Trial plan ───────────────────────── */
 
-export function TrialSection() {
+export function TrialSection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
   const onTrial = useTrial();
   const steps = [
     { day: 'Day 1', title: 'Connect your store', text: 'Share your Shopify or WooCommerce store. On a short setup call we agree your language, call timing and rules.', icon: Storefront },
-    { day: 'Day 2–3', title: 'Go live on real orders', text: 'The AI starts calling your COD buyers. Every call, recording and outcome appears on your dashboard.', icon: Lightning },
-    { day: 'Day 4–13', title: 'Watch RTO move', text: 'See confirmed, cancelled and unreachable orders before they ship. Your team only handles exceptions.', icon: ChartLineUp },
+    { day: 'Day 2–3', title: 'Go live on real orders', text: checkoutFirst ? 'The AI follows up on contactable abandoned checkouts. Calls and outcomes appear on your dashboard.' : 'The AI starts calling your COD buyers. Every call, recording and outcome appears on your dashboard.', icon: Lightning },
+    { day: 'Day 4–13', title: checkoutFirst ? 'Follow checkout outcomes' : 'Watch RTO move', text: checkoutFirst ? 'See conversations and completed orders as shoppers return to checkout.' : 'See confirmed, cancelled and unreachable orders before they ship. Your team only handles exceptions.', icon: ChartLineUp },
     { day: 'Day 14', title: 'Decide with real numbers', text: 'We review your results with you. Continue only if the numbers work for your store.', icon: CalendarCheck },
   ];
   return <section className={styles.trialSection} id="trial" aria-labelledby="trial-title">
     <div className={styles.sectionHead}>
       <p className={styles.eyebrowLight}>14-day free trial</p>
       <h2 id="trial-title">Don’t take our word for it. Take your own numbers.</h2>
-      <p>A demo shows you our results. A trial shows you yours. Here is exactly what happens.</p>
+      <p>{checkoutFirst ? 'Sign up, book your onboarding call and see checkout follow-up on your own store.' : 'A demo shows you our results. A trial shows you yours. Here is exactly what happens.'}</p>
     </div>
     <ol className={styles.trialTimeline}>
       {steps.map((step, index) => {
@@ -1035,7 +1079,7 @@ export function TrialSection() {
       })}
     </ol>
     <div className={styles.trialCta}>
-      <TrialButton onClick={onTrial} source="trial_section" />
+      {checkoutFirst ? <SignUpButton source="checkout_trial_section" primary /> : <TrialButton onClick={onTrial} source="trial_section" />}
       <ul className={styles.trustRow}>
         <li><ShieldCheck size={17} weight="fill" aria-hidden="true" />Zero setup fee</li>
         <li><ShieldCheck size={17} weight="fill" aria-hidden="true" />No annual lock-in</li>
@@ -1063,7 +1107,7 @@ export function QuotesSection() {
 
 /* ───────────────────────── Pricing ───────────────────────── */
 
-export function PricingSection() {
+export function PricingSection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
   const onTrial = useTrial();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
@@ -1090,14 +1134,14 @@ export function PricingSection() {
             </li>;
           })}
         </ul>
-        <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'pricing', tier: tier.id }); onTrial(); }}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
+        {checkoutFirst ? <a href={SIGNUP_URL} className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => trackEvent('cta_clicked', { cta: 'sign_up', source: 'checkout_pricing', tier: tier.id })}>Start free trial<ArrowRight size={16} aria-hidden="true" /></a> : <button type="button" className={tier.recommended ? styles.trialButton : styles.outlineButton} onClick={() => { trackEvent('cta_clicked', { cta: 'book_demo', source: 'pricing', tier: tier.id }); onTrial(); }}>Book a demo<ArrowRight size={16} aria-hidden="true" /></button>}
       </article>)}
     </div>
     <div className={styles.whatsappIncluded}>
       <p><WhatsappLogo size={20} weight="fill" aria-hidden="true" /><strong>WhatsApp flows in every plan:</strong></p>
       <ul>{ALL_PLANS_WHATSAPP.map((feature) => <li key={feature}>{feature}</li>)}</ul>
     </div>
-    <p className={styles.pricingNote}>Each COD order or abandoned checkout counts once for billing. Doing more than 1,800 orders a month? Start a trial and we will size a plan to your volume.</p>
+    <p className={styles.pricingNote}>{checkoutFirst && <>AI calls for abandoned checkout recovery are included in Growth and Scale; WhatsApp recovery flows are available on every plan. </>}Each COD order or abandoned checkout counts once for billing. Doing more than 1,800 orders a month? Start a trial and we will size a plan to your volume.</p>
   </section>;
 }
 
@@ -1106,7 +1150,7 @@ export function PricingSection() {
 const trialFaqs = [
   { q: 'What do I get in the 14-day free trial?', a: 'AI calls on your real COD orders, WhatsApp follow-up and the full dashboard, set up with your team on a short call. You see confirmed, cancelled and unreachable orders from your own store, with zero setup fee.' },
   { q: 'What happens after 14 days?', a: 'We review your trial results with you. If the numbers work, you choose a plan and continue. There is no annual lock-in.' },
-  { q: 'Who can start a trial?', a: 'Shopify and WooCommerce stores doing 500 or more orders a month go straight to a setup call. Smaller stores can request an onboarding call to explore WhatsApp recovery.' },
+  { q: 'Who can start a trial?', a: 'Any store can sign up and see the dashboard. Book your onboarding call from there, and we connect your store and WhatsApp with you.' },
 ];
 
 // Answers confirmed against the product; they replace the generic shared versions on this page.
@@ -1116,8 +1160,9 @@ const faqOverrides: Record<string, string> = {
   'What happens when a call is unanswered?': 'For COD and failed deliveries the call is retried up to 3 times at the gaps you choose, and a WhatsApp follow-up can go out in between. If the buyer is still unreachable, the order is marked for your team. Your team always controls what ships.',
 };
 
-export function FaqSection() {
-  const items = [...trialFaqs, ...faqs.filter((item) => item.question !== 'Who can book a live demo?').map((item) => ({ q: item.question, a: faqOverrides[item.question] ?? item.answer }))];
+export function FaqSection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
+  const checkoutTrialFaqs = trialFaqs.map((item) => item.q === 'What do I get in the 14-day free trial?' ? { ...item, a: 'Connect your store with our team, set your follow-up rules and see AI calls, WhatsApp follow-up and checkout outcomes in your dashboard. AI checkout calls are included in Growth and Scale.' } : item);
+  const items = [...(checkoutFirst ? checkoutTrialFaqs : trialFaqs), ...faqs.filter((item) => item.question !== 'Who can book a live demo?').map((item) => ({ q: item.question, a: faqOverrides[item.question] ?? item.answer }))];
   return <section className={styles.faqSection} id="faq" aria-labelledby="faq-title">
     <div className={styles.sectionHead}><p className={styles.eyebrow}>FAQ</p><h2 id="faq-title">Questions founders and ops teams ask.</h2></div>
     <div className={styles.faqList}>
@@ -1131,18 +1176,19 @@ export function FaqSection() {
 
 /* ───────────────────────── Final CTA with inline form ───────────────────────── */
 
-export function FinalSection() {
+export function FinalSection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
   return <section className={styles.finalSection} id="start" aria-labelledby="final-title">
     <div className={styles.finalInner}>
       <div className={styles.finalCopy}>
         <p className={styles.eyebrowLight}>Start today</p>
-        <h2 id="final-title">See your RTO drop on your own orders, free for 14 days.</h2>
+        <h2 id="final-title">{checkoutFirst ? 'Bring more shoppers back to checkout, free for 14 days.' : 'See your RTO drop on your own orders, free for 14 days.'}</h2>
         <ul>
-          <li><CheckCircle size={20} weight="fill" aria-hidden="true" />AI calls on your real COD orders</li>
+          <li><CheckCircle size={20} weight="fill" aria-hidden="true" />{checkoutFirst ? 'AI calls on contactable abandoned checkouts' : 'AI calls on your real COD orders'}</li>
           <li><CheckCircle size={20} weight="fill" aria-hidden="true" />WhatsApp follow-up and full dashboard</li>
           <li><CheckCircle size={20} weight="fill" aria-hidden="true" />Results reviewed with you on day 14</li>
           <li><CheckCircle size={20} weight="fill" aria-hidden="true" />Zero setup fee · No annual lock-in</li>
         </ul>
+        {checkoutFirst && <SignUpButton source="checkout_final" primary />}
         <a className={styles.finalCall} href="tel:+919788274333"><PhoneCall size={18} weight="bold" aria-hidden="true" />Prefer to talk first? Call +91 97882 74333</a>
       </div>
       <div className={styles.finalForm}><LeadCaptureForm idPrefix="home-inline" /></div>
@@ -1219,7 +1265,7 @@ export function SiteFooter() {
 
 /* ───────────────────────── Shared frame: header, footer, sticky bar, trial dialog ───────────────────────── */
 
-export function TrialSiteFrame({ children, isHome = false }: { children: React.ReactNode; isHome?: boolean }) {
+export function TrialSiteFrame({ children, isHome = false, checkoutFirst = false }: { children: React.ReactNode; isHome?: boolean; checkoutFirst?: boolean }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
   const openTrial = useCallback(() => setDialogOpen(true), []);
@@ -1242,12 +1288,12 @@ export function TrialSiteFrame({ children, isHome = false }: { children: React.R
   return <TrialContext.Provider value={openTrial}>
     <div className={styles.page}>
       <div inert={dialogOpen ? true : undefined}>
-        <Header isHome={isHome} />
+        <Header isHome={isHome} checkoutFirst={checkoutFirst} />
         <main>{children}</main>
         <SiteFooter />
-        <div className={`${styles.mobileSticky} ${showSticky ? styles.mobileStickyVisible : ''}`} aria-hidden={!showSticky}>
-          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>Book a demo</span><span className={styles.ctaSubtext}>14-day free trial</span></span><ArrowRight size={16} aria-hidden="true" /></button>
-          <a href="tel:+919788274333" aria-label="Call +91 97882 74333" tabIndex={showSticky ? 0 : -1}><PhoneCall size={22} weight="bold" aria-hidden="true" /></a>
+        <div className={`${styles.mobileSticky} ${checkoutFirst ? styles.mobileStickyCheckout : ''} ${showSticky ? styles.mobileStickyVisible : ''}`} aria-hidden={!showSticky}>
+          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}><CalendarCheck size={17} aria-hidden="true" />Book a demo</button>
+          <a href={SIGNUP_URL} onClick={() => trackEvent('sticky_cta_clicked', { cta: 'sign_up' })} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>{checkoutFirst ? 'Start free trial' : 'Sign up'}</span><span className={styles.ctaSubtext}>{checkoutFirst ? '14 days free · No setup fee' : '14 days free trial'}</span></span><ArrowRight size={16} aria-hidden="true" /></a>
         </div>
       </div>
       <TrialDialog open={dialogOpen} onClose={closeTrial} />
@@ -1273,30 +1319,57 @@ export function PageHero({ eyebrow, title, description, crumbs, showCtas = true 
       {description && <p className={styles.pageHeroLead}>{description}</p>}
       {showCtas && <div className={styles.heroActions}>
         <TrialButton onClick={onTrial} source="page_hero" />
-        <Link className={styles.ghostButton} href="/hear-a-call"><Play size={17} weight="fill" aria-hidden="true" />Hear a real call</Link>
+        <SignUpButton source="page_hero" />
       </div>}
     </div>
   </section>;
 }
 
+function CheckoutCalculator() {
+  const [cart, setCart] = useState(600);
+  const [aov, setAov] = useState(1200);
+  const [rate, setRate] = useState(18);
+  const orders = cart * rate / 100;
+  return <section className={styles.lossSection} id="calc" aria-labelledby="checkout-calc-title"><div className={styles.sectionHead}><a href="#calc-sliders" className={styles.challengeBadge}><Calculator size={16} weight="fill" aria-hidden="true" /><span>Checkout calculator</span><b>Try it now</b></a><h2 id="checkout-calc-title">What could another chance be worth?</h2><p>Explore an example using your own numbers.</p></div>
+    <div className={styles.lossGrid} id="calc-sliders"><div className={styles.lossControls}>
+      <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={setCart} format={(v) => v.toLocaleString('en-IN')} />
+      <Slider label="Average order value" value={aov} min={300} max={5000} step={100} onChange={setAov} format={formatInr} />
+      <Slider label="Average recovery rate" value={rate} min={0} max={50} step={1} onChange={setRate} format={(v) => `${v}%`} />
+      <p className={styles.lossAssumption}>The recovery rate is an example you can change, not a promised or measured result. Actual results vary.</p>
+    </div><div className={styles.lossResult}><p className={styles.lossLabel}>Estimated recovered order value</p><p className={styles.lossBig}>{formatInr(orders * aov)}<small>/month</small></p><p className={styles.lossYear}>{cart.toLocaleString('en-IN')} checkouts × {rate}% × {formatInr(aov)}</p><p className={styles.lossYear}>Approximately {Math.round(orders).toLocaleString('en-IN')} orders before cancellations, returns, costs and fees. This is order value, not profit.</p><SignUpButton source="checkout_calculator" primary /></div></div>
+  </section>;
+}
+
 /* ───────────────────────── Homepage ───────────────────────── */
 
-export function TrialHomepage({ refinedHero = false }: { refinedHero?: boolean }) {
-  return <TrialSiteFrame isHome>
-    <Hero refined={refinedHero} />
+export function TrialHomepage({ refinedHero = false, checkoutHook = false }: { refinedHero?: boolean; checkoutHook?: boolean }) {
+  return <TrialSiteFrame isHome checkoutFirst={checkoutHook}>
+    <Hero refined={refinedHero} checkoutHook={checkoutHook} />
     <IntegrationStrip />
-    <ProofBand />
-    <CaseStudySection />
-    <ProblemSection />
-    <ShipOrHoldGame />
-    <StorySection />
-    <WhatsAppSection />
-    <LossSection />
-    <SafetySection />
-    <TrialSection />
-    <QuotesSection />
-    <PricingSection />
-    <FaqSection />
-    <FinalSection />
+    {checkoutHook ? <>
+      <StorySection defaultScenario="checkout" />
+      <WhatsAppSection checkoutFirst />
+      <CheckoutCalculator />
+      <SafetySection checkoutFirst />
+      <TrialSection checkoutFirst />
+      <PricingSection checkoutFirst />
+      <QuotesSection />
+      <FaqSection checkoutFirst />
+      <FinalSection checkoutFirst />
+    </> : <>
+      <ProofBand />
+      <CaseStudySection />
+      <ProblemSection />
+      <ShipOrHoldGame />
+      <StorySection />
+      <WhatsAppSection />
+      <LossSection />
+      <SafetySection />
+      <TrialSection />
+      <QuotesSection />
+      <PricingSection />
+      <FaqSection />
+      <FinalSection />
+    </>}
   </TrialSiteFrame>;
 }
