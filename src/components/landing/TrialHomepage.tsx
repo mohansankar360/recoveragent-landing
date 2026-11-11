@@ -172,7 +172,7 @@ function Header({ isHome, checkoutFirst = false }: { isHome: boolean; checkoutFi
   }, [open]);
   const links = navLinks.filter((link) => !checkoutFirst || !['#case-study', '#game'].includes(link.home)).map((link) => [isHome ? link.home : link.page, checkoutFirst && link.home === '#game' ? 'Shopper questions' : checkoutFirst && link.home === '#calc' ? 'Checkout calculator' : link.label] as const);
   return <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
-    <a href={isHome ? '#top' : '/'} className={styles.brand} aria-label="RecoverAgent home">
+    <a href={checkoutFirst ? 'https://www.recoveragent.ai/' : isHome ? '#top' : '/'} className={styles.brand} aria-label="RecoverAgent home">
       <Image src="/recover-agent-logo-transparent.png" width={500} height={250} alt="RecoverAgent" priority />
     </a>
     <nav className={styles.desktopNav} aria-label="Primary navigation">
