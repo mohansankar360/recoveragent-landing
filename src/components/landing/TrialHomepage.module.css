@@ -128,7 +128,6 @@
 @keyframes pulse { from { opacity: 0.8; transform: scale(0.6); } to { opacity: 0; transform: scale(1.8); } }
 .heroCopy h1 { font-size: clamp(42px, 5.6vw, 76px); line-height: 0.98; font-weight: 800; }
 .heroRefined .phoneRinging,
-.heroRefined .answerButton,
 .heroRefined .pulseDot::after,
 .heroRefined .trialButton::after { animation: none; }
 .heroRefined .pulseDot::after,
@@ -869,11 +868,11 @@
 
   .mobileSticky {
     position: fixed; z-index: 60; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); left: 10px;
-    display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 6px; opacity: 0; pointer-events: none; transform: translateY(18px); transition: opacity 0.2s ease, transform 0.2s ease;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; opacity: 0; pointer-events: none; transform: translateY(18px); transition: opacity 0.2s ease, transform 0.2s ease;
   }
   .mobileStickyVisible { opacity: 1; pointer-events: auto; transform: none; }
   .mobileSticky button, .mobileSticky a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; color: #fff; font: 700 15px var(--font-geist), sans-serif; text-decoration: none; background: linear-gradient(135deg, #3d78ff, #2456e6); border: 0; border-radius: 14px; box-shadow: 0 16px 36px rgba(47, 107, 255, 0.4); cursor: pointer; }
-  .mobileSticky a { background: var(--green); box-shadow: 0 16px 36px rgba(34, 197, 94, 0.35); }
+  .mobileSticky a { background: #142344; border: 1px solid #586989; box-shadow: 0 16px 36px rgba(9, 22, 48, 0.3); }
 }
 @media (max-width: 380px) {
   .phone { width: 240px; height: 456px; }
@@ -881,3 +880,73 @@
 @media (prefers-reduced-motion: reduce) {
   .page *, .page *::before, .page *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+.callInvitation { position: relative; z-index: 2; display: grid; justify-items: center; gap: 4px; margin-bottom: 14px; text-align: center; }
+.callInvitation span { color: #79d9ff; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.callInvitation strong { color: #fff; font-size: 19px; line-height: 1.2; }
+.callInvitation p { margin: 0; color: #c4d3ef; font-size: 13px; }
+.heroRefined .answerButton { animation: none; }
+.heroRefined .answerReady { animation: answerPulse 2.4s ease-out infinite; }
+.heroRefined .callerMeta, .heroRefined .callTime, .heroRefined .phoneHint { color: #c2d0eb; }
+.heroRefined .callAction small { color: #e0e9fa; }
+@media (prefers-reduced-motion: reduce) { .heroRefined .answerReady { animation: none; } }
+@media (min-width: 901px) and (max-height: 860px) {
+  .heroRefined .phone { width: 250px; height: 490px; }
+  .heroRefined .phoneScreen { padding-top: 50px; }
+  .heroRefined .callerAvatar { width: 70px; height: 70px; margin-top: 18px; }
+  .heroRefined .callerName { margin-top: 16px !important; }
+  .heroRefined .waveform { height: 40px; margin-top: 16px; }
+  .heroRefined .callProgress { margin-top: 10px; }
+}
+.listenExperience { position: relative; width: min(100%, 450px); justify-self: center; color: #fff; }
+.listenHeading { margin-bottom: 17px; }
+.listenHeading > span { color: #77d4ff; font-size: 10px; font-weight: 750; letter-spacing: .14em; }
+.listenHeading h2 { margin: 6px 0 0; color: #fff; font-size: clamp(22px, 2vw, 27px); line-height: 1.15; letter-spacing: -.025em; }
+.listenHeading p { margin: 7px 0 0; color: #bdcdea; font-size: 13px; }
+.listenTabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; padding: 4px; margin-bottom: 10px; border: 1px solid #33466c; border-radius: 12px; background: #101f40; }
+.listenTabs button { min-height: 40px; border: 0; border-radius: 8px; background: transparent; color: #b9cae8; font: 650 13px var(--font-geist),sans-serif; cursor: pointer; }
+.listenTabs button[aria-pressed='true'] { background: #f4f7ff; color: #122348; }
+.listenTabs button:focus-visible, .listenPlay:focus-visible { outline: 3px solid #75d7ff; outline-offset: 3px; }
+.listenCard { padding: 20px; border: 1px solid #35496d; border-radius: 20px; background: #101e3b; box-shadow: 0 24px 65px rgba(0,0,0,.25); }
+.listenCardTop { display: flex; justify-content: space-between; color: #becdeb; font-size: 11px; font-weight: 650; letter-spacing: .04em; }
+.listenCardTop span:first-child { display: flex; align-items: center; gap: 7px; color: #8fd7f4; }
+.listenCardTop i { width: 7px; height: 7px; border-radius: 50%; background: #2fce82; }
+.listenStory { display: flex; gap: 13px; align-items: center; margin-top: 21px; }
+.listenStoryIcon { display: grid; place-items: center; flex: 0 0 46px; height: 46px; border-radius: 14px; color: #b5d7ff; background: #223e76; }
+.listenStory strong { display: block; font-size: 16px; }
+.listenStory p { margin: 4px 0 0; color: #b5c5e3; font-size: 12px; line-height: 1.4; }
+.listenConversation { min-height: 135px; margin-top: 20px; padding: 16px; border-radius: 13px; background: #0a1731; border: 1px solid #293d60; }
+.listenConversation > span { display: block; color: #76d6f5; font-size: 10px; font-weight: 750; letter-spacing: .1em; }
+.listenConversation strong { display: block; margin-top: 9px; font-size: 16px; line-height: 1.4; font-weight: 600; }
+.listenConversation p { margin: 6px 0 0; color: #b3c2dd; font-size: 12px; line-height: 1.4; }
+.listenControls { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+.listenPlay { display: grid; place-items: center; flex: 0 0 52px; height: 52px; border: 0; border-radius: 50%; background: #22c55e; color: #fff; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.listenPlay:active { transform: scale(.95); }
+.listenTimeline { flex: 1; min-width: 0; }
+.listenProgress { height: 4px; overflow: hidden; border-radius: 4px; background: #41516f; }
+.listenProgress i { display: block; height: 100%; background: #6bd8ff; transition: width .2s linear; }
+.listenTimeline > div:last-child { display: flex; justify-content: space-between; margin-top: 9px; color: #cad8ef; font-size: 11px; font-variant-numeric: tabular-nums; }
+.listenFootnote { display: flex; align-items: center; gap: 7px; margin: 12px 0 0; color: #aabfdf; font-size: 12px; }
+@media (max-width: 900px) { .listenExperience { width: min(100%, 450px); } }
+@media (max-width: 420px) { .listenCard { padding: 16px; } .listenConversation { min-height: 120px; } }
+
+.listenPreview { animation: listenReveal .45s ease-out both; }
+.listenPreview > span { display: block; color: #76d6f5; font-size: 10px; font-weight: 750; letter-spacing: .1em; }
+.listenPreview p { animation: listenReveal .45s .65s ease-out both; }
+@keyframes listenReveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .listenPreview, .listenPreview p { animation: none; } }
+
+.listenConversation > .listenSpeaker { display: flex; align-items: center; gap: 8px; }
+.speakingWave { display: inline-flex; align-items: center; gap: 2px; height: 12px; }
+.speakingWave i { width: 2px; height: 4px; border-radius: 2px; background: #76d6f5; }
+.speakingWaveActive i { animation: speakingBar .8s ease-in-out infinite alternate; }
+.speakingWaveActive i:nth-child(2) { animation-delay: -.3s; }
+.speakingWaveActive i:nth-child(3) { animation-delay: -.55s; }
+.speakingWaveActive i:nth-child(4) { animation-delay: -.15s; }
+@keyframes speakingBar { from { height: 3px; } to { height: 11px; } }
+@media (prefers-reduced-motion: reduce) { .speakingWaveActive i { animation: none; height: 6px; } }
+
+.listenConversation { background: #2b2118; border-color: #80613c; }
+.listenConversation > span, .listenPreview > span { color: #f6c879; }
+.listenConversation strong { color: #fff5e6; }
+.listenConversation p { color: #e9c998; }

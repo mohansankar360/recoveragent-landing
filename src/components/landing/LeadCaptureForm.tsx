@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ShopifyLogo, WooCommerceLogo } from "@/components/landing/PlatformLogos";
 import { BookingPicker } from "@/components/calendar/BookingPicker";
 import type { DemoFormData } from "@/lib/demo-booking";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -103,6 +104,8 @@ function validateAll(
 export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "demo" | "trial"; idPrefix?: string }) {
   const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>(EMPTY_FORM);
+  const [verifiedUrl, setVerifiedUrl] = useState("");
+  const [platformCheck, setPlatformCheck] = useState<"idle" | "checking" | "unknown">("idle");
   const [errors, setErrors] = useState<Partial<LeadFormData>>({});
   const [touched, setTouched] = useState<
     Partial<Record<keyof LeadFormData, boolean>>
@@ -138,6 +141,43 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     setRestored(true);
   }, []);
 
+  useEffect(() => {
+    const url = form.storeUrl.trim();
+    setVerifiedUrl("");
+    setForm((prev) => prev.storePlatform ? { ...prev, storePlatform: "" } : prev);
+    if (!url || getStoreUrlValidationError(url) || url.toLowerCase() === "to be shared on call") {
+      setPlatformCheck("idle");
+      return;
+    }
+    const controller = new AbortController();
+    setPlatformCheck("checking");
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch("https://huyoveugeexdhyqhawvq.supabase.co/functions/v1/detect-store-platform", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eW92ZXVnZWV4ZGh5cWhhd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NjUyMDMsImV4cCI6MjA4ODA0MTIwM30.NDbox6KeRJ9FG_TGc6f5yjolaqh51KClrXlP6afFByg", Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eW92ZXVnZWV4ZGh5cWhhd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NjUyMDMsImV4cCI6MjA4ODA0MTIwM30.NDbox6KeRJ9FG_TGc6f5yjolaqh51KClrXlP6afFByg" },
+          body: JSON.stringify({ url: normalizeStoreUrl(url) }),
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Platform check failed");
+        const result = await response.json();
+        if (controller.signal.aborted) return;
+        if ((result.platform === "shopify" || result.platform === "woocommerce")) {
+          setForm((prev) => ({ ...prev, storePlatform: result.platform }));
+          setErrors((prev) => ({ ...prev, storePlatform: undefined }));
+          setVerifiedUrl(url);
+          setPlatformCheck("idle");
+        } else {
+          setPlatformCheck(result.platform === "shopify" || result.platform === "woocommerce" ? "idle" : "unknown");
+        }
+      } catch {
+        if (!controller.signal.aborted) setPlatformCheck("unknown");
+      }
+    }, 800);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [form.storeUrl]);
+
+
   const clearSavedDetails = () => {
     clearSavedLeadDetails();
     setForm(EMPTY_FORM);
@@ -163,7 +203,10 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       trackEvent("lead_form_started");
     }
 
-    setForm((prev) => ({ ...prev, [field]: value }));
+    if (field === "storeUrl") {
+      setVerifiedUrl("");
+      setForm((prev) => ({ ...prev, storeUrl: value, storePlatform: "" }));
+    } else setForm((prev) => ({ ...prev, [field]: value }));
 
     if (errors[field] || touched[field]) {
       const error = validateField(field, value);
@@ -186,6 +229,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   const handleNext = (e: FormEvent) => {
     e.preventDefault();
     const nextErrors = validateAll(form, STEP_ONE_FIELDS);
+    if (verifiedUrl !== form.storeUrl.trim() || platformCheck === "checking") nextErrors.storePlatform = platformCheck === "checking" ? "Please wait while we check your store." : "We could not verify this as a Shopify or WooCommerce store. If you are a marketer/agency please enter any of your client's store.";
     setErrors(nextErrors);
     markTouched(STEP_ONE_FIELDS);
     if (Object.keys(nextErrors).length > 0) {
@@ -409,6 +453,24 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                 inputMode="url"
               />
 
+              <div className="lead-field">
+                <label htmlFor={`${idPrefix}-platform`}>Store platform</label>
+                <div id={`${idPrefix}-platform`} className="lead-platform-options" role="radiogroup" aria-label="Store platform">
+                  {STORE_PLATFORM_OPTIONS.map((option) => (
+                    <button key={option.value} type="button" role="radio" aria-checked={form.storePlatform === option.value} disabled className={form.storePlatform === option.value ? "is-selected" : undefined}>
+                      {option.value === "shopify" ? <ShopifyLogo size={26} /> : option.value === "woocommerce" ? <WooCommerceLogo size={15} /> : <Globe size={22} aria-hidden />}
+                      <span>{option.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (platformCheck === "unknown" || errors.storePlatform) ? (
+                  <div className="lead-platform-notice" role="status">
+                    <span className="lead-platform-notice-icon" aria-hidden="true">!</span>
+                    <div><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client&apos;s store.</p></div>
+                  </div>
+                ) : null}
+              </div>
+
               <button type="submit" className="btn btn-green lead-form-submit">
                 Next →
               </button>
@@ -446,20 +508,6 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
                 }))}
               />
 
-              <IconSelectField
-                id={`${idPrefix}-platform`}
-                label="Store platform"
-                icon={Storefront}
-                value={form.storePlatform}
-                error={errors.storePlatform}
-                onChange={(v) => handleChange("storePlatform", v)}
-                onBlur={() => handleBlur("storePlatform")}
-                placeholder="Platform"
-                options={STORE_PLATFORM_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-              />
               <IconField
                 id={`${idPrefix}-email`}
                 label="Email"

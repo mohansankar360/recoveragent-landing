@@ -7146,3 +7146,11 @@ footer.site-footer .wrap {
 @media (max-width: 600px) {
   .calc-section .calc-baseline .out-label { display: block; min-height: 2.8em; line-height: 1.4; }
 }
+.lead-platform-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.lead-platform-options button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 70px; padding: 8px 4px; border: 1px solid #d7e0ed; border-radius: 8px; background: transparent; color: #667085; font-size: 13px; opacity: .7; }
+.lead-platform-options button.is-selected { border-color: #1b5bc4; background: #eef4ff; color: #164eaa; opacity: 1; }
+
+.lead-platform-notice { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; padding: 12px 14px; border: 1px solid #f0d7ad; border-radius: 8px; background: #fff9ee; color: #704d19; font-size: 13px; line-height: 1.45; }
+.lead-platform-notice-icon { display: grid; flex: 0 0 19px; height: 19px; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font-weight: 700; line-height: 1; }
+.lead-platform-notice strong { font-weight: 600; }
+.lead-platform-notice p { margin: 4px 0 0; color: #80643c; }

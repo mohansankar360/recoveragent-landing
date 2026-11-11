@@ -139,7 +139,7 @@ export function TrialButton({ onClick, children, variant = 'primary', source }: 
     type="button"
     className={`${styles.trialButton} ${variant === 'light' ? styles.trialButtonLight : ''} ${variant === 'compact' ? styles.trialButtonCompact : ''}`}
     onClick={() => { trackEvent('cta_clicked', { cta: children ? 'start_trial' : 'book_demo', source }); onClick(); }}
-  >{children ?? 'Book a demo'}<ArrowRight size={17} weight="bold" aria-hidden="true" /></button>;
+  >{source === 'hero' && <CalendarCheck size={17} aria-hidden="true" />}{children ?? 'Book a demo'}{source !== 'hero' && <ArrowRight size={17} weight="bold" aria-hidden="true" />}</button>;
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -320,6 +320,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
   return <div className={styles.heroStage} ref={stageRef} onPointerMove={onPointerMove} onPointerLeave={() => { pointerX.set(0); pointerY.set(0); }}>
         <motion.div className={styles.stageGlow} style={glowLayer} aria-hidden="true" />
 
+        {refined && <div className={styles.callInvitation}><span>LISTEN FOR YOURSELF</span><strong>Hear a real AI call</strong><p>Choose a scenario, then press play.</p></div>}
         <div className={styles.scenarioTabs} role="tablist" aria-label="Choose a call to hear">
           {scenarioKeys.map((key) => {
             const Icon = scenarios[key].icon;
@@ -335,7 +336,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
           <div className={`${styles.phone} ${player.status === 'ringing' ? styles.phoneRinging : ''}`}>
             <div className={styles.phoneNotch} aria-hidden="true" />
             <div className={styles.phoneScreen}>
-              <p className={styles.phoneStatus}>{live ? <><span className={styles.liveDot} />Live call · {item.language}</> : ended ? 'Call ended' : player.status === 'paused' ? (refined ? 'Recording paused' : 'On hold') : (refined ? 'Real AI call · ' + item.language : 'Incoming AI call…')}</p>
+              <p className={styles.phoneStatus}>{live ? <><span className={styles.liveDot} />Playing recording · {item.language}</> : ended ? 'Call ended' : player.status === 'paused' ? (refined ? 'Recording paused' : 'On hold') : (refined ? 'Real AI call · ' + item.language : 'Incoming AI call…')}</p>
               <div className={`${styles.callerAvatar} ${live ? styles.callerAvatarLive : ''}`}><PhoneCall size={30} weight="duotone" aria-hidden="true" /></div>
               <p className={styles.callerName}>RecoverAgent</p>
               <p className={styles.callerMeta}>{item.caller}</p>
@@ -357,10 +358,10 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
                       <small aria-hidden="true">{refined ? 'Next sample' : 'Not now'}</small>
                     </span>
                     <span className={styles.callAction}>
-                      <button type="button" className={styles.answerButton} onClick={answer} aria-label={live ? 'Pause call' : refined ? (player.status === 'paused' ? 'Resume call' : 'Play sample call') : 'Answer and play the real AI call'}>
+                      <button type="button" className={`${styles.answerButton} ${!live && !ended && player.status !== 'paused' ? styles.answerReady : ''}`} onClick={answer} aria-label={live ? 'Pause call' : refined ? (player.status === 'paused' ? 'Resume call' : 'Play sample call') : 'Answer and play the real AI call'}>
                         {live ? <span className={styles.pauseBars}><i /><i /></span> : refined ? <Play size={24} weight="fill" aria-hidden="true" /> : <Phone size={24} weight="fill" />}
                       </button>
-                      <small aria-hidden="true">{live ? 'Pause' : refined ? (player.status === 'paused' ? 'Resume' : 'Play call') : 'Answer'}</small>
+                      <small aria-hidden="true">{live ? 'Pause' : refined ? (player.status === 'paused' ? 'Resume' : 'Play sample') : 'Answer'}</small>
                     </span>
                   </motion.div>}
               </AnimatePresence>
@@ -369,7 +370,7 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
             </div>
             <audio {...player.audioProps} />
           </div>
-          <p className={styles.phoneHint}>{live ? 'Real recording of our AI voice agent' : ended ? 'What happened next:' : <><SpeakerHigh size={15} weight="fill" aria-hidden="true" />Turn your sound on</>}</p>
+          <p className={styles.phoneHint}>{live ? 'Real recording of our AI voice agent' : ended ? 'What happened next:' : <><SpeakerHigh size={15} weight="fill" aria-hidden="true" />Sound on to hear the conversation</>}</p>
           {refined && !ended && <div className={styles.refinedSummary} aria-label="Sample workflow follow-up">
             <span><WhatsappLogo size={15} aria-hidden="true" />WhatsApp follow-up</span>
             <span><Tag size={15} aria-hidden="true" />{item.tag}</span>
@@ -395,6 +396,41 @@ export function CallStage({ defaultScenario = 'cod', playRef, refined = false }:
       </div>;
 }
 
+function CallExperience() {
+  const [scenario, setScenario] = useState<ScenarioKey>('cod');
+  const player = useCallPlayer(scenario);
+  const item = scenarios[scenario];
+  const preview = scenario === 'cod' ? CALL_CAPTIONS.cod[4] : scenario === 'checkout' ? CALL_CAPTIONS.checkout[10] : CALL_CAPTIONS.ndr[5];
+  const playing = player.status === 'live';
+  const caption = (playing || player.status === 'paused')
+    ? [...CALL_CAPTIONS[scenario]].reverse().find((line) => line.at <= player.progress)
+    : undefined;
+  const changeScenario = (next: ScenarioKey) => {
+    if (next === scenario) return;
+    player.hangUp();
+    setScenario(next);
+  };
+  return <section className={styles.listenExperience} aria-label="Listen to real AI calls">
+    <div className={styles.listenHeading}><span>HEAR IT IN ACTION</span><h2>Real calls. Real conversations.</h2><p>Choose a moment and hear how the AI responds.</p></div>
+    <div className={styles.listenTabs} role="group" aria-label="Choose a call sample">
+      {scenarioKeys.map((key) => <button key={key} type="button" aria-pressed={scenario === key} onClick={() => changeScenario(key)}>{scenarios[key].short}</button>)}
+    </div>
+    <div className={styles.listenCard}>
+      <div className={styles.listenCardTop}><span><i /> REAL RECORDING</span><span>{item.language}</span></div>
+      <div className={styles.listenStory}><span className={styles.listenStoryIcon}><PhoneCall size={23} weight="duotone" aria-hidden="true" /></span><div><strong>{item.label}</strong><p>{item.context}</p></div></div>
+      <div className={styles.listenConversation} aria-live="polite">
+        {player.status === 'ended' ? <><span>THE OUTCOME</span><strong>{item.outcome}</strong><p>Saved to your dashboard</p></> : caption ? <><span className={styles.listenSpeaker}>{caption.speaker === 'agent' ? 'AI AGENT' : 'BUYER'}{caption.speaker === 'agent' && <span className={`${styles.speakingWave} ${playing ? styles.speakingWaveActive : ''}`} aria-hidden="true"><i /><i /><i /><i /></span>}</span><strong>{caption.text}</strong></> : <div key={scenario} className={styles.listenPreview}><span>BUYER {scenario !== 'ndr' && '· TRANSLATED FROM HINDI'}</span><strong>“{preview.text}”</strong><p>Hear how the AI responds →</p></div>}
+      </div>
+      <div className={styles.listenControls}>
+        <button type="button" className={styles.listenPlay} onClick={() => playing ? player.pause() : player.play()} aria-label={playing ? 'Pause sample' : player.status === 'ended' ? 'Replay sample' : 'Play sample'}>{playing ? <span className={styles.pauseBars}><i /><i /></span> : <Play size={20} weight="fill" aria-hidden="true" />}</button>
+        <div className={styles.listenTimeline}><div className={styles.listenProgress} aria-hidden="true"><i style={{width: `${player.duration ? player.progress / player.duration * 100 : 0}%`}} /></div><div><span>{playing ? 'Playing' : player.status === 'paused' ? 'Paused' : player.status === 'ended' ? 'Call complete' : 'Play recording'}</span><span>{formatTime(player.progress)} / {player.duration ? formatTime(player.duration) : '—:—'}</span></div></div>
+      </div>
+      {player.error && <p className={styles.callError} role="alert">{player.error}</p>}
+      <audio {...player.audioProps} />
+    </div>
+  </section>;
+}
+
 export function Hero({ refined = false }: { refined?: boolean }) {
   const onTrial = useTrial();
   const playRef = useRef<(() => void) | null>(null);
@@ -416,7 +452,7 @@ export function Hero({ refined = false }: { refined?: boolean }) {
           {!refined && <li><Check size={15} weight="bold" aria-hidden="true" />No annual lock-in</li>}
         </ul>
       </div>
-      <CallStage playRef={playRef} refined={refined} />
+      {refined ? <CallExperience /> : <CallStage playRef={playRef} />}
     </div>
     {!refined && <a href="#proof" className={styles.scrollCue} aria-label="Scroll to results"><span /></a>}
   </section>;
@@ -1255,8 +1291,8 @@ export function TrialSiteFrame({ children, isHome = false }: { children: React.R
         <main>{children}</main>
         <SiteFooter />
         <div className={`${styles.mobileSticky} ${showSticky ? styles.mobileStickyVisible : ''}`} aria-hidden={!showSticky}>
-          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}>Book a demo<ArrowRight size={16} aria-hidden="true" /></button>
-          <a href="tel:+919788274333" aria-label="Call +91 97882 74333" tabIndex={showSticky ? 0 : -1}><PhoneCall size={22} weight="bold" aria-hidden="true" /></a>
+          <button type="button" onClick={() => { trackEvent('sticky_cta_clicked', { cta: 'book_demo' }); openTrial(); }} tabIndex={showSticky ? 0 : -1}><CalendarCheck size={17} aria-hidden="true" />Book a demo</button>
+          <a href={SIGNUP_URL} onClick={() => trackEvent('sticky_cta_clicked', { cta: 'sign_up' })} tabIndex={showSticky ? 0 : -1}><span className={styles.ctaCopy}><span>Sign up</span><span className={styles.ctaSubtext}>14 days free trial</span></span><ArrowRight size={16} aria-hidden="true" /></a>
         </div>
       </div>
       <TrialDialog open={dialogOpen} onClose={closeTrial} />
