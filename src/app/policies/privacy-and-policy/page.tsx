@@ -1,0 +1,33 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import styles from "./privacy.module.css";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Recover Agent",
+  description: "How Recover Agent handles personal information across its website, AI voice and WhatsApp services.",
+};
+
+export default function PrivacyPolicy() {
+  return <div className={styles.page}>
+    <header className={styles.header}><Link href="/">RecoverAgent</Link><Link href="/">Back to home <span aria-hidden="true">↗</span></Link></header>
+    <main className={styles.main}>
+      <p className={styles.eyebrow}>Recover Agent / Legal</p>
+      <h1>Privacy policy</h1>
+      <p className={styles.intro}>How we handle information when you visit our website, use Recover Agent, or interact with a business using our services.</p>
+      <div className={styles.content}>
+        <section><h2>About this policy</h2><p>Recover Agent Technologies provides AI voice and WhatsApp tools that help businesses confirm orders, follow up on abandoned checkouts and resolve delivery issues. This policy explains how we handle personal information in connection with our website and services.</p><p>When a business uses Recover Agent to contact its customers, the business generally decides why and how that customer information is used. We process it on the business’s behalf under our agreement with it. The business’s own privacy policy also applies.</p></section>
+        <section><h2>Information we collect</h2><p>Depending on how you interact with us, information may include:</p><ul><li><strong>Business and account details:</strong> names, contact details, company and store information, account details, demo requests and support messages.</li><li><strong>Order and customer details:</strong> names, phone numbers, addresses, language preferences, order and checkout details, payment or delivery status, and information supplied by a connected store or service.</li><li><strong>Calls and messages:</strong> call recordings, transcripts, responses and outcomes; WhatsApp messages, delivery status and replies; and related interaction history.</li><li><strong>Usage and technical information:</strong> device and browser details, IP address, pages visited, event logs and interactions with our services.</li><li><strong>Billing information:</strong> subscription and transaction details. Payment providers may collect payment information directly.</li></ul></section>
+        <section><h2>How we use information</h2><p>We use information to provide and maintain the services; connect stores and other tools; make and manage calls and messages configured by merchants; record outcomes; provide support; administer accounts and billing; understand and improve service performance; protect our systems; and meet legal obligations. We may also contact business users about our services, subject to applicable choices and law.</p></section>
+        <section><h2>AI calls and WhatsApp</h2><p>Our services can use automated voice technology to contact customers and interpret their responses. Calls may be recorded or transcribed, and outcomes may be made available to the merchant. WhatsApp messages and replies may also be processed and displayed to the merchant. Merchants are responsible for providing appropriate notices, obtaining any required permissions and configuring their communications in accordance with applicable law and platform rules.</p></section>
+        <section><h2>Sharing information</h2><p>We may share information with service providers that help us operate the service, such as hosting, communications, AI, analytics, payment and support providers; with integrations selected by a merchant; and with authorities when required by law. We use Hostinger for WhatsApp hosting, Vercel for the dashboard, Supabase for storage, and Gemini and Sarvam for AI calls. A merchant can access information processed for its account. Information may also be transferred as part of a business transaction, subject to applicable law.</p></section>
+        <section><h2>Retention and security</h2><p>Shopify customer data, call recordings and transcripts are retained for 12 months. When a merchant uninstalls the Shopify app, it stops collecting new data through that installation. Retention of other information can vary by data type, merchant agreement and legal requirements. We use administrative and technical measures intended to protect information, but no system can guarantee absolute security.</p></section>
+        <section><h2>Cookies and analytics</h2><p>Our website uses Microsoft Clarity to understand how visitors use the site and may use Meta and OpenAI advertising pixels when configured to measure marketing performance. These services may collect device, browser and interaction information using cookies or similar technologies. Your browser may let you manage or block cookies; doing so may affect some features.</p></section>
+        <section><h2>Your choices and requests</h2><p>Depending on applicable law, you may have rights to request access to, correction or deletion of your personal information, withdraw consent where processing relies on it, or raise a complaint. You can contact us using the address below. We may need to verify your identity and some requests may be subject to legal exceptions.</p><p>If a business contacted you using Recover Agent, please contact that business directly to exercise rights concerning your order or to request that it stop contacting you. You may also contact us and we will direct your request to the relevant business where appropriate.</p></section>
+        <section><h2>International processing</h2><p>Our providers may process information in countries other than your own. Where applicable law requires safeguards for international transfers, we use appropriate measures for those transfers.</p></section>
+        <section><h2>Children</h2><p>Our services are intended for businesses and are not directed to children. If you believe a child’s personal information has been provided to us inappropriately, please contact us.</p></section>
+        <section><h2>Changes and contact</h2><p>We may update this policy as our services or legal requirements change. We will post the updated policy here and provide additional notice where required.</p><p>For privacy questions, requests or complaints, contact <a href="mailto:support@recoveragent.ai">support@recoveragent.ai</a>.</p></section>
+      </div>
+    </main>
+    <footer className={styles.footer}>© {new Date().getFullYear()} RecoverAgent <Link href="/">Home</Link></footer>
+  </div>;
+}

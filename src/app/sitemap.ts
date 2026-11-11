@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogPosts = getAllBlogPosts();
 
   return [
+    { url: `${siteUrl}/policies/privacy-and-policy`, lastModified, changeFrequency: "yearly", priority: 0.3 },
     {
       url: siteUrl,
       lastModified,
