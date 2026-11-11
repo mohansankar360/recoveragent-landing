@@ -1243,7 +1243,7 @@ const footerColumns = [
   { title: 'Product', links: [['How it works', '/how-it-works'], ['Hear a call', '/hear-a-call'], ['Control room', '/control-room'], ['Voice + WhatsApp', '/why-calling'], ['WhatsApp Agent', '/whatsapp']] },
   { title: 'Use cases', links: [['COD verification', '/cod-verification'], ['Abandoned checkout recovery', '/abandoned-checkout-recovery'], ['NDR recovery', '/ndr-recovery'], ['Where brands leak', '/where-you-leak']] },
   { title: 'Plan', links: [['Pricing', '/plans'], ['RTO calculator', '/loss-calculator'], ['Free trial', '/book-demo'], ['Onboarding', '/go-live'], ['FAQ', '/faq']] },
-  { title: 'Resources', links: [['Guides', '/blog'], ['Contact', 'mailto:hello@recoveragent.ai'], ['Call +91 97882 74333', 'tel:+919788274333']] },
+  { title: 'Resources', links: [['Guides', '/blog'], ['Privacy policy', '/policies/privacy-and-policy'], ['Contact', 'mailto:hello@recoveragent.ai'], ['Call +91 97882 74333', 'tel:+919788274333']] },
 ] as const;
 
 export function SiteFooter() {
