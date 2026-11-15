@@ -79,6 +79,7 @@ export default function RootLayout({
         <MetaPageView />
         <VisitorEngagement />
         {children}
+        <script src="https://wa.recoveragent.ai/widget.js" data-key="wgt_013f8c17e7444924bbb5ed12efa0ddd5" async />
       </body>
     </html>
   );
