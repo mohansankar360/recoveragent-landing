@@ -3,6 +3,7 @@ import { CAL_BOOKING_FIELDS, CAL_EVENT_LINK, DEMO_URL } from "./constants";
 export { CAL_EVENT_LINK };
 
 export interface DemoFormData {
+  goal?: string;
   name: string;
   whatsapp: string;
   email: string;
@@ -10,7 +11,21 @@ export interface DemoFormData {
   storePlatform: string;
   monthlyOrders: string;
   preferredLanguage: string;
-  goals?: string[];
+}
+
+export const DEMO_GOAL_LABELS: Record<string, string> = {
+  cod: "Confirm COD orders",
+  checkout: "Recover abandoned checkouts",
+  ndr: "Reduce failed deliveries",
+};
+
+export function demoGoalLabel(value: string): string {
+  return value.split(",").map((goal) => DEMO_GOAL_LABELS[goal]).filter(Boolean).join(", ");
+}
+
+export function isValidDemoGoal(value: string): boolean {
+  const goals = value.split(",");
+  return goals.length > 0 && new Set(goals).size === goals.length && goals.every((goal) => Object.prototype.hasOwnProperty.call(DEMO_GOAL_LABELS, goal));
 }
 
 export const DEMO_LANGUAGE_OPTIONS = [
@@ -81,14 +96,17 @@ export function getDisqualificationMessage(
   const lowVolume = data.monthlyOrders === "0-500";
   const unsupportedPlatform = data.storePlatform === "other";
 
-  if (unsupportedPlatform) {
-    return "Our team will review your store details and contact you about onboarding options.";
+  if (lowVolume && unsupportedPlatform) {
+    return UNSUPPORTED_PLATFORM_MESSAGE;
   }
 
   if (lowVolume) {
     return "Live demos are for stores doing 500+ orders per month. We can still set you up with our WhatsApp API service — our team will call you soon to see how we can help you reduce your RTO.";
   }
 
+  if (unsupportedPlatform) {
+    return UNSUPPORTED_PLATFORM_MESSAGE;
+  }
 
   return null;
 }
@@ -196,7 +214,7 @@ export function buildDemoBookingUrl(data: DemoFormData): string {
   params.set(CAL_BOOKING_FIELDS.websiteUrl, storeUrl);
   params.set(CAL_BOOKING_FIELDS.preferredLanguage, preferredLanguage);
   params.set(CAL_BOOKING_FIELDS.storePlatform, storePlatform);
-  params.set("notes", `Monthly orders: ${monthlyOrders}`);
+  params.set("notes", `Monthly orders: ${monthlyOrders}${data.goal ? `\nPriorities: ${demoGoalLabel(data.goal)}` : ""}`);
   params.set("metadata[storeUrl]", storeUrl);
   params.set("metadata[monthlyOrders]", monthlyOrders);
   params.set("metadata[preferredLanguage]", preferredLanguage);
@@ -225,7 +243,7 @@ export function buildDemoEmbedConfig(
     [CAL_BOOKING_FIELDS.websiteUrl]: storeUrl,
     [CAL_BOOKING_FIELDS.preferredLanguage]: preferredLanguage,
     [CAL_BOOKING_FIELDS.storePlatform]: storePlatform,
-    notes: `Monthly orders: ${monthlyOrders}`,
+    notes: `Monthly orders: ${monthlyOrders}${data.goal ? `\nPriorities: ${demoGoalLabel(data.goal)}` : ""}`,
     "metadata[storeUrl]": storeUrl,
     "metadata[monthlyOrders]": monthlyOrders,
     "metadata[preferredLanguage]": preferredLanguage,

@@ -7146,11 +7146,17 @@ footer.site-footer .wrap {
 @media (max-width: 600px) {
   .calc-section .calc-baseline .out-label { display: block; min-height: 2.8em; line-height: 1.4; }
 }
+.lead-platform-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.lead-priorities { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.lead-priorities legend { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.lead-priority { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border: 1px solid #d7e0ed; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.lead-priority.is-selected { border-color: #1b5bc4; background: #eef4ff; }
+.lead-priority input { width: 18px; height: 18px; margin: 0; accent-color: #1b5bc4; flex: none; }
+.lead-priority:focus-within { outline: 2px solid #1b5bc4; outline-offset: 2px; }
+.lead-platform-options button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 70px; padding: 8px 4px; border: 1px solid #d7e0ed; border-radius: 8px; background: transparent; color: #667085; font-size: 13px; opacity: .7; }
+.lead-platform-options button.is-selected { border-color: #1b5bc4; background: #eef4ff; color: #164eaa; opacity: 1; }
 
-.lead-goals { border: 0; padding: 0; margin: 0; min-width: 0; }
-.lead-goals legend { font-size: 12px; font-weight: 600; color: #52647d; margin-bottom: 8px; }
-.lead-goals legend span { font-weight: 400; }
-.lead-goals-options { display: flex; flex-wrap: wrap; gap: 8px; }
-.lead-goals-options label { display: flex; align-items: center; gap: 7px; padding: 10px 12px; border: 1px solid #d7e0ed; border-radius: 7px; font-size: 13px; color: #142344; cursor: pointer; }
-.lead-goals-options label.is-selected { border-color: #1b5bc4; background: #eef4ff; color: #164eaa; }
-.lead-goals-options input { accent-color: #1b5bc4; margin: 0; }
+.lead-platform-notice { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; padding: 12px 14px; border: 1px solid #f0d7ad; border-radius: 8px; background: #fff9ee; color: #704d19; font-size: 13px; line-height: 1.45; }
+.lead-platform-notice-icon { display: grid; flex: 0 0 19px; height: 19px; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font-weight: 700; line-height: 1; }
+.lead-platform-notice strong { font-weight: 600; }
+.lead-platform-notice p { margin: 4px 0 0; color: #80643c; }
