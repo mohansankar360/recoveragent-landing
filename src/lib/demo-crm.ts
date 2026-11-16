@@ -2,6 +2,7 @@ import type { LeadEngagement } from "./visitor-engagement";
 
 /** Server-only adapter for RecoverAgent's company-scoped Lead Followup API. */
 export interface WebsiteDemoLead {
+  goal?: string;
   source: string;
   name: string;
   phone: string;
@@ -67,6 +68,7 @@ export function buildDashboardLeadRequest(payload: WebsiteDemoLead, companyId: s
         store_url: payload.storeUrl,
         store_platform: payload.storePlatform,
         monthly_orders: payload.monthlyOrders,
+        ...(payload.goal ? { priority: payload.goal } : {}),
         preferred_language: payload.preferredLanguage,
         product: payload.qualifiesForCalendar ? "Product demo" : "WhatsApp API onboarding",
         calendar_eligible: payload.qualifiesForCalendar ? "Yes" : "No",

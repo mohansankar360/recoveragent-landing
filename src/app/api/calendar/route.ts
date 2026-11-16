@@ -1,7 +1,7 @@
 import { availableBookingSlots, calRequest, CAL_EVENT_TYPE_ID } from "@/lib/cal-server";
 import { allowedSlot, BOOKING_TIME_ZONE } from "@/lib/calendar-slots";
 import { isValidDemoFormData } from "@/lib/demo-lead";
-import { monthlyOrdersLabel, normalizeWhatsAppNumber, qualifiesForDemoCalendar } from "@/lib/demo-booking";
+import { demoGoalLabel, monthlyOrdersLabel, normalizeWhatsAppNumber, qualifiesForDemoCalendar } from "@/lib/demo-booking";
 import { CAL_BOOKING_FIELDS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       bookingFieldsResponses: {
         [CAL_BOOKING_FIELDS.websiteUrl]: details.storeUrl.trim(),
         [CAL_BOOKING_FIELDS.storePlatform]: details.storePlatform === "shopify" ? "Shopify" : "Woocommerce",
-        notes: `Monthly orders: ${monthlyOrdersLabel(details.monthlyOrders)}`,
+        notes: `Monthly orders: ${monthlyOrdersLabel(details.monthlyOrders)}${details.goal ? `\nPriorities: ${demoGoalLabel(details.goal)}` : ""}`,
       },
       metadata: {
         source: "recover-agent-landing", storeUrl: details.storeUrl.trim().slice(0, 500),

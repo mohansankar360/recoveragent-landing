@@ -29,6 +29,7 @@ import { getEngagementSnapshot } from "@/lib/visitor-engagement";
 import { appleFade, appleSpring } from "@/lib/motion";
 
 interface LeadFormData {
+  goal: string;
   name: string;
   whatsapp: string;
   email: string;
@@ -38,6 +39,7 @@ interface LeadFormData {
 }
 
 const EMPTY_FORM: LeadFormData = {
+  goal: "",
   name: "",
   whatsapp: "",
   email: "",
@@ -59,6 +61,9 @@ function validateField(
   const trimmed = value.trim();
 
   switch (field) {
+    case "goal":
+      if (!trimmed) return "Choose your main priority";
+      return undefined;
     case "name":
       if (!trimmed) return "Name is required";
       return undefined;
@@ -87,7 +92,7 @@ function validateField(
 
 // Step 1 is saved to the CRM on its own, so a visitor who drops off on step 2
 // can still be followed up. Step 2 then completes the same contact.
-const STEP_ONE_FIELDS: (keyof LeadFormData)[] = ["name", "whatsapp", "storeUrl"];
+const STORE_FIELDS: (keyof LeadFormData)[] = ["monthlyOrders", "storeUrl", "storePlatform"];
 
 function validateAll(
   form: LeadFormData,
@@ -116,11 +121,12 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   const [hasStarted, setHasStarted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [onboardingRequested, setOnboardingRequested] = useState(false);
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   // True when the fields were filled from details this browser saved on an earlier visit.
   const [restored, setRestored] = useState(false);
   // Step 1 values last sent to the CRM, so Back → Next without edits doesn't resend.
   const savedStepOne = useRef<string | null>(null);
+  const partialRequest = useRef<Promise<void> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const pendingFocus = useRef<string | null>(null);
 
@@ -180,7 +186,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
   const clearSavedDetails = () => {
     clearSavedLeadDetails();
-    setForm(EMPTY_FORM);
+    setForm((prev) => ({ ...prev, name: "", whatsapp: "", email: "" }));
     setErrors({});
     setTouched({});
     setRestored(false);
@@ -190,7 +196,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
   const focusFirstError = (nextErrors: Partial<LeadFormData>) => {
     const ids: Record<keyof LeadFormData, string> = {
-      name: `${idPrefix}-name`, whatsapp: `${idPrefix}-whatsapp`, storeUrl: `${idPrefix}-store-url`,
+      goal: `${idPrefix}-goal`, name: `${idPrefix}-name`, whatsapp: `${idPrefix}-whatsapp`, storeUrl: `${idPrefix}-store-url`,
       monthlyOrders: `${idPrefix}-orders`, storePlatform: `${idPrefix}-platform`, email: `${idPrefix}-email`,
     };
     const first = (Object.keys(ids) as (keyof LeadFormData)[]).find((field) => nextErrors[field]);
@@ -228,40 +234,32 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
   const handleNext = (e: FormEvent) => {
     e.preventDefault();
-    const nextErrors = validateAll(form, STEP_ONE_FIELDS);
-    if (verifiedUrl !== form.storeUrl.trim() || platformCheck === "checking") nextErrors.storePlatform = platformCheck === "checking" ? "Please wait while we check your store." : "We could not verify this as a Shopify or WooCommerce store. If you are a marketer/agency please enter any of your client's store.";
-    setErrors(nextErrors);
-    markTouched(STEP_ONE_FIELDS);
-    if (Object.keys(nextErrors).length > 0) {
-      focusFirstError(nextErrors);
-      return;
+    const fields: (keyof LeadFormData)[] = step === 1 ? ["goal"] : STORE_FIELDS;
+    const nextErrors = validateAll(form, fields);
+    if (step === 2 && (verifiedUrl !== form.storeUrl.trim() || platformCheck === "checking")) {
+      nextErrors.storePlatform = platformCheck === "checking" ? "Please wait while we check your store." : "We could not verify this as a Shopify or WooCommerce store.";
     }
+    setErrors(nextErrors);
+    markTouched(fields);
+    if (Object.keys(nextErrors).length) { focusFirstError(nextErrors); return; }
+    pendingFocus.current = step === 1 ? `${idPrefix}-orders` : `${idPrefix}-name`;
+    setStep(step === 1 ? 2 : 3);
+  };
 
+  // Capture a partial lead once contact details are available, even if email is abandoned.
+  const savePartialLead = () => {
+    if (validateField("name", form.name) || validateField("whatsapp", form.whatsapp) || !verifiedUrl) return;
     const name = form.name.trim();
     const whatsapp = form.whatsapp.replace(/\D/g, "").slice(0, 10);
     const storeUrl = normalizeStoreUrl(form.storeUrl);
-    saveLeadDetails({ name, whatsapp, storeUrl: form.storeUrl });
     const key = `${name}|${whatsapp}|${storeUrl}`;
-    if (savedStepOne.current !== key) {
-      savedStepOne.current = key;
-      trackEvent("lead_form_step1_completed");
-      // Fire-and-forget: a CRM hiccup here must never block the visitor from step 2.
-      fetch("/api/demo-lead/partial", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, whatsapp, storeUrl, engagement: getEngagementSnapshot() }),
-        keepalive: true,
-      })
-        .then((response) => {
-          if (!response.ok) savedStepOne.current = null;
-        })
-        .catch(() => {
-          savedStepOne.current = null;
-        });
-    }
-    setSubmitError(null);
-    pendingFocus.current = `${idPrefix}-orders`;
-    setStep(2);
+    saveLeadDetails({ name, whatsapp, storeUrl: form.storeUrl });
+    if (savedStepOne.current === key) return;
+    savedStepOne.current = key;
+    partialRequest.current = fetch("/api/demo-lead/partial", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, whatsapp, storeUrl, engagement: getEngagementSnapshot() }), keepalive: true,
+    }).then((response) => { if (!response.ok) savedStepOne.current = null; }).catch(() => { savedStepOne.current = null; });
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -274,7 +272,13 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
 
     if (Object.keys(nextErrors).length > 0) {
       focusFirstError(nextErrors);
-      if (STEP_ONE_FIELDS.some((field) => nextErrors[field])) setStep(1);
+      if (nextErrors.goal) setStep(1);
+      else if (STORE_FIELDS.some((field) => nextErrors[field])) setStep(2);
+      return;
+    }
+
+    if (form.storePlatform === "other") {
+      setIsUnsupportedPlatform(true);
       return;
     }
 
@@ -288,6 +292,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     const metaEventId = generateMetaEventId();
 
     const payload = {
+      goal: form.goal,
       name: form.name.trim(),
       email: form.email.trim(),
       whatsapp: form.whatsapp.replace(/\D/g, "").slice(0, 10),
@@ -298,6 +303,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     };
     setSubmitError(null);
     try {
+      await partialRequest.current;
       const response = await fetch('/api/demo-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, metaEventId, ...getMetaBrowserIds(), engagement: getEngagementSnapshot() }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error ?? 'Could not save your details. Please try again.');
@@ -368,18 +374,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
             </p>
           </motion.div>
         ) : isUnsupportedPlatform ? (
-          <motion.div
-            key="unsupported-platform"
-            ref={revealOutcome}
-            tabIndex={-1}
-            className="lead-form-success"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={appleFade}
-            role="status"
-            aria-live="polite"
-          >
+          <motion.div key="unsupported-platform" ref={revealOutcome} tabIndex={-1} className="lead-form-success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={appleFade} role="status" aria-live="polite">
             <p className="lead-form-success-title">This platform is not supported.</p>
             <p className="lead-form-success-copy">{UNSUPPORTED_PLATFORM_MESSAGE}</p>
           </motion.div>
@@ -396,155 +391,57 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
           >
             <div className="lead-form-topline">
               <div className="lead-form-badge">{isTrial ? "No setup fee" : "14-day free trial available"}</div>
-              <span className="lead-form-step" aria-live="polite">Step {step} of 2</span>
+              <span className="lead-form-step" aria-live="polite">Step {step} of 3</span>
             </div>
             <div className="lead-form-head">
-              <h2>{isTrial ? "Start your 14-day free trial" : "Book a demo"}</h2>
-              <p>
-                {step === 1
-                  ? "Start with your name, WhatsApp number and store."
-                  : isTrial
-                    ? "A few store details, then pick a time for your setup call."
-                    : "A few store details, then choose a time for your 30-minute demo."}
-              </p>
+              <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : "How can we reach you?"}</h2>
+              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "Live demos are for Shopify and WooCommerce stores doing 500+ orders per month." : "We’ll use your details to arrange your next step."}</p>
             </div>
-
             {step === 1 ? (
-            <form onSubmit={handleNext} noValidate className="lead-form-fields">
-              {restored && (
-                <div className="lead-form-recap">
-                  <span>Welcome back. We’ve filled in your details.</span>
-                  <button type="button" className="lead-form-back" onClick={clearSavedDetails}>
-                    Not you? Clear
-                  </button>
-                </div>
-              )}
-              <IconField
-                id={`${idPrefix}-name`}
-                label="Full name"
-                icon={User}
-                value={form.name}
-                error={errors.name}
-                onChange={(v) => handleChange("name", v)}
-                onBlur={() => handleBlur("name")}
-                placeholder="Your name"
-                autoComplete="name"
-              />
-
-              <PhoneField
-                id={`${idPrefix}-whatsapp`}
-                label="WhatsApp number"
-                value={form.whatsapp}
-                error={errors.whatsapp}
-                onChange={(v) => handleChange("whatsapp", v)}
-                onBlur={() => handleBlur("whatsapp")}
-              />
-
-              <IconField
-                id={`${idPrefix}-store-url`}
-                label="Store URL"
-                icon={Globe}
-                value={form.storeUrl}
-                error={errors.storeUrl}
-                onChange={(v) => handleChange("storeUrl", v)}
-                onBlur={() => handleBlur("storeUrl")}
-                placeholder="yourstore.com"
-                autoComplete="url"
-                inputMode="url"
-              />
-
-              <div className="lead-field">
-                <label htmlFor={`${idPrefix}-platform`}>Store platform</label>
-                <div id={`${idPrefix}-platform`} className="lead-platform-options" role="radiogroup" aria-label="Store platform">
-                  {STORE_PLATFORM_OPTIONS.map((option) => (
-                    <button key={option.value} type="button" role="radio" aria-checked={form.storePlatform === option.value} disabled className={form.storePlatform === option.value ? "is-selected" : undefined}>
-                      {option.value === "shopify" ? <ShopifyLogo size={26} /> : option.value === "woocommerce" ? <WooCommerceLogo size={15} /> : <Globe size={22} aria-hidden />}
+              <form onSubmit={handleNext} noValidate className="lead-form-fields">
+                <fieldset className="lead-priorities" aria-describedby={errors.goal ? `${idPrefix}-goal-error` : undefined}>
+                  <legend>Choose your priorities</legend>
+                  {[
+                    { value: "cod", label: "Confirm COD orders" },
+                    { value: "checkout", label: "Recover abandoned checkouts" },
+                    { value: "ndr", label: "Reduce failed deliveries" },
+                  ].map((option, index) => {
+                    const selected = form.goal.split(",").filter(Boolean);
+                    return <label key={option.value} className={`lead-priority${selected.includes(option.value) ? " is-selected" : ""}`}>
+                      <input id={index === 0 ? `${idPrefix}-goal` : undefined} type="checkbox" checked={selected.includes(option.value)} onChange={(event) => handleChange("goal", (event.target.checked ? [...selected, option.value] : selected.filter((value) => value !== option.value)).join(","))} />
                       <span>{option.label}</span>
-                    </button>
-                  ))}
-                </div>
-                {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (platformCheck === "unknown" || errors.storePlatform) ? (
-                  <div className="lead-platform-notice" role="status">
-                    <span className="lead-platform-notice-icon" aria-hidden="true">!</span>
-                    <div><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client&apos;s store.</p></div>
+                    </label>;
+                  })}
+                  {errors.goal && <p id={`${idPrefix}-goal-error`} className="lead-field-msg" role="alert">{errors.goal}</p>}
+                </fieldset>
+                <button type="submit" className="btn btn-green lead-form-submit">Continue →</button>
+              </form>
+            ) : step === 2 ? (
+              <form onSubmit={handleNext} noValidate className="lead-form-fields">
+                <IconSelectField id={`${idPrefix}-orders`} label="Monthly orders" icon={ChartBar} value={form.monthlyOrders} error={errors.monthlyOrders} onChange={(v) => handleChange("monthlyOrders", v)} onBlur={() => handleBlur("monthlyOrders")} placeholder="Choose volume" options={MONTHLY_ORDERS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} />
+                <IconField id={`${idPrefix}-store-url`} label="Store URL" icon={Globe} value={form.storeUrl} error={errors.storeUrl} onChange={(v) => handleChange("storeUrl", v)} onBlur={() => handleBlur("storeUrl")} placeholder="yourstore.com" autoComplete="url" inputMode="url" />
+                <div className="lead-field">
+                  <label htmlFor={`${idPrefix}-platform`}>Store platform</label>
+                  <div id={`${idPrefix}-platform`} className="lead-platform-options" role="radiogroup" aria-label="Store platform">
+                    {STORE_PLATFORM_OPTIONS.map((option) => <button key={option.value} type="button" role="radio" aria-checked={form.storePlatform === option.value} disabled className={form.storePlatform === option.value ? "is-selected" : undefined}>{option.value === "shopify" ? <ShopifyLogo size={26} /> : option.value === "woocommerce" ? <WooCommerceLogo size={15} /> : <Globe size={22} aria-hidden />}<span>{option.label}</span></button>)}
                   </div>
-                ) : null}
-              </div>
-
-              <button type="submit" className="btn btn-green lead-form-submit">
-                Next →
-              </button>
-
-              <p className="lead-form-privacy">
-                <span aria-hidden>✓</span>
-                Your information is safe with us and will only be used to
-                {isTrial ? " set up your trial." : " schedule your demo."}
-              </p>
-            </form>
+                  {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (platformCheck === "unknown" || errors.storePlatform) ? <div className="lead-platform-notice" role="status"><span className="lead-platform-notice-icon" aria-hidden="true">!</span><div><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client’s store.</p></div></div> : null}
+                </div>
+                <button type="submit" className="btn btn-green lead-form-submit">Continue →</button>
+                <button type="button" className="lead-form-back" onClick={() => setStep(1)}>← Back</button>
+              </form>
             ) : (
-            <form onSubmit={handleSubmit} noValidate className="lead-form-fields">
-              <div className="lead-form-recap">
-                <span>
-                  {form.name.trim()} · +91 {form.whatsapp} · {form.storeUrl.trim()}
-                </span>
-                <button type="button" className="lead-form-back" onClick={() => { pendingFocus.current = `${idPrefix}-name`; setStep(1); }}>
-                  <ArrowLeft size={14} weight="bold" aria-hidden />
-                  Edit
-                </button>
-              </div>
-
-              <IconSelectField
-                id={`${idPrefix}-orders`}
-                label="Monthly orders"
-                icon={ChartBar}
-                value={form.monthlyOrders}
-                error={errors.monthlyOrders}
-                onChange={(v) => handleChange("monthlyOrders", v)}
-                onBlur={() => handleBlur("monthlyOrders")}
-                placeholder="Choose volume"
-                options={MONTHLY_ORDERS_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-              />
-
-              <IconField
-                id={`${idPrefix}-email`}
-                label="Email"
-                icon={EnvelopeSimple}
-                value={form.email}
-                error={errors.email}
-                onChange={(v) => handleChange("email", v)}
-                onBlur={() => handleBlur("email")}
-                type="email"
-                autoComplete="email"
-                inputMode="email"
-                hint={emailSuggestion && (
-                  <>
-                    Did you mean{" "}
-                    <button type="button" className="lead-field-hint-fix" onClick={() => handleChange("email", emailSuggestion)}>
-                      {emailSuggestion}
-                    </button>
-                    ?
-                  </>
-                )}
-              />
-
-              {submitError && <p role="alert" className="lead-field-msg">{submitError}</p>}
-              <button
-                type="submit"
-                className="btn btn-green lead-form-submit"
-                disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}
-              >
-                {isSubmitting ? "Saving…" : routesToOnboarding ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue to choose a time →'}
-              </button>
-
-              <p className="lead-form-privacy">
-                <span aria-hidden>✓</span>
-                Your information is safe with us and will only be used to
-                {isTrial ? " set up your trial." : " schedule your demo."}
-              </p>
-            </form>
+              <form onSubmit={handleSubmit} noValidate className="lead-form-fields">
+                {restored && <div className="lead-form-recap"><span>Welcome back. We’ve filled in your details.</span><button type="button" className="lead-form-back" onClick={clearSavedDetails}>Not you? Clear</button></div>}
+                <IconField id={`${idPrefix}-name`} label="Full name" icon={User} value={form.name} error={errors.name} onChange={(v) => handleChange("name", v)} onBlur={() => { handleBlur("name"); savePartialLead(); }} placeholder="Your name" autoComplete="name" />
+                <PhoneField id={`${idPrefix}-whatsapp`} label="WhatsApp number" value={form.whatsapp} error={errors.whatsapp} onChange={(v) => handleChange("whatsapp", v)} onBlur={() => { handleBlur("whatsapp"); savePartialLead(); }} />
+                <IconField id={`${idPrefix}-email`} label="Email" icon={EnvelopeSimple} value={form.email} error={errors.email} onChange={(v) => handleChange("email", v)} onBlur={() => handleBlur("email")} type="email" autoComplete="email" inputMode="email" hint={emailSuggestion && <>Did you mean <button type="button" className="lead-field-hint-fix" onClick={() => handleChange("email", emailSuggestion)}>{emailSuggestion}</button>?</>} />
+                {submitError && <p role="alert" className="lead-field-msg">{submitError}</p>}
+                <button type="submit" className="btn btn-green lead-form-submit" disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}>{isSubmitting ? "Saving…" : routesToOnboarding ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue →'}</button>
+                {!routesToOnboarding && !isTrial && <p className="lead-form-privacy">Next: choose a demo time.</p>}
+                <button type="button" className="lead-form-back" onClick={() => setStep(2)}>← Back</button>
+                <p className="lead-form-privacy"><span aria-hidden>✓</span> Your information is safe with us and will only be used to {isTrial ? "set up your trial." : "schedule your demo."}</p>
+              </form>
             )}
           </motion.div>
         )}
@@ -740,3 +637,4 @@ function FieldError({
     </AnimatePresence>
   );
 }
+

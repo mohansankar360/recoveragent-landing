@@ -8,10 +8,13 @@ import {
   normalizeWhatsAppNumber,
   storePlatformLabel,
   type DemoFormData,
+  demoGoalLabel,
+  isValidDemoGoal,
 } from "./demo-booking";
 import type { LeadEngagement } from "./visitor-engagement";
 
 export interface DemoLeadPayload {
+  goal?: string;
   source: "recover-agent-landing";
   name: string;
   phone: string;
@@ -35,6 +38,7 @@ export function buildDemoLeadPayload(
 ): DemoLeadPayload {
   return {
     source: "recover-agent-landing",
+    ...(data.goal && isValidDemoGoal(data.goal) ? { goal: demoGoalLabel(data.goal) } : {}),
     name: data.name.trim(),
     phone: normalizeWhatsAppNumber(data.whatsapp),
     email: data.email.trim(),
@@ -100,6 +104,7 @@ export function isValidDemoFormData(data: unknown): data is DemoFormData {
   const form = data as DemoFormData;
   const whatsapp = form.whatsapp?.replace(/\D/g, "") ?? "";
   return (
+    (form.goal === undefined || (typeof form.goal === "string" && isValidDemoGoal(form.goal))) &&
     typeof form.name === "string" &&
     form.name.trim().length > 0 &&
     typeof form.whatsapp === "string" &&
