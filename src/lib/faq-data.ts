@@ -1,7 +1,7 @@
 export const faqs = [
   {
     question: 'How is pricing calculated?',
-    answer: 'Plans are priced per order, with an included monthly allowance and an additional-order rate. Each COD order or abandoned checkout counts once in the estimate. Use the calculator to compare the plan base and overage for your volume; confirm messaging charges, taxes and retry terms in your demo.',
+    answer: 'Plans are priced per workflow, with an included monthly allowance and an additional-workflow rate. Each COD order or abandoned checkout counts as one workflow in the estimate. Use the calculator to compare the plan base and overage for your volume; confirm messaging charges, taxes and retry terms in your demo.',
   },
   {
     question: 'Who can book a live demo?',

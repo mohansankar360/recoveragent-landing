@@ -1110,21 +1110,34 @@ export function QuotesSection() {
 export function PricingSection({ checkoutFirst = false }: { checkoutFirst?: boolean }) {
   const onTrial = useTrial();
   const ref = useRef<HTMLElement>(null);
+  const workflowHelpRef = useRef<HTMLSpanElement>(null);
+  const [workflowHelpOpen, setWorkflowHelpOpen] = useState(false);
   const inView = useInView(ref, { once: true, amount: 0.2 });
   useEffect(() => { if (inView) trackEvent('pricing_viewed'); }, [inView]);
+  useEffect(() => {
+    if (!workflowHelpOpen) return;
+    const dismiss = (event: PointerEvent) => { if (!workflowHelpRef.current?.contains(event.target as Node)) setWorkflowHelpOpen(false); };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') setWorkflowHelpOpen(false); };
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('keydown', onKeyDown);
+    return () => { document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', onKeyDown); };
+  }, [workflowHelpOpen]);
   const taglines = { starter: 'Verify COD before dispatch', growth: 'Verify COD + recover checkouts', scale: 'COD, checkout + failed delivery recovery' };
   return <section ref={ref} className={styles.pricingSection} id="pricing" aria-labelledby="pricing-title">
     <div className={styles.sectionHead}>
       <p className={styles.eyebrow}>Pricing</p>
       <h2 id="pricing-title">Every plan starts with 14 days free.</h2>
-      <p>Priced per order. Pick the workflows your store needs. Zero setup fee and no annual lock-in.</p>
+      <p>Priced per workflow <span ref={workflowHelpRef} className={styles.workflowHelp}>
+        <button type="button" className={styles.workflowHelpButton} aria-label="How workflow cases are counted" aria-expanded={workflowHelpOpen} aria-describedby="workflow-help" onClick={() => setWorkflowHelpOpen((open) => !open)}>?</button>
+        <span id="workflow-help" role="tooltip" className={`${styles.workflowTooltip} ${workflowHelpOpen ? styles.workflowTooltipOpen : ''}`}>500 COD cases + 500 abandoned checkouts + 200 NDR cases = 1,200 workflow cases.</span>
+      </span>. Pick the workflows your store needs. Zero setup fee and no annual lock-in.</p>
     </div>
     <div className={styles.pricingGrid}>
       {PRICING_TIERS.map((tier) => <article key={tier.id} className={`${styles.pricingCard} ${tier.recommended ? styles.pricingRecommended : ''}`}>
         <div className={styles.pricingTitle}><h3>{tier.name}</h3>{tier.recommended && <span>Most popular</span>}</div>
         <p className={styles.pricingTagline}>{taglines[tier.id]}</p>
         <p className={styles.pricingPrice}>₹{tier.base.toLocaleString('en-IN')}<span>/month</span></p>
-        <p className={styles.pricingAllowance}>{tier.includedCalls.toLocaleString('en-IN')} orders included · ₹{tier.overagePerOrder} per extra order</p>
+        <p className={styles.pricingAllowance}>{tier.includedCalls.toLocaleString('en-IN')} workflows included · ₹{tier.overagePerOrder} per extra workflow</p>
         <ul className={styles.pricingFeatures}>
           {PLAN_FEATURE_ROWS.map((row) => {
             const included = PLAN_FEATURES[tier.id][row.key];
@@ -1141,7 +1154,7 @@ export function PricingSection({ checkoutFirst = false }: { checkoutFirst?: bool
       <p><WhatsappLogo size={20} weight="fill" aria-hidden="true" /><strong>WhatsApp flows in every plan:</strong></p>
       <ul>{ALL_PLANS_WHATSAPP.map((feature) => <li key={feature}>{feature}</li>)}</ul>
     </div>
-    <p className={styles.pricingNote}>{checkoutFirst && <>AI calls for abandoned checkout recovery are included in Growth and Scale; WhatsApp recovery flows are available on every plan. </>}Each COD order or abandoned checkout counts once for billing. Doing more than 1,800 orders a month? Start a trial and we will size a plan to your volume.</p>
+    <p className={styles.pricingNote}>{checkoutFirst && <>AI calls for abandoned checkout recovery are included in Growth and Scale; WhatsApp recovery flows are available on every plan. </>}COD, abandoned checkout and NDR cases count toward your workflow allowance. Running more than 1,800 workflows a month? Start a trial and we will size a plan to your volume.</p>
   </section>;
 }
 

@@ -578,6 +578,13 @@
 
 /* ── Pricing ── */
 .pricingSection { padding: 110px 0 90px; background: var(--paper); }
+.workflowHelp { position: relative; display: inline-flex; vertical-align: middle; }
+.workflowHelpButton { display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 1px solid #aab4c4; border-radius: 50%; background: transparent; color: #59677d; font: inherit; font-size: 12px; font-weight: 700; line-height: 1; cursor: pointer; }
+.workflowHelpButton:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.workflowTooltip { position: absolute; z-index: 5; bottom: calc(100% + 10px); left: 50%; width: 260px; max-width: calc(100vw - 40px); padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 8px 24px rgba(11, 21, 48, 0.12); color: #36425a; font-size: 13px; font-weight: 400; line-height: 1.5; text-align: left; transform: translateX(-50%); visibility: hidden; opacity: 0; transition: opacity 0.15s ease, visibility 0.15s ease; }
+.workflowTooltipOpen { visibility: visible; opacity: 1; }
+@media (hover: hover) { .workflowHelp:hover .workflowTooltip { visibility: visible; opacity: 1; } }
+
 .pricingGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
 .pricingCard { display: flex; flex-direction: column; padding: 30px; background: #fff; border: 1px solid var(--line); border-radius: 22px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .pricingCard:hover { transform: translateY(-4px); box-shadow: 0 24px 50px rgba(11, 21, 48, 0.08); }
