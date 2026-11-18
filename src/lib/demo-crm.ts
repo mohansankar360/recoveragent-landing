@@ -10,6 +10,7 @@ export interface WebsiteDemoLead {
   storeUrl: string;
   storePlatform: string;
   storePlatformValue: string;
+  platformVerification?: "manual" | "detected";
   monthlyOrders: string;
   monthlyOrdersValue: string;
   preferredLanguage: string;
@@ -67,6 +68,7 @@ export function buildDashboardLeadRequest(payload: WebsiteDemoLead, companyId: s
         whatsapp: payload.phone,
         store_url: payload.storeUrl,
         store_platform: payload.storePlatform,
+        ...(payload.platformVerification ? { platform_verification: payload.platformVerification === "manual" ? "Manually selected; verify platform" : "Automatically detected" } : {}),
         monthly_orders: payload.monthlyOrders,
         ...(payload.goal ? { priority: payload.goal } : {}),
         preferred_language: payload.preferredLanguage,

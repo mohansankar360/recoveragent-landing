@@ -7160,3 +7160,8 @@ footer.site-footer .wrap {
 .lead-platform-notice-icon { display: grid; flex: 0 0 19px; height: 19px; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font-weight: 700; line-height: 1; }
 .lead-platform-notice strong { font-weight: 600; }
 .lead-platform-notice p { margin: 4px 0 0; color: #80643c; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lead-platform-notice-shake { animation: lead-platform-shake 360ms ease-out; }
+  @keyframes lead-platform-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+}

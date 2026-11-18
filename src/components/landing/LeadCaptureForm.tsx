@@ -106,10 +106,12 @@ function validateAll(
   return next;
 }
 
-export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "demo" | "trial"; idPrefix?: string }) {
+export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = false }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean }) {
   const isTrial = mode === "trial";
-  const [form, setForm] = useState<LeadFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<LeadFormData>(() => ({ ...EMPTY_FORM, goal: initialGoal }));
   const [verifiedUrl, setVerifiedUrl] = useState("");
+  const [manualPlatformUrl, setManualPlatformUrl] = useState("");
+  const [platformErrorAttempt, setPlatformErrorAttempt] = useState(0);
   const [platformCheck, setPlatformCheck] = useState<"idle" | "checking" | "unknown">("idle");
   const [errors, setErrors] = useState<Partial<LeadFormData>>({});
   const [touched, setTouched] = useState<
@@ -143,13 +145,14 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
   useEffect(() => {
     const saved = readSavedLeadDetails();
     if (!saved) return;
-    setForm((prev) => ({ ...prev, ...saved }));
+    setForm((prev) => ({ ...prev, ...saved, goal: initialGoal || prev.goal }));
     setRestored(true);
-  }, []);
+  }, [initialGoal]);
 
   useEffect(() => {
     const url = form.storeUrl.trim();
     setVerifiedUrl("");
+    setManualPlatformUrl("");
     setForm((prev) => prev.storePlatform ? { ...prev, storePlatform: "" } : prev);
     if (!url || getStoreUrlValidationError(url) || url.toLowerCase() === "to be shared on call") {
       setPlatformCheck("idle");
@@ -236,19 +239,22 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
     e.preventDefault();
     const fields: (keyof LeadFormData)[] = step === 1 ? ["goal"] : STORE_FIELDS;
     const nextErrors = validateAll(form, fields);
-    if (step === 2 && (verifiedUrl !== form.storeUrl.trim() || platformCheck === "checking")) {
+    const manuallyConfirmed = allowManualPlatform && manualPlatformUrl === form.storeUrl.trim() && !!form.storePlatform;
+    if (step === 2 && !manuallyConfirmed && (verifiedUrl !== form.storeUrl.trim() || platformCheck === "checking")) {
       nextErrors.storePlatform = platformCheck === "checking" ? "Please wait while we check your store." : "We could not verify this as a Shopify or WooCommerce store.";
     }
+    if (allowManualPlatform && step === 2 && nextErrors.storePlatform && !form.storePlatform) setPlatformErrorAttempt((attempt) => attempt + 1);
     setErrors(nextErrors);
     markTouched(fields);
     if (Object.keys(nextErrors).length) { focusFirstError(nextErrors); return; }
+    if (step === 2 && form.storePlatform === "other") { setIsUnsupportedPlatform(true); return; }
     pendingFocus.current = step === 1 ? `${idPrefix}-orders` : `${idPrefix}-name`;
     setStep(step === 1 ? 2 : 3);
   };
 
   // Capture a partial lead once contact details are available, even if email is abandoned.
   const savePartialLead = () => {
-    if (validateField("name", form.name) || validateField("whatsapp", form.whatsapp) || !verifiedUrl) return;
+    if (validateField("name", form.name) || validateField("whatsapp", form.whatsapp) || !(verifiedUrl || (allowManualPlatform && manualPlatformUrl === form.storeUrl.trim()))) return;
     const name = form.name.trim();
     const whatsapp = form.whatsapp.replace(/\D/g, "").slice(0, 10);
     const storeUrl = normalizeStoreUrl(form.storeUrl);
@@ -298,6 +304,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
       whatsapp: form.whatsapp.replace(/\D/g, "").slice(0, 10),
       monthlyOrders: form.monthlyOrders,
       storePlatform: form.storePlatform,
+      platformVerification: manualPlatformUrl === form.storeUrl.trim() ? 'manual' as const : 'detected' as const,
       storeUrl: normalizeStoreUrl(form.storeUrl),
       preferredLanguage: 'english-or-hindi',
     };
@@ -395,7 +402,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
             </div>
             <div className="lead-form-head">
               <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : "How can we reach you?"}</h2>
-              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "Live demos are for Shopify and WooCommerce stores doing 500+ orders per month." : "We’ll use your details to arrange your next step."}</p>
+              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? (allowManualPlatform ? "We’ll use these details to tailor the demo to your store." : "Live demos are for Shopify and WooCommerce stores doing 500+ orders per month.") : "We’ll use your details to arrange your next step."}</p>
             </div>
             {step === 1 ? (
               <form onSubmit={handleNext} noValidate className="lead-form-fields">
@@ -418,14 +425,14 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead" }: { mode?: "
               </form>
             ) : step === 2 ? (
               <form onSubmit={handleNext} noValidate className="lead-form-fields">
-                <IconSelectField id={`${idPrefix}-orders`} label="Monthly orders" icon={ChartBar} value={form.monthlyOrders} error={errors.monthlyOrders} onChange={(v) => handleChange("monthlyOrders", v)} onBlur={() => handleBlur("monthlyOrders")} placeholder="Choose volume" options={MONTHLY_ORDERS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} />
+                <IconSelectField id={`${idPrefix}-orders`} label="Monthly orders" icon={ChartBar} value={form.monthlyOrders} error={errors.monthlyOrders} onChange={(v) => handleChange("monthlyOrders", v)} onBlur={() => handleBlur("monthlyOrders")} placeholder="Choose volume" hint={allowManualPlatform ? "Helps us recommend the right plan." : undefined} options={MONTHLY_ORDERS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} />
                 <IconField id={`${idPrefix}-store-url`} label="Store URL" icon={Globe} value={form.storeUrl} error={errors.storeUrl} onChange={(v) => handleChange("storeUrl", v)} onBlur={() => handleBlur("storeUrl")} placeholder="yourstore.com" autoComplete="url" inputMode="url" />
                 <div className="lead-field">
                   <label htmlFor={`${idPrefix}-platform`}>Store platform</label>
                   <div id={`${idPrefix}-platform`} className="lead-platform-options" role="radiogroup" aria-label="Store platform">
-                    {STORE_PLATFORM_OPTIONS.map((option) => <button key={option.value} type="button" role="radio" aria-checked={form.storePlatform === option.value} disabled className={form.storePlatform === option.value ? "is-selected" : undefined}>{option.value === "shopify" ? <ShopifyLogo size={26} /> : option.value === "woocommerce" ? <WooCommerceLogo size={15} /> : <Globe size={22} aria-hidden />}<span>{option.label}</span></button>)}
+                    {STORE_PLATFORM_OPTIONS.map((option) => <button key={option.value} type="button" role="radio" aria-checked={form.storePlatform === option.value} disabled={!(allowManualPlatform && platformCheck === "unknown")} onClick={() => { handleChange("storePlatform", option.value); setManualPlatformUrl(form.storeUrl.trim()); }} className={form.storePlatform === option.value ? "is-selected" : undefined}>{option.value === "shopify" ? <ShopifyLogo size={26} /> : option.value === "woocommerce" ? <WooCommerceLogo size={15} /> : <Globe size={22} aria-hidden />}<span>{option.label}</span></button>)}
                   </div>
-                  {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (platformCheck === "unknown" || errors.storePlatform) ? <div className="lead-platform-notice" role="status"><span className="lead-platform-notice-icon" aria-hidden="true">!</span><div><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client’s store.</p></div></div> : null}
+                  {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (allowManualPlatform ? !!errors.storePlatform && !form.storePlatform : platformCheck === "unknown" || !!errors.storePlatform) ? <div key={allowManualPlatform ? platformErrorAttempt : undefined} className={`lead-platform-notice${allowManualPlatform ? " lead-platform-notice-shake" : ""}`} role="status"><span className="lead-platform-notice-icon" aria-hidden="true">!</span><div>{allowManualPlatform ? <span>Please select your platform above to continue.</span> : <><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client’s store.</p></>}</div></div> : null}
                 </div>
                 <button type="submit" className="btn btn-green lead-form-submit">Continue →</button>
                 <button type="button" className="lead-form-back" onClick={() => setStep(1)}>← Back</button>
@@ -565,6 +572,7 @@ function IconSelectField({
   onChange,
   onBlur,
   placeholder,
+  hint,
   options,
 }: {
   id: string;
@@ -575,6 +583,7 @@ function IconSelectField({
   onChange: (v: string) => void;
   onBlur: () => void;
   placeholder: string;
+  hint?: string;
   options: { value: string; label: string }[];
 }) {
   const reduceMotion = useReducedMotion();
@@ -593,7 +602,7 @@ function IconSelectField({
           onBlur={onBlur}
           className={!value ? "lead-select-placeholder" : undefined}
           aria-invalid={Boolean(error)}
-          aria-describedby={error ? `${id}-error` : undefined}
+          aria-describedby={[hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined}
         >
           <option value="" disabled>
             {placeholder}
@@ -605,6 +614,7 @@ function IconSelectField({
           ))}
         </select>
       </div>
+      {hint && <p id={`${id}-hint`} className="lead-field-hint">{hint}</p>}
       <FieldError id={id} error={error} reduceMotion={reduceMotion} />
     </div>
   );
@@ -637,4 +647,3 @@ function FieldError({
     </AnimatePresence>
   );
 }
-

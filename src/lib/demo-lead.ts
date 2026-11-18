@@ -22,6 +22,7 @@ export interface DemoLeadPayload {
   storeUrl: string;
   storePlatform: string;
   storePlatformValue: string;
+  platformVerification?: "manual" | "detected";
   monthlyOrders: string;
   monthlyOrdersValue: string;
   preferredLanguage: string;
@@ -45,6 +46,7 @@ export function buildDemoLeadPayload(
     storeUrl: data.storeUrl.trim(),
     storePlatform: storePlatformLabel(data.storePlatform),
     storePlatformValue: data.storePlatform,
+    ...(data.platformVerification === "manual" || data.platformVerification === "detected" ? { platformVerification: data.platformVerification } : {}),
     monthlyOrders: monthlyOrdersLabel(data.monthlyOrders),
     monthlyOrdersValue: data.monthlyOrders,
     preferredLanguage: demoLanguageLabel(data.preferredLanguage),

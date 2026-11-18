@@ -9,6 +9,7 @@ export interface DemoFormData {
   email: string;
   storeUrl: string;
   storePlatform: string;
+  platformVerification?: "manual" | "detected";
   monthlyOrders: string;
   preferredLanguage: string;
 }
