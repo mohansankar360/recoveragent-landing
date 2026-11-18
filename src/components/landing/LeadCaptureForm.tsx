@@ -106,7 +106,7 @@ function validateAll(
   return next;
 }
 
-export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = false }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean }) {
+export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = true }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean }) {
   const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>(() => ({ ...EMPTY_FORM, goal: initialGoal }));
   const [verifiedUrl, setVerifiedUrl] = useState("");
@@ -402,7 +402,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
             </div>
             <div className="lead-form-head">
               <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : "How can we reach you?"}</h2>
-              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? (allowManualPlatform ? "We’ll use these details to tailor the demo to your store." : "Live demos are for Shopify and WooCommerce stores doing 500+ orders per month.") : "We’ll use your details to arrange your next step."}</p>
+              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the demo to your store." : "We’ll use your details to arrange your next step."}</p>
             </div>
             {step === 1 ? (
               <form onSubmit={handleNext} noValidate className="lead-form-fields">

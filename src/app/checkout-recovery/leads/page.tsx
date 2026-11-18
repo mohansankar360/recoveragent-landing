@@ -38,7 +38,7 @@ export default function CheckoutLeadsPage() {
           <details className={styles.transcript}><summary>Read a short transcript</summary><p><strong>Shopper:</strong> Is cash on delivery available?</p><p><strong>AI agent:</strong> Yes. The total with the COD charge is ₹899. Which payment option do you prefer?</p><p><strong>Shopper:</strong> COD.</p><small>Translated from Hindi and shortened for clarity.</small></details>
         </div>
       </div>
-      <div id="book" className={styles.form}><p className={styles.formIntro}>For Shopify and WooCommerce stores with 500+ monthly orders. Book a demo, then decide whether to start your 14-day trial.</p><LeadCaptureForm idPrefix="checkout-leads" initialGoal="checkout" allowManualPlatform /></div>
+      <div id="book" className={styles.form}><LeadCaptureForm idPrefix="checkout-leads" initialGoal="checkout" allowManualPlatform /></div>
     </section>
 
     <section className={`${styles.wrap} ${styles.section}`}>
