@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ArrowRight, CheckCircle, ChatCircleDots, PhoneCall, Storefront, WhatsappLogo } from '@phosphor-icons/react/dist/ssr';
 import { LeadCaptureForm } from '@/components/landing/LeadCaptureForm';
 import { ShopifyLogo, WooCommerceLogo } from '@/components/landing/PlatformLogos';
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function CheckoutLeadsPage() {
   return <main className={styles.page}>
     <header className={styles.header}><div className={styles.wrap}>
-      <a href="/" aria-label="RecoverAgent home"><Image src="/recover-agent-logo-transparent.png" width={152} height={76} alt="RecoverAgent" className={styles.logo} priority /></a>
+      <Link href="/" aria-label="RecoverAgent home"><Image src="/recover-agent-logo-transparent.png" width={152} height={76} alt="RecoverAgent" className={styles.logo} priority /></Link>
       <a href="#book" className={styles.headerButton}>Book a demo <ArrowRight size={16} aria-hidden /></a>
     </div></header>
 
@@ -54,6 +55,6 @@ export default function CheckoutLeadsPage() {
     <section className={`${styles.wrap} ${styles.pricing}`}><div><p className={styles.eyebrow}>SIMPLE PRICING</p><h2>Start with a demo. Try it on your store.</h2><p>AI calling for checkout recovery starts on the Growth plan. WhatsApp checkout recovery is available on every plan.</p></div><div className={styles.priceCard}><span>GROWTH PLAN</span><p><strong>₹4,999</strong> / month</p><p>700 workflows <details className={styles.workflowHelp}><summary aria-label="How workflow cases are counted">?</summary><span>500 COD cases + 500 abandoned checkouts + 200 NDR cases = 1,200 workflow cases.</span></details> included · ₹4.50 per additional workflow</p><small>Includes AI calls for COD confirmation and abandoned checkout recovery. NDR calling is available on Scale.</small><a href="#book" className={styles.primary}>Book a demo <ArrowRight size={17} aria-hidden /></a></div></section>
 
     <section className={styles.final}><div className={styles.wrap}><h2>See what you can recover.</h2><p>Book a demo and explore a 14-day free trial for your store.</p><a href="#book" className={styles.primary}>Book a demo <ArrowRight size={17} aria-hidden /></a></div></section>
-    <footer className={`${styles.wrap} ${styles.footer}`}><span>© {new Date().getFullYear()} RecoverAgent</span><a href="mailto:hello@recoveragent.ai">hello@recoveragent.ai</a><a href="/policies/privacy-and-policy">Privacy policy</a></footer>
+    <footer className={`${styles.wrap} ${styles.footer}`}><span>© {new Date().getFullYear()} RecoverAgent</span><a href="mailto:hello@recoveragent.ai">hello@recoveragent.ai</a><Link href="/policies/privacy-and-policy">Privacy policy</Link></footer>
   </main>;
 }
