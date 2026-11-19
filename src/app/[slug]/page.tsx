@@ -101,6 +101,7 @@ export default async function PublicPage({
       title={page.title}
       description={page.description}
       showCtas={page.slug !== "book-demo"}
+      showHero={page.slug !== "book-demo"}
       finalFirst={page.slug === "book-demo"}
     >
       {resolved.type === "use-case" ? (

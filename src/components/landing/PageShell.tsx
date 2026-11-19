@@ -5,6 +5,7 @@ export function PageShell({
   title,
   description,
   showCtas,
+  showHero,
   finalFirst,
   children,
 }: {
@@ -12,6 +13,7 @@ export function PageShell({
   title?: string;
   description?: string;
   showCtas?: boolean;
+  showHero?: boolean;
   finalFirst?: boolean;
   children: React.ReactNode;
 }) {
@@ -22,6 +24,7 @@ export function PageShell({
       title={title ?? navLabel}
       description={description}
       showCtas={showCtas}
+      showHero={showHero}
       finalFirst={finalFirst}
     >
       {children}

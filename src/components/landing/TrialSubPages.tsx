@@ -17,9 +17,9 @@ import {
 import styles from './TrialHomepage.module.css';
 
 /** Every sub page: shared header and footer, a dark page header, the page body, then the trial sign-up. */
-export function SubPage({ crumbs, eyebrow, title, description, showCtas, finalFirst = false, children }: { crumbs: Array<{ href?: string; label: string }>; eyebrow?: string; title: string; description?: string; showCtas?: boolean; finalFirst?: boolean; children: React.ReactNode }) {
+export function SubPage({ crumbs, eyebrow, title, description, showCtas, showHero = true, finalFirst = false, children }: { crumbs: Array<{ href?: string; label: string }>; eyebrow?: string; title: string; description?: string; showCtas?: boolean; showHero?: boolean; finalFirst?: boolean; children: React.ReactNode }) {
   return <TrialSiteFrame>
-    <PageHero crumbs={crumbs} eyebrow={eyebrow} title={title} description={description} showCtas={showCtas} />
+    {showHero && <PageHero crumbs={crumbs} eyebrow={eyebrow} title={title} description={description} showCtas={showCtas} />}
     {finalFirst && <FinalSection />}
     {children}
     {!finalFirst && <FinalSection />}
