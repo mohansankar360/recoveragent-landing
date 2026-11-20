@@ -1010,7 +1010,7 @@ export function LossSection() {
         <Slider label="Average order value" value={aov} min={300} max={3000} step={50} onChange={touch(setAov)} format={(value) => `${formatInr(value)}${value >= 3000 ? '+' : ''}`} />
         <div className={styles.sliderPair}>
           <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={touch(setCart)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
-          <Slider label="Your current recovery rate" value={currentRecovery} min={0} max={100} step={1} onChange={touch(setCurrentRecovery)} format={(value) => `${value}%`} />
+          <Slider label="Your current recovery rate" value={currentRecovery} min={0} max={30} step={1} onChange={touch(setCurrentRecovery)} format={(value) => `${value}%`} />
         </div>
         <details className={styles.costEditor}>
           <summary>Cost per RTO: {formatInr(estimate.costPerRto + estimate.acquisitionCostPerOrder)}{costsEdited ? ' · your numbers' : ' · sample'}<CaretDown size={14} aria-hidden="true" /></summary>
@@ -1357,7 +1357,7 @@ function CheckoutCalculator() {
     <div className={styles.lossGrid} id="calc-sliders"><div className={styles.lossControls}>
       <div className={styles.sliderPair}>
         <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={setCart} format={(v) => v.toLocaleString('en-IN')} />
-        <Slider label="Your current recovery rate" value={rate} min={0} max={100} step={1} onChange={setRate} format={(v) => `${v}%`} />
+        <Slider label="Your current recovery rate" value={rate} min={0} max={30} step={1} onChange={setRate} format={(v) => `${v}%`} />
       </div>
       <Slider label="Average order value" value={aov} min={300} max={5000} step={100} onChange={setAov} format={formatInr} />
       <p className={styles.lossAssumption}>Projects an 18% recovery rate. Actual results vary.</p>
