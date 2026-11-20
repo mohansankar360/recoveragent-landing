@@ -968,6 +968,13 @@ export function LossSection() {
     forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition),
   }));
   const [withAgent, setWithAgent] = useState(false);
+  const [submissions, setSubmissions] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!submissions) return;
+    const frame = requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }));
+    return () => cancelAnimationFrame(frame);
+  }, [submissions]);
   const savingsRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
   // Bring the savings box into view when the toggle is switched on, so it isn't hidden below the fold on mobile.
@@ -998,10 +1005,10 @@ export function LossSection() {
   return <section className={styles.lossSection} id="calc" aria-labelledby="calc-title">
     <div className={styles.sectionHead}>
       <a href="#calc-sliders" className={styles.challengeBadge}><Calculator size={16} weight="fill" aria-hidden="true" /><span>RTO calculator</span><b>Try it now</b></a>
-      <h2 id="calc-title">Move the sliders. Watch your RTO bill.</h2>
+      <h2 id="calc-title">Move the sliders. See your RTO bill.</h2>
       <p>No form, no email. Just your numbers.</p>
     </div>
-    <div className={styles.lossGrid} id="calc-sliders">
+    <div className={`${styles.lossGrid} ${!submissions ? styles.lossGridPending : ''}`} id="calc-sliders">
       <div className={styles.lossControls}>
         <div className={styles.sliderPair}>
         <Slider label="COD orders per month" value={cod} min={200} max={10000} step={100} onChange={touch(setCod)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
@@ -1023,8 +1030,9 @@ export function LossSection() {
           {costsEdited && <button type="button" className={styles.costReset} onClick={() => setCosts({ forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition) })}>Reset to sample costs</button>}
         </details>
         <p className={styles.lossAssumption}>Savings count only shipping and packaging, because ad spend is already paid. Assumes a {low.reduction}–{high.reduction}% reduction in RTO{cart > 0 ? ' and an 18% checkout recovery rate' : ''}. Every store is different. The trial measures yours.</p>
+        <button type="button" className={styles.calculateButton} onClick={() => setSubmissions((value) => value + 1)}>See my results <ArrowRight size={18} aria-hidden="true" /></button>
       </div>
-      <div className={styles.lossResult}>
+      {submissions > 0 && <div ref={resultRef} className={styles.lossResult}>
         <p className={styles.lossLabel}>RTO is costing you</p>
         <p className={styles.lossBig}>{formatInr(monthlyLoss)}<small>/month</small></p>
         <p className={styles.lossYear}>{formatInr(monthlyLoss * 12)} a year · {Math.round(estimate.rtoOrders).toLocaleString('en-IN')} parcels coming back every month</p>
@@ -1055,7 +1063,7 @@ export function LossSection() {
           </motion.div>}
         </AnimatePresence>
         <TrialButton onClick={() => { trackEvent('calculator_cta_clicked', { source: 'live_sliders' }); onTrial(); }} source="calculator">Measure it on my orders, free</TrialButton>
-      </div>
+      </div>}
     </div>
   </section>;
 }
@@ -1351,17 +1359,25 @@ function CheckoutCalculator() {
   const [cart, setCart] = useState(600);
   const [aov, setAov] = useState(1200);
   const [rate, setRate] = useState(8);
+  const [submissions, setSubmissions] = useState(0);
+  const resultRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!submissions) return;
+    const frame = requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }));
+    return () => cancelAnimationFrame(frame);
+  }, [submissions]);
   const additionalRate = Math.max(0, 18 - rate);
   const orders = cart * additionalRate / 100;
   return <section className={styles.lossSection} id="calc" aria-labelledby="checkout-calc-title"><div className={styles.sectionHead}><a href="#calc-sliders" className={styles.challengeBadge}><Calculator size={16} weight="fill" aria-hidden="true" /><span>Checkout calculator</span><b>Try it now</b></a><h2 id="checkout-calc-title">What could another chance be worth?</h2><p>Explore an example using your own numbers.</p></div>
-    <div className={styles.lossGrid} id="calc-sliders"><div className={styles.lossControls}>
+    <div className={`${styles.lossGrid} ${!submissions ? styles.lossGridPending : ''}`} id="calc-sliders"><div className={styles.lossControls}>
       <div className={styles.sliderPair}>
         <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={setCart} format={(v) => v.toLocaleString('en-IN')} />
         <Slider label="Your current recovery rate" value={rate} min={0} max={30} step={1} onChange={setRate} format={(v) => `${v}%`} />
       </div>
       <Slider label="Average order value" value={aov} min={300} max={5000} step={100} onChange={setAov} format={formatInr} />
       <p className={styles.lossAssumption}>Projects an 18% recovery rate. Actual results vary.</p>
-    </div><div className={styles.lossResult}><p className={styles.lossLabel}>Potential additional checkout revenue</p><p className={styles.lossBig}>{formatInr(orders * aov)}<small>/month</small></p><p className={styles.lossYear}>{rate >= 18 ? `Your current rate is ${rate}%; the 18% projection adds no revenue.` : `${cart.toLocaleString('en-IN')} checkouts × (18% − ${rate}%) × ${formatInr(aov)} · ${formatInr(orders * aov * 12)}/year`}</p><p className={styles.lossYear}>Approximately {Math.round(orders).toLocaleString('en-IN')} additional orders before cancellations, returns, costs and fees. This is order value, not profit.</p><SignUpButton source="checkout_calculator" primary /></div></div>
+      <button type="button" className={styles.calculateButton} onClick={() => setSubmissions((value) => value + 1)}>See my results <ArrowRight size={18} aria-hidden="true" /></button>
+    </div>{submissions > 0 && <div ref={resultRef} className={styles.lossResult}><p className={styles.lossLabel}>Potential additional checkout revenue</p><p className={styles.lossBig}>{formatInr(orders * aov)}<small>/month</small></p><p className={styles.lossYear}>{rate >= 18 ? `Your current rate is ${rate}%; the 18% projection adds no revenue.` : `${cart.toLocaleString('en-IN')} checkouts × (18% − ${rate}%) × ${formatInr(aov)} · ${formatInr(orders * aov * 12)}/year`}</p><p className={styles.lossYear}>Approximately {Math.round(orders).toLocaleString('en-IN')} additional orders before cancellations, returns, costs and fees. This is order value, not profit.</p><SignUpButton source="checkout_calculator" primary /></div>}</div>
   </section>;
 }
 

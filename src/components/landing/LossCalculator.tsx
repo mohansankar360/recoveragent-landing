@@ -133,7 +133,7 @@ export function LossCalculator({ comparePlansHref }: { showInlineDemoCta?: boole
         </details>
         <button className={styles.calculateButton} type="submit" disabled={!ready}>Calculate<ArrowRight size={16} /></button>
         <div className={styles.inputFooter}><span>{hasChanges ? "Click Calculate to update your results." : example ? "Sample numbers. Replace with yours." : "Enter your numbers, then click Calculate."}</span><div>
-          <button type="button" onClick={() => { const sample = { ...emptyFields, orders: "1500", codPct: "60", rtoPct: "25", aov: "1200", cart: "600" }; setExample(true); setEditedFields({}); setCalculatedEdits({}); setFields(sample); setCalculatedFields(sample); }}>Try an example</button>
+          <button type="button" onClick={() => { const sample = { ...emptyFields, orders: "1500", codPct: "60", rtoPct: "25", aov: "1200", cart: "600" }; setExample(true); setEditedFields({}); setCalculatedEdits({}); setFields(sample); setCalculatedFields(null); }}>Try an example</button>
           <button type="button" onClick={() => { setExample(false); setCalculatedFields(null); setEditedFields({}); setFields(emptyFields); }}>Reset</button>
         </div></div>
       </form>

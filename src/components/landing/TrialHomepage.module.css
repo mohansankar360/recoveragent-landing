@@ -499,6 +499,10 @@
 /* ── Loss calculator ── */
 .lossSection { padding: 110px 0; background: #fff; }
 .lossGrid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 28px; width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+.lossGridPending { grid-template-columns: minmax(0, 640px); justify-content: center; }
+.calculateButton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px 20px; font: 700 15px var(--font-geist), sans-serif; color: #fff; background: var(--blue); border: 0; border-radius: 12px; cursor: pointer; }
+.calculateButton:hover { filter: brightness(0.92); }
+.calculateButton:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .lossControls { display: grid; align-content: start; gap: 30px; padding: 32px; background: var(--paper); border: 1px solid var(--line); border-radius: 24px; }
 .sliderPair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 .sliderPair .sliderTop { display: grid; gap: 4px; align-content: start; }
@@ -510,7 +514,7 @@
 .slider input::-moz-range-thumb { width: 22px; height: 22px; background: #fff; border: 3px solid var(--blue); border-radius: 50%; }
 .slider input:focus-visible { outline: 3px solid rgba(47, 107, 255, 0.4); outline-offset: 6px; }
 .lossAssumption { font-size: 13px; line-height: 1.55; color: var(--muted); }
-.lossResult { display: grid; align-content: start; justify-items: start; gap: 6px; padding: 36px; color: #fff; background: linear-gradient(150deg, var(--navy-900), #1a2e66); border-radius: 24px; }
+.lossResult { scroll-margin-top: 100px; display: grid; align-content: start; justify-items: start; gap: 6px; padding: 36px; color: #fff; background: linear-gradient(150deg, var(--navy-900), #1a2e66); border-radius: 24px; }
 .lossLabel { font-size: 15px; font-weight: 600; color: #ffb4a3; }
 .lossBig { font-size: clamp(44px, 5.5vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #fff; font-variant-numeric: tabular-nums; }
 .lossBig small { margin-left: 6px; font-size: 18px; font-weight: 600; color: #a8b6d6; letter-spacing: 0; }
