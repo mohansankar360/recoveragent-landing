@@ -963,6 +963,7 @@ export function LossSection() {
   const [rto, setRto] = useState(25);
   const [aov, setAov] = useState(1200);
   const [cart, setCart] = useState(600);
+  const [currentRecovery, setCurrentRecovery] = useState(8);
   const [costs, setCosts] = useState<Record<keyof typeof RTO_COST, string>>(() => ({
     forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition),
   }));
@@ -986,6 +987,9 @@ export function LossSection() {
   const costsEdited = COST_FIELDS.some(({ key }) => cost(key) !== RTO_COST[key]);
   const estimate = calculateRecoveryEstimate({ cod, rtoPct: rto, cart, aov, forwardCost: cost('forward'), returnCost: cost('return'), packagingCost: cost('packaging'), acquisitionCost: cost('acquisition'), extraMonthlyCost: 0 });
   const monthlyLoss = estimate.rtoCost;
+  const additionalRecoveryPct = Math.max(0, 18 - currentRecovery);
+  const additionalOrders = cart * additionalRecoveryPct / 100;
+  const additionalRevenue = additionalOrders * aov;
   // Shipping and packaging avoided per prevented RTO. Ad spend is already paid, so it is never counted as a saving.
   const [low, high] = estimate.outcomes;
   const parcels = 24;
@@ -999,10 +1003,15 @@ export function LossSection() {
     </div>
     <div className={styles.lossGrid} id="calc-sliders">
       <div className={styles.lossControls}>
+        <div className={styles.sliderPair}>
         <Slider label="COD orders per month" value={cod} min={200} max={10000} step={100} onChange={touch(setCod)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
         <Slider label="RTO rate on COD" value={rto} min={5} max={60} step={1} onChange={touch(setRto)} format={(value) => `${value}%`} />
+        </div>
         <Slider label="Average order value" value={aov} min={300} max={3000} step={50} onChange={touch(setAov)} format={(value) => `${formatInr(value)}${value >= 3000 ? '+' : ''}`} />
-        <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={touch(setCart)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
+        <div className={styles.sliderPair}>
+          <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={touch(setCart)} format={(value) => `${value.toLocaleString('en-IN')}${value >= 10000 ? '+' : ''}`} />
+          <Slider label="Your current recovery rate" value={currentRecovery} min={0} max={100} step={1} onChange={touch(setCurrentRecovery)} format={(value) => `${value}%`} />
+        </div>
         <details className={styles.costEditor}>
           <summary>Cost per RTO: {formatInr(estimate.costPerRto + estimate.acquisitionCostPerOrder)}{costsEdited ? ' · your numbers' : ' · sample'}<CaretDown size={14} aria-hidden="true" /></summary>
           <div className={styles.costFields}>
@@ -1013,7 +1022,7 @@ export function LossSection() {
           </div>
           {costsEdited && <button type="button" className={styles.costReset} onClick={() => setCosts({ forward: String(RTO_COST.forward), return: String(RTO_COST.return), packaging: String(RTO_COST.packaging), acquisition: String(RTO_COST.acquisition) })}>Reset to sample costs</button>}
         </details>
-        <p className={styles.lossAssumption}>Savings count only shipping and packaging, because ad spend is already paid. Assumes a {low.reduction}–{high.reduction}% reduction in RTO{cart > 0 ? ` and ${low.checkoutRecoveryPct}–${high.checkoutRecoveryPct}% of abandoned checkouts recovered` : ''}. Every store is different. The trial measures yours.</p>
+        <p className={styles.lossAssumption}>Savings count only shipping and packaging, because ad spend is already paid. Assumes a {low.reduction}–{high.reduction}% reduction in RTO{cart > 0 ? ' and an 18% checkout recovery rate' : ''}. Every store is different. The trial measures yours.</p>
       </div>
       <div className={styles.lossResult}>
         <p className={styles.lossLabel}>RTO is costing you</p>
@@ -1023,7 +1032,7 @@ export function LossSection() {
           <div><dt>Ad cost per delivered order</dt><dd>{formatInr(estimate.adCostPerDeliveredOrder)}<small>not {formatInr(estimate.acquisitionCostPerOrder)}</small></dd></div>
           <div><dt>Real ROAS on COD</dt><dd>{estimate.realRoas.toFixed(1)}x<small>Meta shows {estimate.reportedRoas.toFixed(1)}x</small></dd></div>
         </dl>}
-        {cart > 0 && <p className={styles.cartLoss}><span>Carts left at checkout</span><strong>{formatInr(estimate.checkoutValue)}<small>/month</small></strong><em>{cart.toLocaleString('en-IN')} abandoned checkouts × {formatInr(aov)}</em></p>}
+        {cart > 0 && <p className={styles.cartLoss}><span>Potential additional checkout revenue</span><strong>{formatInr(additionalRevenue)}<small>/month</small></strong><em>{currentRecovery >= 18 ? `Your current rate is ${currentRecovery}%; the 18% projection adds no revenue.` : `${cart.toLocaleString('en-IN')} checkouts × (${18}% − ${currentRecovery}%) × ${formatInr(aov)} · ${formatInr(additionalRevenue * 12)}/year`}</em></p>}
         <div className={styles.parcelGrid} aria-hidden="true">
           {Array.from({ length: parcels }, (_, index) => {
             const isRed = index < redCount;
@@ -1038,11 +1047,11 @@ export function LossSection() {
           {withAgent && <motion.div ref={savingsRef} className={styles.savings} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <dl className={styles.savingsRows}>
               <div><dt>RTO shipping & packaging saved</dt><dd>{formatInr(low.rtoSavings)} – {formatInr(high.rtoSavings)}</dd></div>
-              {cart > 0 && <div><dt>Abandoned carts recovered ({Math.round(low.recoveredCheckouts).toLocaleString('en-IN')}–{Math.round(high.recoveredCheckouts).toLocaleString('en-IN')} orders)</dt><dd>{formatInr(low.recoveredRevenue)} – {formatInr(high.recoveredRevenue)} in sales</dd></div>}
+              {cart > 0 && <div><dt>Additional checkouts recovered ({additionalOrders.toLocaleString('en-IN', { maximumFractionDigits: 1 })} orders)</dt><dd>{formatInr(additionalRevenue)} in sales</dd></div>}
               <div><dt>{estimate.plan.tier.name} plan fee</dt><dd>− {formatInr(estimate.plan.cost)}</dd></div>
             </dl>
             <p>{cart > 0 ? 'Back each month, before the plan fee' : 'Estimated saving after the plan fee'}</p>
-            <strong>{cart > 0 ? `${formatInr(low.recoveryValue)} – ${formatInr(high.recoveryValue)}` : `${formatInr(Math.max(0, low.rtoSavings - estimate.plan.cost))} – ${formatInr(Math.max(0, high.rtoSavings - estimate.plan.cost))}`}<small>/month</small></strong>
+            <strong>{cart > 0 ? `${formatInr(low.rtoSavings + additionalRevenue)} – ${formatInr(high.rtoSavings + additionalRevenue)}` : `${formatInr(Math.max(0, low.rtoSavings - estimate.plan.cost))} – ${formatInr(Math.max(0, high.rtoSavings - estimate.plan.cost))}`}<small>/month</small></strong>
           </motion.div>}
         </AnimatePresence>
         <TrialButton onClick={() => { trackEvent('calculator_cta_clicked', { source: 'live_sliders' }); onTrial(); }} source="calculator">Measure it on my orders, free</TrialButton>
@@ -1341,15 +1350,18 @@ export function PageHero({ eyebrow, title, description, crumbs, showCtas = true 
 function CheckoutCalculator() {
   const [cart, setCart] = useState(600);
   const [aov, setAov] = useState(1200);
-  const [rate, setRate] = useState(18);
-  const orders = cart * rate / 100;
+  const [rate, setRate] = useState(8);
+  const additionalRate = Math.max(0, 18 - rate);
+  const orders = cart * additionalRate / 100;
   return <section className={styles.lossSection} id="calc" aria-labelledby="checkout-calc-title"><div className={styles.sectionHead}><a href="#calc-sliders" className={styles.challengeBadge}><Calculator size={16} weight="fill" aria-hidden="true" /><span>Checkout calculator</span><b>Try it now</b></a><h2 id="checkout-calc-title">What could another chance be worth?</h2><p>Explore an example using your own numbers.</p></div>
     <div className={styles.lossGrid} id="calc-sliders"><div className={styles.lossControls}>
-      <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={setCart} format={(v) => v.toLocaleString('en-IN')} />
+      <div className={styles.sliderPair}>
+        <Slider label="Abandoned checkouts per month" value={cart} min={0} max={10000} step={50} onChange={setCart} format={(v) => v.toLocaleString('en-IN')} />
+        <Slider label="Your current recovery rate" value={rate} min={0} max={100} step={1} onChange={setRate} format={(v) => `${v}%`} />
+      </div>
       <Slider label="Average order value" value={aov} min={300} max={5000} step={100} onChange={setAov} format={formatInr} />
-      <Slider label="Average recovery rate" value={rate} min={0} max={50} step={1} onChange={setRate} format={(v) => `${v}%`} />
-      <p className={styles.lossAssumption}>The recovery rate is an example you can change, not a promised or measured result. Actual results vary.</p>
-    </div><div className={styles.lossResult}><p className={styles.lossLabel}>Estimated recovered order value</p><p className={styles.lossBig}>{formatInr(orders * aov)}<small>/month</small></p><p className={styles.lossYear}>{cart.toLocaleString('en-IN')} checkouts × {rate}% × {formatInr(aov)}</p><p className={styles.lossYear}>Approximately {Math.round(orders).toLocaleString('en-IN')} orders before cancellations, returns, costs and fees. This is order value, not profit.</p><SignUpButton source="checkout_calculator" primary /></div></div>
+      <p className={styles.lossAssumption}>Projects an 18% recovery rate. Actual results vary.</p>
+    </div><div className={styles.lossResult}><p className={styles.lossLabel}>Potential additional checkout revenue</p><p className={styles.lossBig}>{formatInr(orders * aov)}<small>/month</small></p><p className={styles.lossYear}>{rate >= 18 ? `Your current rate is ${rate}%; the 18% projection adds no revenue.` : `${cart.toLocaleString('en-IN')} checkouts × (18% − ${rate}%) × ${formatInr(aov)} · ${formatInr(orders * aov * 12)}/year`}</p><p className={styles.lossYear}>Approximately {Math.round(orders).toLocaleString('en-IN')} additional orders before cancellations, returns, costs and fees. This is order value, not profit.</p><SignUpButton source="checkout_calculator" primary /></div></div>
   </section>;
 }
 
