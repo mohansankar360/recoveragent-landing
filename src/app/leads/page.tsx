@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, PhoneCall } from "@phosphor-icons/react/dist/ssr";
+import { LeadsResults } from "@/components/landing/LeadsResults";
 import { LeadsJourney } from "@/components/landing/LeadsJourney";
+import { LeadsMobileCTA } from "@/components/landing/LeadsMobileCTA";
 import { ExampleReviews } from "@/components/landing/ExampleReviews";
 import { LeadCaptureForm } from "@/components/landing/LeadCaptureForm";
 import { ShopifyLogo, WooCommerceLogo } from "@/components/landing/PlatformLogos";
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default function LeadsPage() {
-  return <main className={styles.page}>
+  return <main className={`${styles.page} ${styles.leadsPage}`}>
     <header className={styles.header}><div className={styles.wrap}>
       <Link href="/" aria-label="RecoverAgent home"><Image src="/recover-agent-logo-transparent.png" width={152} height={76} alt="RecoverAgent" className={styles.logo} priority /></Link>
       <a href="#book" className={styles.headerButton}>Request a call <ArrowRight size={16} aria-hidden /></a>
@@ -37,9 +39,11 @@ export default function LeadsPage() {
     </div></section>
 
     <section className={styles.audioSection}><div className={`${styles.wrap} ${styles.audioGrid}`}>
-      <div><p className={styles.eyebrow}>HEAR IT FOR YOURSELF</p><h2>A real call.<br />A clearer decision before shipping.</h2><p>Hear the AI agent confirm a COD order with a shopper in Hindi.</p></div>
-      <div className={styles.call}><div className={styles.callLabel}><PhoneCall size={19} weight="fill" aria-hidden /> REAL COD CONFIRMATION CALL</div><p>Hindi · COD confirmation</p><audio controls preload="none" aria-label="Play a real COD confirmation call in Hindi"><source src="/audio/COD_hindi.mp4" type="audio/mp4" />Your browser does not support audio playback.</audio></div>
+      <div><p className={styles.eyebrow}>HEAR THE AI IN ACTION</p><h2>One call can stop an unwanted order.</h2><p>Listen to a real Hindi COD confirmation call. The buyer says they didn’t place the order, so it was held before shipping.</p></div>
+      <div className={styles.call}><div className={styles.callLabel}><PhoneCall size={19} weight="fill" aria-hidden /> REAL COD CONFIRMATION CALL</div><p><strong>Listen to the call</strong> · Hindi</p><audio controls preload="none" aria-label="Play a real COD confirmation call in Hindi"><source src="/audio/COD_hindi.mp4" type="audio/mp4" />Your browser does not support audio playback.</audio><p>Outcome: Buyer denied the order · Held before shipping</p></div>
     </div></section>
+
+    <LeadsResults />
 
     <LeadsJourney />
 
@@ -50,6 +54,7 @@ export default function LeadsPage() {
       <div className={styles.priceCard}><span>AFTER 14-DAY FREE TRIAL</span><p><strong>₹2,499</strong> / month</p><p>300 orders included · ₹5 per additional order</p><small>Starter includes AI calls for COD confirmation. AI calling for abandoned checkout recovery is available on Growth.</small></div>
     </div></section>
 
+    <LeadsMobileCTA />
     <footer className={`${styles.wrap} ${styles.footer}`}><span>© {new Date().getFullYear()} RecoverAgent</span><a href="mailto:hello@recoveragent.ai">hello@recoveragent.ai</a><Link href="/policies/privacy-and-policy">Privacy policy</Link></footer>
   </main>;
 }

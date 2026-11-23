@@ -29,7 +29,7 @@ const steps = [
 ];
 
 export function LeadsJourney() {
-  return <section className={styles.section} aria-labelledby="leads-journey-title">
+  return <section className={`${styles.section} ${styles.voiceSection}`} aria-labelledby="leads-journey-title">
     <div className={styles.wrap}>
       <div className={styles.heading}><p className={styles.eyebrow}>HOW IT WORKS</p><h2 id="leads-journey-title">Follow up across the order journey.</h2><p>AI calls help your team act at each step.</p></div>
       <div className={styles.track}>

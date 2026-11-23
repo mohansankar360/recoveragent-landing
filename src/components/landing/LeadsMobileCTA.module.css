@@ -1,0 +1,8 @@
+.bar { display: none; }
+@media (max-width: 760px) {
+  .bar { display: block; position: fixed; z-index: 30; left: 16px; bottom: max(16px, env(safe-area-inset-bottom)); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+  .bar[data-visible] { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .bar a { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 20px; background: #245ef5; color: white; border-radius: 10px; box-shadow: 0 6px 22px rgba(7, 24, 62, .24); font-size: 14px; font-weight: 700; text-decoration: none; }
+  .bar a:focus-visible { outline: 3px solid #80a6ff; outline-offset: 3px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar { transition: none; } }

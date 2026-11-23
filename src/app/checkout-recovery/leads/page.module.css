@@ -2,6 +2,17 @@
 @media(max-width:760px){.wrap{width:calc(100% - 32px)}.header .wrap{height:60px}.logo{width:130px}.headerButton{font-size:13px;padding:9px 12px}.heroGrid{grid-template-columns:minmax(0,1fr);gap:24px;padding-top:32px;padding-bottom:38px}.heroCopy{padding-top:0}.hero h1{font-size:clamp(37px,10vw,47px);max-width:430px}.lead{font-size:16px;margin:15px 0 17px}.heroNote{margin-top:14px}.audioSection{padding:54px 0}.audioGrid{grid-template-columns:1fr;gap:22px}.audioGrid h2,.section h2,.proof h2{font-size:30px}.audioGrid>div>p:not(.eyebrow){font-size:15px}.section{padding-block:60px}.steps{grid-template-columns:1fr;gap:25px;margin-top:30px}.steps h3{margin:12px 0 6px}.proof{padding:60px 0}.proofInner{grid-template-columns:1fr;gap:30px}.footer{gap:16px}}
 
 .mobileOffer, .mobilePlatforms { display: none; }
+.leadsPage .audioSection { background: #f9f5ed; color: #101b35; }
+.leadsPage .audioGrid .eyebrow { color: #245ef5; }
+.leadsPage .audioGrid > div > p:not(.eyebrow) { color: #596985; }
+.leadsPage .audioGrid .call { color: #101b35; }
+.leadsPage .audioGrid > .call > p:not(.eyebrow) { color: #596985; }
+.leadsPage .proof { background: #f8f4eb; }
+@media (max-width: 760px) {
+  .leadsPage .audioSection { padding-block: 40px; }
+  .leadsPage .proof { padding-block: 45px; }
+  .leadsPage .call audio { margin-block: 4px; }
+}
 .form, .form :global(.lead-form-card), .form :global(.lead-form-fields), .form :global(.lead-field) { min-width: 0; }
 .form :global(.lead-form-fields) { grid-template-columns: minmax(0, 1fr); }
 .form :global(.lead-form-recap) { flex-wrap: nowrap; }

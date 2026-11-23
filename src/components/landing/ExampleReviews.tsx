@@ -27,7 +27,7 @@ export function ExampleReviews({ variant = "checkout" }: { variant?: "checkout" 
   const items = variant === "voice" ? voiceReviews : reviews;
   const review = items[active];
   const show = (index: number) => setActive((index + items.length) % items.length);
-  return <section className={styles.section} aria-labelledby="examples-title">
+  return <section className={`${styles.section} ${variant === "voice" ? styles.voice : ""}`} aria-labelledby="examples-title">
     <div className={styles.wrap}>
       <p className={styles.eyebrow}>FOR BRANDS LIKE YOURS</p>
       <h2 id="examples-title">{variant === "voice" ? "Conversations that help recover more." : "Conversations that bring shoppers back."}</h2>

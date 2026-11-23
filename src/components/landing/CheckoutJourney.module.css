@@ -1,4 +1,5 @@
 .section { background: #f4f7fc; color: #101b35; padding: 100px 0; }
+.voiceSection { background: #fff; }
 .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
 .heading { max-width: 650px; margin-bottom: 52px; }
 .eyebrow { margin: 0 0 16px; color: #245ef5; font-size: 11px; letter-spacing: .12em; font-weight: 800; }
