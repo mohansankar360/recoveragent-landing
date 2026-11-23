@@ -29,8 +29,11 @@ export function ExampleReviews({ variant = "checkout" }: { variant?: "checkout" 
   const show = (index: number) => setActive((index + items.length) % items.length);
   return <section className={`${styles.section} ${variant === "voice" ? styles.voice : ""}`} aria-labelledby="examples-title">
     <div className={styles.wrap}>
+      <div className={styles.heading}>
       <p className={styles.eyebrow}>FOR BRANDS LIKE YOURS</p>
       <h2 id="examples-title">{variant === "voice" ? "Conversations that help recover more." : "Conversations that bring shoppers back."}</h2>
+      </div>
+      <div className={styles.carousel}>
       <div className={styles.card} aria-live="polite" aria-atomic="true">
         <div className={styles.top}><span>{String(active + 1).padStart(2, "0")} / 06</span></div>
         <p className={styles.quote}>“{review.quote}”</p>
@@ -39,6 +42,7 @@ export function ExampleReviews({ variant = "checkout" }: { variant?: "checkout" 
       <div className={styles.controls}>
         <div className={styles.dots} aria-label="Choose a sample review">{items.map((item, index) => <button key={item.type} type="button" aria-label={`Show sample ${index + 1}: ${item.type}`} aria-current={index === active ? "true" : undefined} className={index === active ? styles.active : ""} onClick={() => show(index)} />)}</div>
         <div className={styles.arrows}><button type="button" aria-label="Previous sample review" onClick={() => show(active - 1)}><ArrowLeft size={18} /></button><button type="button" aria-label="Next sample review" onClick={() => show(active + 1)}><ArrowRight size={18} /></button></div>
+      </div>
       </div>
     </div>
   </section>;

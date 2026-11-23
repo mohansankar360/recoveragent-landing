@@ -11,6 +11,7 @@ import { ShopifyLogo, WooCommerceLogo } from "@/components/landing/PlatformLogos
 import { SITE_NAME } from "@/lib/site-metadata";
 import { siteUrl } from "@/lib/site-url";
 import styles from "../checkout-recovery/leads/page.module.css";
+import offer from "./offer.module.css";
 
 export const metadata: Metadata = {
   title: `AI Voice Agent for COD, Carts & NDR — ${SITE_NAME}`,
@@ -49,9 +50,25 @@ export default function LeadsPage() {
 
     <ExampleReviews variant="voice" />
 
-    <section className={styles.proof}><div className={`${styles.wrap} ${styles.proofInner}`}>
-      <div><p className={styles.eyebrow}>14-DAY FREE TRIAL</p><h2>See how it works for your store.</h2><p>Our team will call you to discuss your workflows, pricing and the 14-day free trial.</p><a href="#book" className={styles.primary}>Request a call <ArrowRight size={17} aria-hidden /></a></div>
-      <div className={styles.priceCard}><span>AFTER 14-DAY FREE TRIAL</span><p><strong>₹2,499</strong> / month</p><p>300 orders included · ₹5 per additional order</p><small>Starter includes AI calls for COD confirmation. AI calling for abandoned checkout recovery is available on Growth.</small></div>
+    <section className={offer.section} aria-labelledby="trial-offer-title"><div className={offer.panel}>
+      <div className={offer.intro}>
+        <p className={offer.eyebrow}>14-DAY FREE TRIAL</p>
+        <h2 id="trial-offer-title">See what your store can recover.</h2>
+        <p className={offer.description}>Our team will call you to discuss your workflows and help you get started.</p>
+        <ul className={offer.benefits}>
+          <li><CheckCircle size={19} weight="fill" aria-hidden /> Multilingual AI voice calling</li>
+          <li><CheckCircle size={19} weight="fill" aria-hidden /> Order updates and notifications</li>
+          <li><CheckCircle size={19} weight="fill" aria-hidden /> AI agent on WhatsApp &amp; web chat</li>
+        </ul>
+      </div>
+      <div className={offer.pricing}>
+        <span>STARTER · AFTER YOUR FREE TRIAL</span>
+        <p className={offer.amount}><strong>₹2,499</strong> / month</p>
+        <p className={offer.allowance}>300 workflows included · then ₹5 per additional workflow</p>
+        <p className={offer.note}>AI calling for abandoned checkout recovery is available on Growth.</p>
+        <a href="#book" className={offer.cta}>Request a call <ArrowRight size={18} aria-hidden /></a>
+        <small>14-day free trial available for stores with 500+ monthly orders.</small>
+      </div>
     </div></section>
 
     <LeadsMobileCTA />

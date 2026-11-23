@@ -18,8 +18,8 @@ export function LeadsResults() {
     <div className={styles.wrap}>
       <div className={styles.intro}>
         <p className={styles.eyebrow}>A LOOK AT THE NUMBERS</p>
-        <h2 id="leads-results-title">One brand. One month of follow-ups.</h2>
-        <p>Results reported from a men’s apparel store using RecoverAgent.</p>
+        <h2 id="leads-results-title">Real results from one store.</h2>
+        <p>COD confirmation and checkout recovery over 30 days.</p>
       </div>
       <div className={styles.carousel}>
         <div className={styles.card} aria-live="polite" aria-atomic="true">

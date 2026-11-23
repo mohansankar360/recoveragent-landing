@@ -9,6 +9,10 @@
 .step { position: sticky; top: 24px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 44px; min-height: 300px; padding: 42px; border: 1px solid #dce4ef; border-radius: 22px; background: #fff; box-shadow: 0 12px 38px rgba(18, 40, 79, .08); }
 .step:nth-child(2) { top: 94px; background: #f9fbff; }
 .step:nth-child(3) { top: 164px; background: #eef5ff; }
+@media (min-width: 761px) {
+  .voiceSection .step { align-items: start; padding-top: 22px; }
+  .voiceSection .visual { margin-top: 18px; }
+}
 .topline { display: flex; align-items: center; gap: 10px; color: #245ef5; font-size: 10px; font-weight: 800; letter-spacing: .09em; }
 .stepIcon { display: grid; place-items: center; width: 38px; height: 38px; color: #245ef5; background: #eaf0ff; border-radius: 11px; }
 .number { margin-left: auto; color: #71809a; }

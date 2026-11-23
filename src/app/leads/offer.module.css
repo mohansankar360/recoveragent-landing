@@ -1,0 +1,93 @@
+.section {
+  background: #f8f4eb;
+  padding: 74px 20px;
+}
+
+.panel {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 62px);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 390px);
+  gap: 55px;
+  align-items: center;
+  border-radius: 22px;
+  background: #0d2652;
+  color: #fff;
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: #a5d7ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.intro h2 {
+  max-width: 550px;
+  margin: 0;
+  font-size: clamp(34px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.description {
+  max-width: 440px;
+  color: #d1def1;
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 18px 0 0;
+}
+
+.benefits {
+  list-style: none;
+  display: grid;
+  gap: 13px;
+  padding: 0;
+  margin: 26px 0 0;
+  color: #edf4ff;
+  font-size: 15px;
+}
+
+.benefits li { display: flex; align-items: flex-start; gap: 10px; }
+.benefits svg { color: #74d7ad; flex: none; margin-top: 1px; }
+
+.pricing {
+  border-top: 1px solid rgba(255, 255, 255, .3);
+  padding-top: 24px;
+}
+.pricing > span { color: #b7ccef; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+.amount { margin: 10px 0 4px; color: #d4e0f1; font-size: 15px; }
+.amount strong { color: #fff; font-size: 40px; line-height: 1.2; letter-spacing: -.045em; }
+.allowance { color: #e2ebf9; font-size: 14px; line-height: 1.5; margin: 0; }
+.note { color: #bfcfe8; font-size: 12px; line-height: 1.5; margin: 12px 0 0; }
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 24px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: #fff;
+  color: #174ddd;
+  font-weight: 800;
+  font-size: 15px;
+  text-decoration: none;
+}
+.cta:hover { background: #edf4ff; }
+.cta:focus-visible { outline: 3px solid #9bc5ff; outline-offset: 3px; }
+.pricing small { display: block; color: #bfcfe8; line-height: 1.45; margin-top: 12px; font-size: 12px; }
+
+@media (max-width: 760px) {
+  .section { padding: 48px 16px; }
+  .panel { grid-template-columns: minmax(0, 1fr); gap: 30px; padding: 28px 24px; border-radius: 16px; }
+  .intro h2 { font-size: clamp(32px, 9vw, 40px); }
+  .description { font-size: 15px; }
+  .benefits { gap: 12px; margin-top: 22px; font-size: 14px; }
+  .pricing { padding-top: 20px; }
+  .amount strong { font-size: 36px; }
+}
