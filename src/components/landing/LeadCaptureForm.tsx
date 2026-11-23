@@ -106,7 +106,7 @@ function validateAll(
   return next;
 }
 
-export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = true }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean }) {
+export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = true, checkoutCallback = false }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean; checkoutCallback?: boolean }) {
   const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>(() => ({ ...EMPTY_FORM, goal: initialGoal }));
   const [verifiedUrl, setVerifiedUrl] = useState("");
@@ -123,7 +123,8 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
   const [hasStarted, setHasStarted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [onboardingRequested, setOnboardingRequested] = useState(false);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(checkoutCallback ? 3 : 1);
+  const [callRequested, setCallRequested] = useState(false);
   // True when the fields were filled from details this browser saved on an earlier visit.
   const [restored, setRestored] = useState(false);
   // Step 1 values last sent to the CRM, so Back → Next without edits doesn't resend.
@@ -237,7 +238,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
 
   const handleNext = (e: FormEvent) => {
     e.preventDefault();
-    const fields: (keyof LeadFormData)[] = step === 1 ? ["goal"] : STORE_FIELDS;
+    const fields: (keyof LeadFormData)[] = checkoutCallback ? ["name", "whatsapp", "email"] : step === 1 ? ["goal"] : STORE_FIELDS;
     const nextErrors = validateAll(form, fields);
     const manuallyConfirmed = allowManualPlatform && manualPlatformUrl === form.storeUrl.trim() && !!form.storePlatform;
     if (step === 2 && !manuallyConfirmed && (verifiedUrl !== form.storeUrl.trim() || platformCheck === "checking")) {
@@ -248,8 +249,8 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
     markTouched(fields);
     if (Object.keys(nextErrors).length) { focusFirstError(nextErrors); return; }
     if (step === 2 && form.storePlatform === "other") { setIsUnsupportedPlatform(true); return; }
-    pendingFocus.current = step === 1 ? `${idPrefix}-orders` : `${idPrefix}-name`;
-    setStep(step === 1 ? 2 : 3);
+    pendingFocus.current = checkoutCallback || step === 1 ? `${idPrefix}-orders` : `${idPrefix}-name`;
+    setStep(checkoutCallback || step === 1 ? 2 : 3);
   };
 
   // Capture a partial lead once contact details are available, even if email is abandoned.
@@ -280,11 +281,12 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
       focusFirstError(nextErrors);
       if (nextErrors.goal) setStep(1);
       else if (STORE_FIELDS.some((field) => nextErrors[field])) setStep(2);
+      else if (checkoutCallback) setStep(3);
       return;
     }
 
-    if (form.storePlatform === "other") {
-      setIsUnsupportedPlatform(true);
+    if (checkoutCallback && verifiedUrl !== form.storeUrl.trim() && manualPlatformUrl !== form.storeUrl.trim()) {
+      setErrors({ storePlatform: "Please confirm your store platform before continuing." });
       return;
     }
 
@@ -325,8 +327,12 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
         });
         setOnboardingRequested(true); setIsSubmitting(false); return;
       }
-      saveDemoBookingSession(payload);
-      setCalendarPrefill(payload);
+      if (checkoutCallback) {
+        setCallRequested(true);
+      } else {
+        saveDemoBookingSession(payload);
+        setCalendarPrefill(payload);
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Could not save your details. Please try again.');
       setIsSubmitting(false);
@@ -357,7 +363,12 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
   return (
     <div ref={cardRef} className="lead-form-card">
       <AnimatePresence mode="wait" initial={false}>
-        {onboardingRequested ? (
+        {callRequested ? (
+          <motion.div key="call-requested" ref={revealOutcome} tabIndex={-1} className="lead-form-success" role="status">
+            <p className="lead-form-success-title">Your request is received.</p>
+            <p>Our team will call you to discuss checkout recovery and the 14-day free trial.</p>
+          </motion.div>
+        ) : onboardingRequested ? (
           <motion.div
             key="onboarding-requested"
             ref={revealOutcome}
@@ -398,11 +409,11 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
           >
             <div className="lead-form-topline">
               <div className="lead-form-badge">{isTrial ? "No setup fee" : "14-day free trial available"}</div>
-              <span className="lead-form-step" aria-live="polite">Step {step} of 3</span>
+              {!checkoutCallback && <span className="lead-form-step" aria-live="polite">Step {step} of 3</span>}
             </div>
             <div className="lead-form-head">
-              <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : "How can we reach you?"}</h2>
-              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the demo to your store." : "We’ll use your details to arrange your next step."}</p>
+              <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : checkoutCallback ? "See how recovery works for your store" : "How can we reach you?"}</h2>
+              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the demo to your store." : checkoutCallback ? "Share your details and our team will call you to discuss your store and free trial." : "We’ll use your details to arrange your next step."}</p>
             </div>
             {step === 1 ? (
               <form onSubmit={handleNext} noValidate className="lead-form-fields">
@@ -424,7 +435,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
                 <button type="submit" className="btn btn-green lead-form-submit">Continue →</button>
               </form>
             ) : step === 2 ? (
-              <form onSubmit={handleNext} noValidate className="lead-form-fields">
+              <form onSubmit={checkoutCallback ? handleSubmit : handleNext} noValidate className="lead-form-fields">
                 <IconSelectField id={`${idPrefix}-orders`} label="Monthly orders" icon={ChartBar} value={form.monthlyOrders} error={errors.monthlyOrders} onChange={(v) => handleChange("monthlyOrders", v)} onBlur={() => handleBlur("monthlyOrders")} placeholder="Choose volume" hint={allowManualPlatform ? "Helps us recommend the right plan." : undefined} options={MONTHLY_ORDERS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} />
                 <IconField id={`${idPrefix}-store-url`} label="Store URL" icon={Globe} value={form.storeUrl} error={errors.storeUrl} onChange={(v) => handleChange("storeUrl", v)} onBlur={() => handleBlur("storeUrl")} placeholder="yourstore.com" autoComplete="url" inputMode="url" />
                 <div className="lead-field">
@@ -434,20 +445,29 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
                   </div>
                   {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (allowManualPlatform ? !!errors.storePlatform && !form.storePlatform : platformCheck === "unknown" || !!errors.storePlatform) ? <div key={allowManualPlatform ? platformErrorAttempt : undefined} className={`lead-platform-notice${allowManualPlatform ? " lead-platform-notice-shake" : ""}`} role="status"><span className="lead-platform-notice-icon" aria-hidden="true">!</span><div>{allowManualPlatform ? <span>Please select your platform above to continue.</span> : <><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client’s store.</p></>}</div></div> : null}
                 </div>
-                <button type="submit" className="btn btn-green lead-form-submit">Continue →</button>
-                <button type="button" className="lead-form-back" onClick={() => setStep(1)}>← Back</button>
+                {checkoutCallback && submitError && <p role="alert" className="lead-field-msg">{submitError}</p>}
+                <button type="submit" className="btn btn-green lead-form-submit" disabled={isSubmitting}>{isSubmitting ? "Saving…" : checkoutCallback ? (routesToOnboarding ? "Request an onboarding call" : "Request a call →") : "Continue →"}</button>
+                {checkoutCallback && <span className="lead-form-step" aria-live="polite">Step 2 of 2</span>}
+                <button type="button" className="lead-form-back" onClick={() => setStep(checkoutCallback ? 3 : 1)}>← Back</button>
               </form>
             ) : (
-              <form onSubmit={handleSubmit} noValidate className="lead-form-fields">
+              <form onSubmit={checkoutCallback ? handleNext : handleSubmit} noValidate className="lead-form-fields">
                 {restored && <div className="lead-form-recap"><span>Welcome back. We’ve filled in your details.</span><button type="button" className="lead-form-back" onClick={clearSavedDetails}>Not you? Clear</button></div>}
                 <IconField id={`${idPrefix}-name`} label="Full name" icon={User} value={form.name} error={errors.name} onChange={(v) => handleChange("name", v)} onBlur={() => { handleBlur("name"); savePartialLead(); }} placeholder="Your name" autoComplete="name" />
                 <PhoneField id={`${idPrefix}-whatsapp`} label="WhatsApp number" value={form.whatsapp} error={errors.whatsapp} onChange={(v) => handleChange("whatsapp", v)} onBlur={() => { handleBlur("whatsapp"); savePartialLead(); }} />
                 <IconField id={`${idPrefix}-email`} label="Email" icon={EnvelopeSimple} value={form.email} error={errors.email} onChange={(v) => handleChange("email", v)} onBlur={() => handleBlur("email")} type="email" autoComplete="email" inputMode="email" hint={emailSuggestion && <>Did you mean <button type="button" className="lead-field-hint-fix" onClick={() => handleChange("email", emailSuggestion)}>{emailSuggestion}</button>?</>} />
                 {submitError && <p role="alert" className="lead-field-msg">{submitError}</p>}
+                {checkoutCallback ? <>
+                  <button type="submit" className="btn btn-green lead-form-submit">Continue →</button>
+                  <span className="lead-form-step" aria-live="polite">Step 1 of 2</span>
+                  <p className="lead-form-privacy">Next: a few details about your store.</p>
+                  <p className="lead-form-privacy">Our team will use your details to contact you about your request.</p>
+                </> : <>
                 <button type="submit" className="btn btn-green lead-form-submit" disabled={isSubmitting || !!calendarPrefill || form.storePlatform === 'other'}>{isSubmitting ? "Saving…" : routesToOnboarding ? 'Request an onboarding call' : isTrial ? 'Start free trial: choose setup time →' : 'Continue →'}</button>
                 {!routesToOnboarding && !isTrial && <p className="lead-form-privacy">Next: choose a demo time.</p>}
                 <button type="button" className="lead-form-back" onClick={() => setStep(2)}>← Back</button>
                 <p className="lead-form-privacy"><span aria-hidden>✓</span> Your information is safe with us and will only be used to {isTrial ? "set up your trial." : "schedule your demo."}</p>
+                </>}
               </form>
             )}
           </motion.div>
