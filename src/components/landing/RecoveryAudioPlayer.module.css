@@ -1,0 +1,19 @@
+.player { display: flex; align-items: center; flex-wrap: wrap; gap: 15px; padding: 16px; margin-top: 18px; background: #f2f6ff; border: 1px solid #dfE8fa; border-radius: 14px; }
+.play { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: #245ef5; color: #fff; cursor: pointer; }
+.play:hover { background: #164bd5; }
+.play:focus-visible, .track input:focus-visible { outline: 3px solid #8caaff; outline-offset: 3px; }
+.track { min-width: 0; flex: 1; }
+.trackTop, .times { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.trackTop { color: #182b4e; font-size: 13px; font-weight: 700; }
+.trackTop svg { color: #59749c; }
+.track input { display: block; width: 100%; height: 18px; margin: 5px 0 1px; accent-color: #245ef5; cursor: pointer; }
+.track input:disabled { cursor: default; }
+.times { color: #667895; font-size: 11px; font-variant-numeric: tabular-nums; }
+.error { flex-basis: 100%; color: #993c3c; font-size: 12px; margin: 0; }
+.error a { color: inherit; text-decoration: underline; }
+.track input { appearance: none; -webkit-appearance: none; background: transparent; }
+.track input::-webkit-slider-runnable-track { height: 4px; border-radius: 999px; background: #cbd8ee; }
+.track input::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 12px; height: 12px; margin-top: -4px; border: 0; border-radius: 50%; background: #245ef5; }
+.track input::-moz-range-track { height: 4px; border-radius: 999px; background: #cbd8ee; }
+.track input::-moz-range-progress { height: 4px; border-radius: 999px; background: #245ef5; }
+.track input::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #245ef5; }

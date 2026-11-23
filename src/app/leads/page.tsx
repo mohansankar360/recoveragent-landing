@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, PhoneCall } from "@phosphor-icons/react/dist/ssr";
 import { LeadsResults } from "@/components/landing/LeadsResults";
+import { RecoveryAudioPlayer } from "@/components/landing/RecoveryAudioPlayer";
 import { LeadsJourney } from "@/components/landing/LeadsJourney";
 import { LeadsMobileCTA } from "@/components/landing/LeadsMobileCTA";
 import { ExampleReviews } from "@/components/landing/ExampleReviews";
@@ -41,7 +42,7 @@ export default function LeadsPage() {
 
     <section className={styles.audioSection}><div className={`${styles.wrap} ${styles.audioGrid}`}>
       <div><p className={styles.eyebrow}>HEAR THE AI IN ACTION</p><h2>One call can stop an unwanted order.</h2><p>Listen to a real Hindi COD confirmation call. The buyer says they didn’t place the order, so it was held before shipping.</p></div>
-      <div className={styles.call}><div className={styles.callLabel}><PhoneCall size={19} weight="fill" aria-hidden /> REAL COD CONFIRMATION CALL</div><p><strong>Listen to the call</strong> · Hindi</p><audio controls preload="none" aria-label="Play a real COD confirmation call in Hindi"><source src="/audio/COD_hindi.mp4" type="audio/mp4" />Your browser does not support audio playback.</audio><p>Outcome: Buyer denied the order · Held before shipping</p></div>
+      <div className={styles.call}><div className={styles.callLabel}><PhoneCall size={19} weight="fill" aria-hidden /> REAL COD CONFIRMATION CALL</div><p><strong>Listen to the call</strong> · Hindi</p><RecoveryAudioPlayer src="/audio/COD_hindi.mp4" label="COD confirmation call" /><p>Outcome: Buyer denied the order · Held before shipping</p></div>
     </div></section>
 
     <LeadsResults />

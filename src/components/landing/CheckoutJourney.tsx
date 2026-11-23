@@ -29,7 +29,7 @@ const steps = [
 ];
 
 export function CheckoutJourney() {
-  return <section className={styles.section} aria-labelledby="journey-title">
+  return <section className={`${styles.section} ${styles.voiceSection}`} aria-labelledby="journey-title">
     <div className={styles.wrap}>
       <div className={styles.heading}><p className={styles.eyebrow}>HOW IT WORKS</p><h2 id="journey-title">From abandoned checkout to a conversation.</h2><p>Three steps to give shoppers a way back.</p></div>
       <div className={styles.track}>
