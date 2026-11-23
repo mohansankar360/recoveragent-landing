@@ -366,7 +366,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
         {callRequested ? (
           <motion.div key="call-requested" ref={revealOutcome} tabIndex={-1} className="lead-form-success" role="status">
             <p className="lead-form-success-title">Your request is received.</p>
-            <p>Our team will call you to discuss checkout recovery and the 14-day free trial.</p>
+            <p>Our team will call you to discuss {initialGoal === "checkout" ? "checkout recovery" : "your store’s recovery workflow"} and the 14-day free trial.</p>
           </motion.div>
         ) : onboardingRequested ? (
           <motion.div
@@ -413,7 +413,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
             </div>
             <div className="lead-form-head">
               <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : checkoutCallback ? "See how recovery works for your store" : "How can we reach you?"}</h2>
-              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the demo to your store." : checkoutCallback ? "Share your details and our team will call you to discuss your store and free trial." : "We’ll use your details to arrange your next step."}</p>
+              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the conversation to your store." : checkoutCallback ? "Share your details and our team will call you to discuss your store and free trial." : "We’ll use your details to arrange your next step."}</p>
             </div>
             {step === 1 ? (
               <form onSubmit={handleNext} noValidate className="lead-form-fields">
