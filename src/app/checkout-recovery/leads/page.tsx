@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ArrowRight, CheckCircle, PhoneCall } from '@phosphor-icons/react/dist/ssr';
 import { LeadCaptureForm } from '@/components/landing/LeadCaptureForm';
 import { ExampleReviews } from '@/components/landing/ExampleReviews';
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 export default function CheckoutLeadsPage() {
   return <main className={styles.page}>
     <header className={styles.header}><div className={styles.wrap}>
-      <a href="/" aria-label="RecoverAgent home"><Image src="/recover-agent-logo-transparent.png" width={152} height={76} alt="RecoverAgent" className={styles.logo} priority /></a>
+      <Link href="/" aria-label="RecoverAgent home"><Image src="/recover-agent-logo-transparent.png" width={152} height={76} alt="RecoverAgent" className={styles.logo} priority /></Link>
       <a href="#book" className={styles.headerButton}>Request a call <ArrowRight size={16} aria-hidden /></a>
     </div></header>
     <section className={styles.hero}><div className={`${styles.wrap} ${styles.heroGrid}`}>
@@ -37,6 +38,6 @@ export default function CheckoutLeadsPage() {
     <CheckoutJourney />
     <ExampleReviews />
     <section className={styles.proof}><div className={`${styles.wrap} ${styles.proofInner}`}><div><p className={styles.eyebrow}>BUILT FOR RECOVERY</p><h2>See the workflow on your store.</h2><p>Our team will call you to discuss AI calls, WhatsApp follow-up, pricing and the 14-day free trial.</p><a href="#book" className={styles.primary}>Request a call <ArrowRight size={17} aria-hidden /></a></div><div className={styles.priceCard}><span>AFTER 14-DAY FREE TRIAL</span><p><strong>₹4,999</strong> / month</p><p>700 workflow cases included · ₹4.50 per additional workflow</p><small>Includes AI calls for COD confirmation and abandoned checkout recovery. NDR calling is available on Scale.</small></div></div></section>
-    <footer className={`${styles.wrap} ${styles.footer}`}><span>© {new Date().getFullYear()} RecoverAgent</span><a href="mailto:hello@recoveragent.ai">hello@recoveragent.ai</a><a href="/policies/privacy-and-policy">Privacy policy</a></footer>
+    <footer className={`${styles.wrap} ${styles.footer}`}><span>© {new Date().getFullYear()} RecoverAgent</span><a href="mailto:hello@recoveragent.ai">hello@recoveragent.ai</a><Link href="/policies/privacy-and-policy">Privacy policy</Link></footer>
   </main>;
 }
