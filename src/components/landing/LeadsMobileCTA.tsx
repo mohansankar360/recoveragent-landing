@@ -5,7 +5,7 @@ import { ArrowRight } from "@phosphor-icons/react";
 import { trackEvent } from "@/lib/analytics";
 import styles from "./LeadsMobileCTA.module.css";
 
-export function LeadsMobileCTA() {
+export function LeadsMobileCTA({ label = "Request a call" }: { label?: string }) {
   const [visible, setVisible] = useState(false);
   const [reviewsVisible, setReviewsVisible] = useState(false);
 
@@ -36,7 +36,7 @@ export function LeadsMobileCTA() {
 
   return <div className={styles.bar} data-visible={show || undefined}>
     <a href="#book" tabIndex={show ? 0 : -1} onClick={() => trackEvent("sticky_cta_clicked", { source: "leads_mobile" })}>
-      Request a call <ArrowRight size={17} aria-hidden />
+      {label} <ArrowRight size={17} aria-hidden />
     </a>
   </div>;
 }

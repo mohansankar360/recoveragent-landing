@@ -25,7 +25,7 @@ export default function LeadsPage() {
   return <main className={`${styles.page} ${styles.leadsPage}`}>
     <header className={styles.header}><div className={styles.wrap}>
       <Link href="/" aria-label="RecoverAgent home"><Image src="/recover-agent-logo-transparent.png" width={152} height={76} alt="RecoverAgent" className={styles.logo} priority /></Link>
-      <a href="#book" className={styles.headerButton}>Request a call <ArrowRight size={16} aria-hidden /></a>
+      <a href="#book" className={styles.headerButton}>Book a demo <ArrowRight size={16} aria-hidden /></a>
     </div></header>
 
     <section className={styles.hero}><div className={`${styles.wrap} ${styles.heroGrid}`}>
@@ -36,7 +36,7 @@ export default function LeadsPage() {
         <div className={styles.compatibility}><span>Works with</span><span className={styles.platformBadge}><ShopifyLogo size={18} /> Shopify</span><span className={styles.platformBadge}><WooCommerceLogo size={13} /><span className={styles.srOnly}>WooCommerce</span></span></div>
         <div className={styles.heroNote}><CheckCircle size={19} weight="fill" aria-hidden /><span>14-day free trial available · AI calls in six Indian languages</span></div>
       </div>
-      <div id="book" className={styles.form}><LeadCaptureForm idPrefix="voice-leads" initialGoal="cod" allowManualPlatform checkoutCallback /></div>
+      <div id="book" className={styles.form}><LeadCaptureForm idPrefix="voice-leads" initialGoal="cod" allowManualPlatform checkoutCallback bookCalendar /></div>
       <div className={styles.mobilePlatforms}><span>Works with</span><span className={styles.platformBadge}><ShopifyLogo size={18} /> Shopify</span><span className={styles.platformBadge}><WooCommerceLogo size={13} /><span className={styles.srOnly}>WooCommerce</span></span><span>AI calls in six Indian languages</span></div>
     </div></section>
 
@@ -55,7 +55,7 @@ export default function LeadsPage() {
       <div className={offer.intro}>
         <p className={offer.eyebrow}>14-DAY FREE TRIAL</p>
         <h2 id="trial-offer-title">See what your store can recover.</h2>
-        <p className={offer.description}>Our team will call you to discuss your workflows and help you get started.</p>
+        <p className={offer.description}>Pick a time for a demo. We’ll walk through your workflows and help you get started.</p>
         <ul className={offer.benefits}>
           <li><CheckCircle size={19} weight="fill" aria-hidden /> Multilingual AI voice calling</li>
           <li><CheckCircle size={19} weight="fill" aria-hidden /> Order updates and notifications</li>
@@ -67,12 +67,12 @@ export default function LeadsPage() {
         <p className={offer.amount}><strong>₹2,499</strong> / month</p>
         <p className={offer.allowance}>300 workflows included · then ₹5 per additional workflow</p>
         <p className={offer.note}>AI calling for abandoned checkout recovery is available on Growth.</p>
-        <a href="#book" className={offer.cta}>Request a call <ArrowRight size={18} aria-hidden /></a>
+        <a href="#book" className={offer.cta}>Book a demo <ArrowRight size={18} aria-hidden /></a>
         <small>14-day free trial available for stores with 500+ monthly orders.</small>
       </div>
     </div></section>
 
-    <LeadsMobileCTA />
+    <LeadsMobileCTA label="Book a demo" />
     <footer className={`${styles.wrap} ${styles.footer}`}><span>© {new Date().getFullYear()} RecoverAgent</span><a href="mailto:hello@recoveragent.ai">hello@recoveragent.ai</a><Link href="/policies/privacy-and-policy">Privacy policy</Link></footer>
   </main>;
 }
