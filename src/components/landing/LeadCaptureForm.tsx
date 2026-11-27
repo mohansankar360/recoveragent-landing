@@ -106,7 +106,7 @@ function validateAll(
   return next;
 }
 
-export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = true, checkoutCallback = false }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean; checkoutCallback?: boolean }) {
+export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal = "", allowManualPlatform = true, checkoutCallback = false, bookCalendar = false }: { mode?: "demo" | "trial"; idPrefix?: string; initialGoal?: string; allowManualPlatform?: boolean; checkoutCallback?: boolean; bookCalendar?: boolean }) {
   const isTrial = mode === "trial";
   const [form, setForm] = useState<LeadFormData>(() => ({ ...EMPTY_FORM, goal: initialGoal }));
   const [verifiedUrl, setVerifiedUrl] = useState("");
@@ -327,7 +327,8 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
         });
         setOnboardingRequested(true); setIsSubmitting(false); return;
       }
-      if (checkoutCallback) {
+      // bookCalendar keeps the short contact-first form but opens the calendar instead of a callback.
+      if (checkoutCallback && !bookCalendar) {
         setCallRequested(true);
       } else {
         saveDemoBookingSession(payload);
@@ -413,7 +414,7 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
             </div>
             <div className="lead-form-head">
               <h2>{step === 1 ? "What would you like to improve?" : step === 2 ? "Tell us about your store" : checkoutCallback ? "See how recovery works for your store" : "How can we reach you?"}</h2>
-              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the conversation to your store." : checkoutCallback ? "Share your details and our team will call you to discuss your store and free trial." : "We’ll use your details to arrange your next step."}</p>
+              <p>{step === 1 ? "Select all that apply. We’ll tailor the conversation to your priorities." : step === 2 ? "We’ll use these details to tailor the conversation to your store." : checkoutCallback ? (bookCalendar ? "Share your details, then pick a time for your demo." : "Share your details and our team will call you to discuss your store and free trial.") : "We’ll use your details to arrange your next step."}</p>
             </div>
             {step === 1 ? (
               <form onSubmit={handleNext} noValidate className="lead-form-fields">
@@ -446,8 +447,9 @@ export function LeadCaptureForm({ mode = "demo", idPrefix = "lead", initialGoal 
                   {platformCheck === "checking" ? <p role="status">Checking your store…</p> : verifiedUrl ? <p role="status">Detected a {form.storePlatform === "shopify" ? "Shopify" : "WooCommerce"} store</p> : (allowManualPlatform ? !!errors.storePlatform && !form.storePlatform : platformCheck === "unknown" || !!errors.storePlatform) ? <div key={allowManualPlatform ? platformErrorAttempt : undefined} className={`lead-platform-notice${allowManualPlatform ? " lead-platform-notice-shake" : ""}`} role="status"><span className="lead-platform-notice-icon" aria-hidden="true">!</span><div>{allowManualPlatform ? <span>Please select your platform above to continue.</span> : <><strong>We could not verify this as a Shopify or WooCommerce store.</strong><p>If you are a marketer/agency please enter any of your client’s store.</p></>}</div></div> : null}
                 </div>
                 {checkoutCallback && submitError && <p role="alert" className="lead-field-msg">{submitError}</p>}
-                <button type="submit" className="btn btn-green lead-form-submit" disabled={isSubmitting}>{isSubmitting ? "Saving…" : checkoutCallback ? (routesToOnboarding ? "Request an onboarding call" : "Request a call →") : "Continue →"}</button>
+                <button type="submit" className="btn btn-green lead-form-submit" disabled={isSubmitting}>{isSubmitting ? "Saving…" : checkoutCallback ? (routesToOnboarding ? "Request an onboarding call" : bookCalendar ? "See available times →" : "Request a call →") : "Continue →"}</button>
                 {checkoutCallback && <span className="lead-form-step" aria-live="polite">Step 2 of 2</span>}
+                {bookCalendar && !routesToOnboarding && <p className="lead-form-privacy">Next: choose a demo time.</p>}
                 <button type="button" className="lead-form-back" onClick={() => setStep(checkoutCallback ? 3 : 1)}>← Back</button>
               </form>
             ) : (
